@@ -61,13 +61,13 @@ JavaScript 引擎工作基本原理：引擎解析脚本，然后将脚本编译
 
 **浏览器开发者控制台**
 
-> Tips: 在控制台中要插入多行代码，按 Shift+Enter 来进行换行。
+> Tips: 在控制台中要插入多行代码，按 `Shift+Enter` 来进行换行。
 
 **script 标签**
 
 应该尽量将较复杂的脚本存放在单独的文件中，使用独立文件的好处是浏览器会下载它，然后将它保存到浏览器的缓存中。之后，其他页面想要相同的脚本就会从缓存中获取，所以文件实际上只会下载一次，这可以节省流量，并使得页面（加载）更快。
 
-> ❗ : 如果设置了 src 特性，script 标签内容将会被忽略。
+> Note: 如果设置了 `src` 特性，`script` 标签内容将会被忽略。
 
 JavaScript 代码以分号结尾，注意添加完整分号，以下代码会报错；
 
@@ -241,7 +241,7 @@ alert( undefined == 0 ); // false
 - 与运算符 && 返回的值是第一个假值的初始形式；
 - 非运算符 ! 返回操作数的取反布尔值；
 
-> Tips: 两个非运算 !! 有时候用来将某个值转化为布尔类型：
+> Tips: 两个非运算 `!!` 有时候用来将某个值转化为布尔类型：
 
 **空值合并运算符**
 
@@ -298,7 +298,7 @@ outer: for (let i = 0; i < 3; i++) {
 3. “步入（Step into）”，快捷键 F11；
 4. “步出（Step out）”：继续执行到当前函数的末尾，快捷键 Shift+F11；
 
-> Tips: 在代码中的某一行上右键，在显示的关联菜单（context menu）中点击一个非常有用的名为 “Continue to here” 的选项；
+> Tips: 在代码中的某一行上右键，在显示的关联菜单中点击一个非常有用的名为 `Continue to here` 的选项；
 
 **注释**
 
@@ -353,3 +353,398 @@ npm i -D jest
 - [试试前端自动化测试！（基础篇）](https://juejin.cn/post/6844904194600599560)
 - [Jest 测试框架中文文档](https://jestjs.io/zh-Hans/)
 - [Vue.js Jest 单元测试](https://alexjover.com/blog/write-the-first-vue-js-component-unit-test-in-jest/)
+
+**普通对象**
+
+- 对象属性
+
+> Tips: 对象属性可以用 `delete` 操作符移除；
+
+属性名可以是任何字符串或者 symbol，包括使用保留字；包含空格，以数字开头，或包含特殊字符（除 $ 和 _ 以外）的属性名需要加引号；
+
+- 计算属性
+
+在对象字面量中使用方括号定义动态属性名，括号中可以使用变量或更复杂的表达式；
+
+```js
+let fruit = prompt("Which fruit to buy?", "apple");
+
+let bag = {
+  [fruit]: 5, // 属性名是从 fruit 变量中得到的
+};
+
+alert( bag.apple ); // 5 如果 fruit="apple"
+```
+
+
+- "in" 操作符
+
+```js
+let user = { name: "John", age: 30 };
+
+alert( "age" in user ); // true
+alert( "blabla" in user ); // false
+```
+
+遍历对象：for(let key in obj) 循环；
+
+> Tips: 对象中，整数属性会被进行排序，其他属性则按照创建的顺序显示；整数属性指的是一个可以在不做任何更改的情况下与一个整数进行相互转换的字符串；
+
+**对象引用和复制**
+
+> Tips: 赋值了对象的变量存储的不是对象本身，而是该对象“在内存中的地址” —— 换句话说就是对该对象的“引用”；
+
+> Tips: JavaScript 变量复制，原始类型可类比为“搬家”，对象类型类比为“配钥匙”；
+
+使用 `Object.assign(dest, [src1, src2, src3...])` 方法深拷贝对象；
+
+- 第一个参数 dest 是指目标对象；
+- 一个或多个源对象 src1, ..., srcN；
+- 该方法将所有源对象的属性拷贝到目标对象 dest 中；
+- 调用结果返回 dest；
+- 如果被拷贝的属性的属性名已经存在，则会被覆盖；
+
+或使用 Spread 语法拷贝对象；`clone = { ...user }`
+
+当对象中存在有其他对象的引用时，可以使用递归循环深拷贝，也可以直接使用 Lodash 定义好的方法 [_.cloneDeep(obj)](https://lodash.com/docs#cloneDeep)；
+
+```js
+function cloneDeep(object) {
+  if (typeof object !== "object" || object === null) {
+    return object;
+  }
+
+  const copy = {};
+  for (const key in object) {
+    if (Object.hasOwnProperty.call(object, key)) {
+      copy[key] = cloneDeep(object[key]);
+    }
+  }
+  return copy;
+}
+```
+
+**垃圾回收**
+
+JavaScript 中主要的内存管理概念是可达性（Reachability），及存储在内存中并以某种方式可访问或可用的值，类似于引用计数；
+
+固有的可达值的基本集合，也成为根（roots），包括：
+
+1. 当前执行的函数，它的局部变量和参数；
+2. 当前嵌套调用链上的其他函数、它们的局部变量和参数；
+3. 全局变量；
+4. 还有一些内部的根；
+
+如果一个值可以通过引用或引用链从根访问任何其他值，则认为该值是可达的；
+
+垃圾回收的基本算法被称为 “mark-and-sweep”；标记算法类似于广度优先遍历；
+
+优化建议：
+
+- 分代收集（Generational collection）—— 对象被分成两组：“新的”和“旧的”；许多对象出现，完成它们的工作并很快死去，它们可以很快被清理。那些长期存活的对象会变得“老旧”，而且被检查的频次也会减少；
+- 增量收集（Incremental collection）—— 如果有许多对象，并且我们试图一次遍历并标记整个对象集，则可能需要一些时间，并在执行过程中带来明显的延迟。所以引擎试图将垃圾收集工作分成几部分来做。然后将这几部分会逐一进行处理。这需要它们之间有额外的标记来追踪变化，但是这样会有许多微小的延迟而不是一个大的延迟；
+- 闲时收集（Idle-time collection）—— 垃圾收集器只会在 CPU 空闲时尝试运行，以减少可能对代码执行的影响；
+
+**对象方法，"this"**
+
+JavaScript 中的 this 可以用于任何函数，即使它不是对象的方法；this 的值是在代码运行时计算出来的，它取决于代码上下文；
+
+在全局函数中的 this，严格模式下的值为 undefined，非严格模式的情况下，this 将会是 全局对象（浏览器为 window）；
+
+箭头函数没有自己的 this，其 this 值取决于外部“正常的”函数；
+
+**构造器和操作符"new"**
+
+从技术上讲，构造函数也是一个常规函数；但一般以大写字母开头并只用 new 操作符执行；
+
+当一个函数被使用 new 操作符执行时，它按照以下步骤：
+
+1. 一个新的空对象被创建并分配给 this；
+2. 函数体执行，通常它会修改 this，为其添加新的属性；
+3. 返回 this 的值；
+
+```js
+function User(name) {
+  // this = {};（隐式创建）
+
+  // 添加属性到 this
+  this.name = name;
+  this.isAdmin = false;
+
+  // return this;（隐式返回）
+}
+```
+
+> Tips: 创建单个复杂对象的代码，可以将它们封装在一个立即调用的构造函数中 `new function() { … }`；
+
+```js
+// 创建一个函数并立即使用 new 调用它
+let user = new function() {
+  this.name = "John";
+  this.isAdmin = false;
+
+  // 函数定义
+  this.sayHi = function() {
+    alert( "My name is: " + this.name );
+  };
+
+  // 用于用户创建的其他代码
+  // 也许是复杂的逻辑和语句、局部变量等
+};
+```
+
+> 在一个函数内部，我们可以使用 new.target 属性来检查它是否被使用 new 进行调用了；对于常规调用，它为 undefined，对于使用 new 的调用，则等于该函数；
+
+```js
+function User() {
+  alert(new.target);
+}
+
+User(); // undefined
+
+new User(); // function User { ... }
+
+// 常规模式重定向构造器模式
+function User(name) {
+  if (!new.target) { // 没有通过 new 运行
+    return new User(name); // 添加 new
+  }
+
+  this.name = name;
+}
+
+let john = User("John"); // 将调用重定向
+alert(john.name); // John
+```
+
+通常，构造器没有 return 语句；它们的任务是将所有必要的东西写入 this，并自动转换为结果；
+
+当构造器中有 return，若返回值为一个对象，则会返回该对象并覆盖默认的 this；若返回值为原始类型或为空时，则会被忽略，仍然返回默认的 this；
+
+> Tips: 如果没有参数，我们可以省略 `new` 后的括号；
+
+**可选链"?."**
+
+如果可选链 ?. 前面的值为 undefined 或者 null，它会停止运算并返回 undefined；
+
+```js
+// 可选链
+let user = {};
+
+console.log(user?.name?.first);
+user.admin?.();
+user?.["key"];
+```
+
+> Note: `?.` 前的变量必须已声明，且只将 `?.` 使用在一些东西可以不存在的地方，不要过度使用可选链；
+
+可选链 ?. 不是一个运算符，而是一个特殊的语法结构；它还可以与函数和方括号一起使用；
+
+1. ?.() 用于调用一个可能不存在的函数；
+2. ?.[] 用于访问一个可能不存在的属性；
+
+> Tips: 删除一个可能不存在的属性，`delete user?.name`；可以使用 ?. 来安全地读取或删除，但不能写入；
+
+**Symbol类型**
+
+规范中，对象的属性键只能是字符串类型或者 Symbol 类型，Symbol 值表示唯一的标识符；
+
+使用 Symbol() 来创建这种类型的值，创建时可以给 Symbol 一个描述（也称为 Symbol 名），这在代码调试时非常有用；可以通过 symbol.description 属性获取 Symbol 的描述；
+
+```js
+// id 是 symbol 的一个实例化对象
+let id = Symbol();
+
+// id 是描述为 "id" 的 Symbol
+let id2 = Symbol("id");
+
+console.log(id2.description) // id
+```
+
+Symbol 保证是唯一的；即使我们创建了许多具有相同描述的 Symbol，它们的值也是不同；描述只是一个标签，不影响任何东西；
+
+```js
+let id1 = Symbol("id");
+let id2 = Symbol("id");
+
+console.warn(id1 == id2); // false
+```
+
+> Note: `Symbol` 不会被自动转换为字符串；只能手动调用 `toString()`；
+
+- “隐藏”属性
+
+Symbol 允许我们创建对象的“隐藏”属性，代码的任何其他部分都不能意外访问或重写这些属性；
+
+```js
+let user = {};
+let id = Symbol("id");
+user[id] = 1;
+```
+> Note: 在对象字面量中使用 `Symbol`，需要使用方括号；
+
+```js
+let id = Symbol();
+
+let user = {
+  name: "Coley",
+  [id]: 12  
+}
+```
+
+Symbol 属性不参与 for..in 循环，Object.keys(user) 也会忽略 Symbol；这是一般“隐藏符号属性”原则的一部分；但 Object.assign 会同时复制字符串和 symbol 属性；
+
+从技术上讲，内建方法 Object.getOwnPropertySymbols(obj) 允许我们获取所有的 Symbol；还有一个 Reflect.ownKeys(obj) 方法可以返回一个对象的所有键，包括 Symbol；
+
+- 全局 symbol
+
+调用 Symbol.for(key) 方法创建或查询，该方法会先检查全局注册表，如果有一个描述为 key 的 Symbol，则返回该 Symbol，否则将创建一个新 Symbol，并通过给定的 key 将其存储在全局注册表中；
+
+或者调用 Symbol.keyFor(sym) 方法，通过全局 Symbol 返回一个名字；如果查找的 Symbol 不是全局的则会返回 undefined；
+
+```js
+// 从全局注册表中读取
+let id = Symbol.for("id"); // 如果该 Symbol 不存在，则创建它
+
+// 再次读取（可能是在代码中的另一个位置）
+let idAgain = Symbol.for("id");
+
+// 相同的 Symbol
+alert( id === idAgain ); // true
+
+Symbol.keyFor(id); // id
+```
+
+除此之外，JavaScript 内部还有许多系统 Symbol，可以用来微调对象的各个方面，以此改变一些内建行为，这些 Symbol 被列在了 [Symbol 表](https://tc39.github.io/ecma262/#sec-well-known-symbols) 的规范中；
+
+
+**对象——原始值转换**
+
+JavaScript 不允许自定义运算符对对象的处理方式；因此在对对象进行运算时，对象会被自动转换为原始值，并会得到一个原始值的结果；
+
+所有的对象在布尔上下文（context）中均为 true，因此对于对象，不存在 boolean 转换；
+
+- "string" hint
+
+对象到字符串的转换，当我们对期望一个字符串的对象执行操作时，如 “alert”；
+
+```js
+// 输出
+alert(obj); // [object Object]
+
+// 将对象作为属性键
+anotherObj[obj] = 123; // {[object Object]: 123}
+```
+
+- "number" hint
+
+对象到数字的转换，例如当我们进行数学运算时；
+
+```js
+// 显式转换
+let num = Number(obj); // NaN
+
+// 数学运算（除了二元加法）
+let n = +obj; // NaN
+let delta = new Date - new Date; // 0
+
+// 小于/大于的比较
+let greater = user1 > user2; // false
+```
+
+- "default" hint
+
+在少数情况下发生，当运算符“不确定”期望值的类型时；
+
+```js
+let total = obj + user; // [object Object][object Object]
+
+console.log(user == 1); // false
+```
+
+> Note: 像 < 和 > 这样的小于/大于比较运算符，也可以同时用于字符串和数字。不过，它们使用 “number” hint，而不是 “default”。这是历史原因；
+
+JavaScript 转换算法：
+
+1. 调用 obj[Symbol.toPrimitive](hint) —— 带有 symbol 键 Symbol.toPrimitive（系统 symbol）的方法，如果这个方法存在的话；
+2. 否则，如果 hint 是 "string" —— 尝试 obj.toString() 和 obj.valueOf()，对于字符串转换，优先 toString；
+3. 否则，如果 hint 是 "number" 或 "default" —— 尝试 obj.valueOf() 和 obj.toString()，对于数学运算，优先 valueOf；
+
+
+- Symbol.toPrimitive
+
+```js
+obj[Symbol.toPrimitive] = function(hint) {
+  // 这里是将此对象转换为原始值的代码
+  // 它必须返回一个原始值
+  // hint = "string"、"number" 或 "default" 中的一个
+}
+
+// 在对象原型上添加
+Object.prototype[Symbol.toPrimitive] = function () {
+  return "string";
+};
+
+let o = {};
+
+console.warn("" + o); // string
+
+// 另一个例子
+let user = {
+  name: "John",
+  money: 1000,
+
+  [Symbol.toPrimitive](hint) {
+    alert(`hint: ${hint}`);
+    return hint == "string" ? `{name: "${this.name}"}` : this.money;
+  }
+};
+
+// 转换演示：
+alert(user); // hint: string -> {name: "John"}
+alert(+user); // hint: number -> 1000
+alert(user + 500); // hint: default -> 1500
+```
+
+- toString 和 valueOf
+
+还可以使用 toString 和 valueOf 方法，但必须返回一个原始值，如果 toString 或 valueOf 返回了一个对象，那么返回值会被忽略；
+
+默认情况下，普通对象具有 toString 和 valueOf 方法：toString 方法返回一个字符串 "[object Object]"；valueOf 方法返回对象自身；
+
+```js
+
+// 另一个例子
+let user = {
+  name: "John",
+  money: 1000,
+
+  // 对于 hint="string"
+  toString() {
+    return `{name: "${this.name}"}`;
+  },
+
+  // 对于 hint="number" 或 "default"
+  valueOf() {
+    return this.money;
+  }
+};
+```
+
+> Tips: 通常我们希望有一个“全能”的地方来处理所有原始转换；这时，我们可以只实现 toString；如果没有 Symbol.toPrimitive 和 valueOf，toString 将处理所有原始转换；
+
+> Note: 三种方式转换可以返回任何原始类型；但由于历史原因，如果 toString 或 valueOf 返回一个对象，则不会出现 error，但是这种值会被忽略；
+
+如果将对象作为参数传递，会先被转换为原始值，如果生成的原始值的类型不正确，则继续进行转换；
+
+```js
+let obj = {
+  // toString 在没有其他方法的情况下处理所有转换
+  toString() {
+    return "2";
+  }
+};
+
+alert(obj * 2); // 4，对象被转换为原始值字符串 "2"，之后它被乘法转换为数字 2。
+```
+
