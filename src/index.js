@@ -1,184 +1,248 @@
-// "use strict";
+"use strict";
 
-// // 检查空对象
+// console.log("string".toUpperCase()); // STRING
 
-// function isEmpty(obj) {
-//   for (let key in obj) {
-//     // 如果进到循环里面，说明有属性。
-//     return false;
-//   }
-//   return true;
-// }
+// let str = "string";
 
-// let srcObj = {
-//   name: "srcObj",
-//   isEmpty,
+// // str.test = 1;
+
+// // console.warn(str.test); // undefined
+// // console.warn(str.test); // Uncaught TypeError: Cannot create property 'test' on string 'string'
+
+// let billion = 1_000_000_000;
+
+// console.log(billion);
+
+// let number = 200;
+
+// console.log("number.toString(16):", number.toString(16)); // "c8"
+
+// console.log("parseInt('200', 16):", parseInt("c8", 16)); // 200
+
+// console.log((123456).toString(36)); // 2n9c
+
+// // Hello！我是一个会自我增加的数字！
+// console.log(9999999999999999); // 显示 10000000000000000
+
+// console.warn(Math.max(-1, " ")); // 0
+
+// console.log(str[1000]); // undefined
+// console.log(str.charAt(1000)); // ''
+
+// // str[0] = "h"; // Uncaught TypeError: Cannot assign to read only property '0' of string 'string'
+
+// // substr substring slice
+
+// // string
+// console.warn(str.substring(1, 3)); // tr
+// console.warn(str.substring(3, -1)); // str
+
+// let text = "abcdefghijklmnopqrstuvwxyz1234567890";
+
+// console.log(text.slice(0, 20));
+
+// 数组
+
+// Array.prototype[Symbol.toPrimitive] = function (hint) {
+//   console.error(hint);
+
+//   return "This is an array";
 // };
 
-// let anotherSrcObj = {
-//   test: true,
-// };
+// alert(1 + [1, 2, 3]);
 
-// let result = Object.assign({}, srcObj, anotherSrcObj);
+export function getMaxSubSum(arr) {
+  let result = 0;
 
-// console.warn(result);
+  for (let i = 0; i < arr.length; i++) {
+    let total = 0;
+    for (let j = i; j < arr.length; j++) {
+      total += arr[j];
+      result = Math.max(total, result);
+    }
+  }
 
-// function deepCopy(object) {
-//   if (typeof object !== "object" || object === null) {
-//     return object;
-//   }
-//   let copy = {};
-//   for (const key in object) {
-//     if (Object.hasOwnProperty.call(object, key)) {
-//       copy[key] = deepCopy(object[key]);
-//     }
-//   }
-//   return copy;
-// }
+  return result;
+}
 
-// let newSrcObj = {
-//   id: 0,
-//   src: srcObj,
-// };
+export function getMaxSubSum2(arr) {
+  let maxSum = 0;
+  let partialSum = 0;
 
-// let copySrcObj = deepCopy(newSrcObj);
+  for (let item of arr) {
+    // arr 中的每个 item
+    partialSum += item; // 将其加到 partialSum
+    maxSum = Math.max(maxSum, partialSum); // 记住最大值
+    if (partialSum < 0) partialSum = 0; // 如果是负数就置为 0
+  }
 
-// console.log(copySrcObj);
-// console.log(newSrcObj == copySrcObj); // false
+  return maxSum;
+}
 
-// console.log(deepCopy(document));
-// console.log(document == deepCopy(document)); // false
+// getMaxSubSum([-1, 2, 3, -9]) == 5
+// getMaxSubSum([2, -1, 2, 3, -9]) == 6
+// getMaxSubSum([-1, 2, 3, -9, 11]) == 11
+// getMaxSubSum([-2, -1, 1, 2]) == 3
+// getMaxSubSum([100, -9, 2, -3, 5]) == 100
+// getMaxSubSum([1, 2, 3]) == 6
 
-// function sayHi() {
-//   console.error(this);
-// }
+// 数组方法
 
-// sayHi(); // window
-// sayHi.bind(null)(); // window
-// sayHi.bind(srcObj)(); // srcObj
+let arr = [1, 2, 3, 4, 5];
 
-// // "use strict";
+// 从索引 1 开始删除 1 个元素
+console.log(arr.splice(1, 1), arr); // [2] [1, 3, 4, 5]
+// 删除最后一个元素
+console.log(arr.splice(-1, 1), arr); // [5] [1, 3, 4]
 
-// sayHi(); // undefined
-// sayHi.bind(null)(); // null
-// sayHi.bind(srcObj)(); // srcObj
+// 插入元素
+console.log(arr.splice(2, 0, 100), arr); // [] [1, 3, 100, 4]
 
-// function teacher(name) {
-//   // this.name = name;
-//   // this.isAdmin = false;
-//   console.log(new.target);
-// }
-
-// teacher(""); // undefined
-// let t = new teacher("zhang"); // function teacher
-
-// console.log(t);
-
-// function BigUser() {
-//   this.name = "John";
-
-//   return { newName: "Godzilla" }; // <-- 返回这个对象
-// }
-
-// let bigUser = new BigUser();
-// console.log(bigUser.name, bigUser.newName); // undefined 'Godzilla'
-
-// console.log("====================================>");
-
-// function A() {
-//   return srcObj;
-// }
-// function B() {
-//   return srcObj;
-// }
-
-// console.warn(new A() == new B(), new A() === new B()); // true true
-
-// // 可选链
-// let user = {};
-
-// console.log(user?.name?.first);
-// user.admin?.();
-// console.log(user?.["key"]);
-
-// // Symbol
-
-// let id1 = Symbol("id");
-// let id2 = Symbol("id");
-
-// console.log(id1, id2);
-// console.warn(id1 == id2); // false
-
-// // alert(id1); // Uncaught TypeError: Cannot convert a Symbol value to a string
-
-// let id = Symbol("key");
-
-// let user2 = {
-//   name: "Coley",
-//   [id]: 12,
-// };
-
-// console.log(user2);
-
-// for (const key in user2) {
-//   if (Object.hasOwnProperty.call(user2, key)) {
-//     const element = user2[key];
-//     console.log(element);
-//   }
-// }
-
-// console.log(Object.getOwnPropertySymbols(user2)); // [Symbol(key)]
-// console.log(Reflect.ownKeys(user2)); // ['name', Symbol(key)]
-
-let obj = {
-  id: 1,
+let arrayLike = {
+  0: "something",
+  length: 1,
 };
 
-// string
-// alert(obj); [object Object]
-let user = {};
+let arrayLike2 = {
+  0: "something",
+  [Symbol.isConcatSpreadable]: true,
+  length: 1,
+};
 
-user[obj] = 2;
-console.log(user); // {[object Object]: 2}
+// alert(arr.concat([3, 4], 5)); // 1,2,3,4,5
+// alert(arr.concat(arrayLike, arrayLike2)); // 1,2,3,4,5,[object Object],something
 
-// number
-let num = Number(obj);
-console.log(num); // NaN
+// let arr2 = [1, 2, NaN, null, undefined];
 
-let n = +obj;
-let delta = new Date() - new Date();
-console.log(n, delta); // NaN 0
+// console.warn(arr2.indexOf(NaN)); // -1
+// console.warn(arr2.indexOf(null)); // 3
+// console.warn(arr2.lastIndexOf(undefined)); // 4
 
-let greater = obj > user;
-console.log(greater); // false
+// console.warn(arr2.includes(NaN)); // true
+// console.warn(arr2.includes(null)); // true
+// console.warn(arr2.includes(undefined)); // true
 
-// default
-let total = obj + user;
+// let arr3 = [1, -2, 15, 2, 0, 8];
+// arr3.sort((a, b) => a - b);
+// console.log(arr3);
 
-console.log(user == 1); // false
-console.log(total); // [object Object][object Object]
-
-// Object.prototype[Symbol.toPrimitive] = function () {
-//   return new URLSearchParams(this).toString();
+// let army = {
+//   minAge: 18,
+//   maxAge: 27,
+//   canJoin(user) {
+//     return user.age > 20;
+//   },
 // };
 
-let o = {
-  name: "obj",
-  age: 18,
-  bool: true,
-  number: 1,
+// let users = [{ age: 16 }, { age: 20 }, { age: 23 }, { age: 30 }];
 
-  toString() {
-    return 3; // 同时返回空对象时报错：Uncaught TypeError: Cannot convert object to primitive value
-  },
+// let soldiers = users.filter(army.canJoin, army);
 
-  valueOf() {
-    return this.number++; // default hint 和 number hint 输出 4，该方法不存在时，调用 toString 输出 3
+// console.log(soldiers); // [{age: 23}, {age: 30}]
+
+// 可迭代对象
+
+let range = {
+  from: 1,
+  to: 5,
+
+  [Symbol.iterator]() {
+    return {
+      current: this.from,
+      last: this.to,
+
+      next() {
+        return this.current < this.last
+          ? { done: false, value: this.current++ }
+          : { done: true, value: -1 };
+      },
+    };
   },
 };
 
-console.warn(o == 1 && o == 2 && o == 3); // true
-console.warn(o); // o
-console.warn("" + o); // name=obj&age=18&bool=true
-console.warn(+o);
-// console.warn(o[Symbol.toPrimitive]()); // name=obj&age=18&bool=true
+let rangeEntries = {
+  from: 1,
+  to: 5,
+
+  [Symbol.iterator]() {
+    return {
+      current: this.from,
+      last: this.to,
+
+      next() {
+        return this.current < this.last
+          ? { done: false, value: [this.current++, 1] }
+          : { done: true, value: -1 };
+      },
+    };
+  },
+};
+
+// for (const it of range) {
+//   console.warn(it); // 1, 2, 3, 4
+// }
+
+// let map = new Map(rangeEntries);
+
+// map.set("1", "str1").set(1, "num1").set(true, "bool1");
+
+// console.log(map);
+
+// for (const value of map) {
+//   console.log(value);
+// }
+
+// let set = new Set([1, 2, 3]);
+// console.warn(set.keys());
+
+// console.log(Object.fromEntries(rangeEntries)); // {1: 1, 2: 1, 3: 1, 4: 1}
+
+// let title, width, height;
+
+// 这一行发生了错误
+// {title, width, height} = {title: "Menu", width: 200, height: 100};
+
+// 获取某月的最后一天
+export function getLastDayOfMonth(year, month) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+let user = {
+  sayHi() {
+    // 被忽略
+    alert("Hello");
+  },
+  [Symbol("id")]: 123, // 被忽略
+  something: undefined, // 被忽略
+};
+
+console.log(JSON.stringify(user)); // {}（空对象）
+
+let room = {
+  number: 23,
+};
+
+let meetup = {
+  title: "Conference",
+  participants: [{ name: "John" }, { name: "Alice" }],
+  place: room, // meetup 引用了 room
+};
+
+room.occupiedBy = meetup; // room 引用了 meetup
+
+Object.prototype.toString = function () {
+  return "[" + Object.keys(this).join(", ") + "]";
+};
+
+// 映射函数
+console.log(
+  "result:",
+  JSON.stringify(
+    meetup,
+    function replacer(key, value) {
+      console.log(`${key}: ${value}`);
+      return key == "occupiedBy" ? undefined : value;
+    },
+    "****"
+  )
+);
