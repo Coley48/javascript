@@ -2670,3 +2670,146 @@ f(); // John
 > Note: 箭头函数不具有 `this` 自然也就意味着另一个限制：箭头函数不能用作构造器（constructor），因此不能用 `new` 调用它们；
 
 > Note: 相较与 `func.bind(this)`，前者创建了一个该函数的“绑定版本”；而箭头函数 `=>` 没有创建任何绑定，箭头函数只是没有 `this`；`this` 的查找与常规变量的搜索方式完全相同：在外部词法环境中查找；
+
+#### 属性标志和属性描述符
+
+对象属性（properties），除 value 外，还有三个特殊的特性（attributes），也就是所谓的“标志”；默认都为 true；
+
+- writable 表示是否值可以被修改；
+- enumerable 表示是否会被在循环中列出；
+- configurable 表示是否此特性可以被删除，这些属性也可以被修改；
+
+**writable**
+
+通过更改 writable 标志来把对象属性设置为只读，不能被重新赋值；
+
+> Note: 在非严格模式下，在对不可写的属性等进行写入操作时，不会出现错误，但是操作仍然不会成功；因为在非严格模式下，违反标志的行为（flag-violating action）只会被默默地忽略掉；
+
+**enumerable**
+
+通过更改 enumerable 标志来把对象属性设置为不可枚举，不会显示在 for..in 中；也会被 Object.keys 排除；
+
+**configurable**
+
+通过设置 configurable 标志把对象属性标志设置为不能被删除（delete），它的特性（attribute）不能被修改；
+
+configurable: false 防止更改和删除属性标志，但是允许更改对象的值，不可配置标志（configurable:false）有时会预设在内建对象和属性中；
+
+> Note: 对于不可配置的属性，我们可以将 `writable: true` 更改为  `false`，从而防止其值被修改（以添加另一层保护），但无法反向行之；
+
+**Object.getOwnPropertyDescriptor / Object.getOwnPropertyDescriptors**
+
+可以通过 Object.getOwnPropertyDescriptor(obj, propertyName) 方法获取，返回一个“属性描述符”对象：包含值和所有的标志；
+
+或者可以使用 Object.getOwnPropertyDescriptors(obj) 方法一次获取对象所有包含 symbol 类型的和不可枚举的属性在内的属性描述符；
+
+**Object.defineProperty / Object.defineProperties**
+
+可以使用 Object.defineProperty(obj, propertyName, descriptor) 方法修改标志；如果该属性存在，defineProperty 会更新其标志，否则它会使用给定的值和标志创建属性；在这种情况下，如果没有提供标志，则会假定它是 false；
+
+或者使用 Object.defineProperties(obj, descriptors) 方法同时定义多个属性；
+
+> Tips: 克隆对象的“标志感知”方式：`let clone = Object.defineProperties({}, Object.getOwnPropertyDescriptors(obj))`，
+
+```js
+let user = {
+  name: "Coley48",
+  toString() {
+    return this.name;
+  },
+};
+
+// 常规方式定义的属性，标志默认全为 true
+Object.getOwnPropertyDescriptor(user, "name");
+// {value: 'Coley48', writable: true, enumerable: true, configurable: true}
+
+// 更改旧属性
+Object.defineProperty(user, "toString", {
+  // 只更新 enumerable 标志
+  enumerable: false,
+});
+
+// 跳过不可枚举的属性
+for (let key in user) console.warn(key); // name
+Object.keys(user); // ['name']
+
+// 定义新属性
+Object.defineProperty(user, "important", {
+  // value 默认 undefined
+  // enumerable 未显式给出，默认为 false
+  writable: false,
+  configurable: false,
+});
+
+// 更改不可配置属性 Cannot redefine property: important
+Object.defineProperty(user, "important", {
+  writable: true,
+  configurable: false,
+});
+
+// 获取全部属性的标志对象
+let descriptors = Object.getOwnPropertyDescriptors(user);
+
+console.log(descriptors);
+```
+
+**全局封闭对象**
+
+属性描述符在单个属性的级别上工作，以下方法可以限制整个对象访问，但在实际开发中较少用到；
+
+- Object.preventExtensions(obj) 禁止向对象添加新属性
+- Object.seal(obj) 禁止添加/删除属性；为所有现有的属性设置 configurable: false；
+- Object.freeze(obj) 禁止添加/删除/更改属性；为所有现有的属性设置 configurable: false, writable: false；
+- Object.isExtensible(obj) 如果添加属性被禁止，则返回 false，否则返回 true；
+- Object.isSealed(obj) 如果添加/删除属性被禁止，并且所有现有的属性都具有 configurable: false则返回 true；
+- Object.isFrozen(obj) 如果添加/删除/更改属性被禁止，并且所有当前属性都是 configurable: false, writable: false，则返回 true；
+
+#### 属性的 getter 和 setter
+
+对象属性分为两种，一种是数据属性，另一种是访问器属性（accessor properties）；本质上是用于获取和设置值的函数，但从外部代码来看就像常规属性；
+
+**getter 和 setter**
+
+访问器属性由 “getter” 和 “setter” 方法表示，在对象字面量中，它们用 get 和 set 表示；
+
+从外表看，访问器属性看起来就像一个普通属性，这就是访问器属性的设计思想；不以函数的方式调用 getter / setter 属性，当读取 / 设置属性时，getter / setter 会在幕后运行；
+
+**访问器描述符**
+
+访问器属性的描述符与数据属性的不同，没有 value 和 writable，但是有 get 和 set 函数；
+
+- get 一个没有参数的函数，在读取属性时工作；
+- set 带有一个参数的函数，当属性被设置时调用；
+- enumerable 与数据属性的相同；
+- configurable 与数据属性的相同；
+
+> Note: 一个属性要么是访问器（具有 `get/set` 方法），要么是数据属性（具有 `value`），但不能两者都是；如果试图在同一个描述符中同时提供 `get` 和 `value`，则会出现错误；
+
+访问器的一大用途是，它们允许随时通过使用 getter 和 setter 替换“正常的”数据属性，来控制和调整这些属性的行为；例如为旧代码添加一个 getter 以实现兼容；
+
+```js
+let user = {
+  _name: "John",
+};
+
+Object.defineProperty(user, 'name', {
+  get() {
+    return this._name;
+  },
+
+  set(value) {
+    set name(value) {
+    if (value.length < 4) {
+      alert("Name is too short, need at least 4 characters");
+      return;
+    }
+    this._name = value;
+  }
+  }
+});
+
+for(let key in user) alert(key); // _name
+
+alert(user.name); // John
+user.name = ""; // alert ...
+```
