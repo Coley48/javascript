@@ -1,248 +1,395 @@
 "use strict";
 
-// console.log("string".toUpperCase()); // STRING
+// let record = [0, 1, 1];
 
-// let str = "string";
+// // 斐波那契
+// export function Fibonacci1(n) {
+//   if (n < 3) {
+//     return 1;
+//   }
+//   let lastOne = 1;
+//   let lastTwo = 1;
 
-// // str.test = 1;
+//   for (let i = 3; i < n; i++) {
+//     [lastTwo, lastOne] = [lastOne, lastOne + lastTwo];
+//   }
 
-// // console.warn(str.test); // undefined
-// // console.warn(str.test); // Uncaught TypeError: Cannot create property 'test' on string 'string'
+//   return lastOne + lastTwo;
+//   // if (n < record.length) {
+//   //   return record[n];
+//   // } else {
+//   //   return (record[n] = Fibonacci(n - 1) + Fibonacci(n - 2));
+//   // }
+//   // return n > 1 ? Fibonacci(n - 1) + Fibonacci(n - 2) : n;
+// }
 
-// let billion = 1_000_000_000;
+// export function Fibonacci(n) {
+//   let caches = {};
 
-// console.log(billion);
+//   function _fib(n) {
+//     if (n < 3) return 1;
+//     return n in caches ? caches[n] : (caches[n] = _fib(n - 1) + _fib(n - 2));
+//   }
 
-// let number = 200;
+//   return _fib(n);
+// }
 
-// console.log("number.toString(16):", number.toString(16)); // "c8"
+// // 数组转单链表
+// function arrayToList(arr, index = 0) {
+//   console.log(1);
+//   if (index < arr.length) {
+//     return {
+//       value: arr[index],
+//       next: arrayToList(arr, index + 1),
+//     };
+//   } else {
+//     return {
+//       value: arr[index],
+//       next: null,
+//     };
+//   }
+// }
 
-// console.log("parseInt('200', 16):", parseInt("c8", 16)); // 200
+// let arr = [1, 2, 3, 4];
+// let list = arrayToList(arr);
 
-// console.log((123456).toString(36)); // 2n9c
+// console.log(list);
+// console.log(arrayToList);
 
-// // Hello！我是一个会自我增加的数字！
-// console.log(9999999999999999); // 显示 10000000000000000
+// // 闭包
 
-// console.warn(Math.max(-1, " ")); // 0
+// let counter = makeCounter();
 
-// console.log(str[1000]); // undefined
-// console.log(str.charAt(1000)); // ''
+// function makeCounter() {
+//   // let value = "abc";
+//   let count = 0;
 
-// // str[0] = "h"; // Uncaught TypeError: Cannot assign to read only property '0' of string 'string'
+//   return function () {
+//     // debugger;
+//     return count++;
+//   };
+// }
 
-// // substr substring slice
+// counter();
 
-// // string
-// console.warn(str.substring(1, 3)); // tr
-// console.warn(str.substring(3, -1)); // str
+// // 闭包 sum
 
-// let text = "abcdefghijklmnopqrstuvwxyz1234567890";
+// export function closureSum(a) {
+//   return function (b) {
+//     return a + b;
+//   };
+// }
 
-// console.log(text.slice(0, 20));
+// // (function () {
+// //   alert("Parentheses around the function");
+// // })();
 
-// 数组
+// // (function () {
+// //   alert("Parentheses around the whole thing");
+// // })();
 
-// Array.prototype[Symbol.toPrimitive] = function (hint) {
-//   console.error(hint);
+// // !(function () {
+// //   alert("Bitwise NOT operator starts the expression");
+// // })();
 
-//   return "This is an array";
+// // ~(function () {
+// //   alert("Unary plus starts the expression");
+// // })();
+
+// // 全局对象
+
+// globalThis.user = {
+//   name: "Coley48",
+//   age: 18,
 // };
 
-// alert(1 + [1, 2, 3]);
+// console.warn(globalThis.user);
 
-export function getMaxSubSum(arr) {
-  let result = 0;
+// // 在数组中创建的函数
+// let funcArr = [function () {}, function func() {}];
 
-  for (let i = 0; i < arr.length; i++) {
-    let total = 0;
-    for (let j = i; j < arr.length; j++) {
-      total += arr[j];
-      result = Math.max(total, result);
-    }
-  }
+// // 引擎无法设置正确的名字，所以没有值
+// console.warn(funcArr[0].name); // <空字符串>
+// console.warn(funcArr[1].name); // func
 
-  return result;
-}
+// function func(...handlers) {
+//   for (const handler of handlers) {
+//     console.log(handler.length); // 1 0
 
-export function getMaxSubSum2(arr) {
-  let maxSum = 0;
-  let partialSum = 0;
+//     if (handler.length == 0) {
+//       // do something
+//       continue;
+//     }
 
-  for (let item of arr) {
-    // arr 中的每个 item
-    partialSum += item; // 将其加到 partialSum
-    maxSum = Math.max(maxSum, partialSum); // 记住最大值
-    if (partialSum < 0) partialSum = 0; // 如果是负数就置为 0
-  }
+//     handler(1);
+//   }
+// }
 
-  return maxSum;
-}
+// // func(
+// //   (param) => param,
+// //   (...rest) => rest
+// // );
 
-// getMaxSubSum([-1, 2, 3, -9]) == 5
-// getMaxSubSum([2, -1, 2, 3, -9]) == 6
-// getMaxSubSum([-1, 2, 3, -9, 11]) == 11
-// getMaxSubSum([-2, -1, 1, 2]) == 3
-// getMaxSubSum([100, -9, 2, -3, 5]) == 100
-// getMaxSubSum([1, 2, 3]) == 6
+// // function func2() {
+// //   // debugger;
+// //   console.log(func2.name);
 
-// 数组方法
+// //   // 没有函数声明提升
+// //   let _f = function (param) {
+// //     console.log(param);
+// //   };
+// //   // debugger;
 
-let arr = [1, 2, 3, 4, 5];
+// //   _f("1234");
+// //   console.dir(_f);
+// // }
 
-// 从索引 1 开始删除 1 个元素
-console.log(arr.splice(1, 1), arr); // [2] [1, 3, 4, 5]
-// 删除最后一个元素
-console.log(arr.splice(-1, 1), arr); // [5] [1, 3, 4]
+// // func2();
 
-// 插入元素
-console.log(arr.splice(2, 0, 100), arr); // [] [1, 3, 100, 4]
+// // console.dir(func2);
 
-let arrayLike = {
-  0: "something",
-  length: 1,
-};
+// function sum(param) {
+//   sum.count = 0;
 
-let arrayLike2 = {
-  0: "something",
-  [Symbol.isConcatSpreadable]: true,
-  length: 1,
-};
+//   _add.toString = function () {
+//     return sum.count;
+//   };
 
-// alert(arr.concat([3, 4], 5)); // 1,2,3,4,5
-// alert(arr.concat(arrayLike, arrayLike2)); // 1,2,3,4,5,[object Object],something
+//   function _add(p) {
+//     sum.count += p;
+//     return _add;
+//   }
 
-// let arr2 = [1, 2, NaN, null, undefined];
+//   return _add(param);
+// }
 
-// console.warn(arr2.indexOf(NaN)); // -1
-// console.warn(arr2.indexOf(null)); // 3
-// console.warn(arr2.lastIndexOf(undefined)); // 4
+// console.log(+sum(3)(4)(5)); // 12
 
-// console.warn(arr2.includes(NaN)); // true
-// console.warn(arr2.includes(null)); // true
-// console.warn(arr2.includes(undefined)); // true
+// function sum2(a) {
+//   const next = (b) => sum(a + b);
+//   next.valueOf = () => a;
+//   return next;
+// }
 
-// let arr3 = [1, -2, 15, 2, 0, 8];
-// arr3.sort((a, b) => a - b);
-// console.log(arr3);
+// console.log(+sum2(1)(2)(3));
 
-// let army = {
-//   minAge: 18,
-//   maxAge: 27,
-//   canJoin(user) {
-//     return user.age > 20;
+// console.clear();
+
+// let start = Date.now();
+// let times = [];
+
+// setTimeout(function run() {
+//   times.push(Date.now() - start); // 保存前一个调用的延时
+
+//   if (start + 100 < Date.now()) console.log(times);
+//   // 100 毫秒之后，显示延时信息
+//   else setTimeout(run); // 否则重新调度
+// });
+
+// // 间谍装饰器
+
+// function work(a, b) {
+//   console.warn(a + b); // work 是一个任意的函数或方法
+// }
+
+// function spy(func) {
+//   _f.calls = [];
+
+//   function _f(...rest) {
+//     _f.calls.push(rest);
+//     func.apply(this, rest);
+//   }
+
+//   return _f;
+// }
+
+// work = spy(work);
+
+// work(1, 2); // 3
+// work(4, 5); // 9
+
+// for (let args of work.calls) {
+//   console.log("call:" + args.join()); // "call:1,2", "call:4,5"
+// }
+
+// // 延时装饰器
+// console.clear();
+
+// function ff(...rest) {
+//   console.log(...rest);
+// }
+
+// function delay(func, ms) {
+//   return function () {
+//     // setTimeout(() => {
+//     //   console.error("...", this); // undefined
+//     //   func.apply(this, arguments);
+//     // }, ms);
+//     let arg = arguments;
+//     setTimeout(function (x = 1) {
+//       console.log("---", this, arg); // Window
+//       func.apply(this, arg);
+//     }, ms);
+//   };
+// }
+
+// // create wrappers
+// let f1000 = delay(ff, 1000);
+// let f1500 = delay(ff, 2500);
+
+// f1000("test"); // 在 1000ms 后显示 "test"
+// f1500("test", 111); // 在 1500ms 后显示 "test"
+
+// // 防抖装饰器
+
+// function debounce(func, ms) {
+//   let timer = null;
+
+//   return function () {
+//     clearTimeout(timer);
+//     timer = setTimeout(() => func.apply(this, arguments), ms);
+//   };
+// }
+
+// let f = debounce(console.log, 1000);
+// f("a");
+// setTimeout(() => f("b"), 200);
+// setTimeout(() => f("c"), 500);
+
+// // 节流装饰器
+
+// function throttle(func, ms) {
+//   let timer = null;
+//   return function () {
+//     if (!timer) {
+//       timer = setTimeout(() => {
+//         func.apply(this, arguments);
+//         timer = null;
+//       }, ms);
+//     }
+//   };
+// }
+
+// let f2 = throttle(console.log, 1000);
+// f2(1); // 显示 1
+// f2(2); // (节流，尚未到 1000ms)
+// f2(3); // (节流，尚未到 1000ms)
+
+// function throttle2(func, ms) {
+//   let isThrottled = false,
+//     savedArgs,
+//     savedThis;
+
+//   function wrapper() {
+//     if (isThrottled) {
+//       // (2)
+//       savedArgs = arguments;
+//       savedThis = this;
+//       return;
+//     }
+//     isThrottled = true;
+
+//     func.apply(this, arguments); // (1)
+
+//     setTimeout(function () {
+//       isThrottled = false; // (3)
+//       if (savedArgs) {
+//         wrapper.apply(savedThis, savedArgs);
+//         savedArgs = savedThis = null;
+//       }
+//     }, ms);
+//   }
+
+//   return wrapper;
+// }
+
+// // 函数绑定
+
+// let user = {
+//   firstName: "John",
+//   sayHi() {
+//     console.warn(`Hello, ${this.firstName}!`);
 //   },
 // };
 
-// let users = [{ age: 16 }, { age: 20 }, { age: 23 }, { age: 30 }];
+// let sayHi = user.sayHi.bind(user); // (*)
 
-// let soldiers = users.filter(army.canJoin, army);
+// // 可以在没有对象（译注：与对象分离）的情况下运行它
+// sayHi(); // Hello, John!
 
-// console.log(soldiers); // [{age: 23}, {age: 30}]
+// setTimeout(sayHi, 1000); // Hello, John!
 
-// 可迭代对象
+// // 即使 user 的值在不到 1 秒内发生了改变
+// // sayHi 还是会使用预先绑定（pre-bound）的值，该值是对旧的 user 对象的引用
+// user = {
+//   sayHi() {
+//     console.warn("Another user in setTimeout!");
+//   },
+// };
 
-let range = {
-  from: 1,
-  to: 5,
-
-  [Symbol.iterator]() {
-    return {
-      current: this.from,
-      last: this.to,
-
-      next() {
-        return this.current < this.last
-          ? { done: false, value: this.current++ }
-          : { done: true, value: -1 };
-      },
-    };
-  },
-};
-
-let rangeEntries = {
-  from: 1,
-  to: 5,
-
-  [Symbol.iterator]() {
-    return {
-      current: this.from,
-      last: this.to,
-
-      next() {
-        return this.current < this.last
-          ? { done: false, value: [this.current++, 1] }
-          : { done: true, value: -1 };
-      },
-    };
-  },
-};
-
-// for (const it of range) {
-//   console.warn(it); // 1, 2, 3, 4
+// function mul(a, b) {
+//   console.log(a, b);
+//   return a * b;
 // }
 
-// let map = new Map(rangeEntries);
+// let double = mul.bind(null, 2);
 
-// map.set("1", "str1").set(1, "num1").set(true, "bool1");
+// console.log(double(3)); // = mul(2, 3) = 6
+// console.log(double(4)); // = mul(2, 4) = 8
+// console.log(double(5)); // = mul(2, 5) = 10
 
-// console.log(map);
-
-// for (const value of map) {
-//   console.log(value);
+// // 在非严格模式下，ES5 标准会将值为 null 的 this 绑定到全局对象，也就是 this=window
+// function f0() {
+//   console.error(this); // null
 // }
 
-// let set = new Set([1, 2, 3]);
-// console.warn(set.keys());
+// let user0 = {
+//   g: f0.bind(null),
+// };
 
-// console.log(Object.fromEntries(rangeEntries)); // {1: 1, 2: 1, 3: 1, 4: 1}
+// user0.g();
 
-// let title, width, height;
+// // bind 函数属性
 
-// 这一行发生了错误
-// {title, width, height} = {title: "Menu", width: 200, height: 100};
+// function sayHi2() {
+//   alert(this.name);
+// }
+// sayHi2.test = 5;
 
-// 获取某月的最后一天
-export function getLastDayOfMonth(year, month) {
-  return new Date(year, month + 1, 0).getDate();
+// let bound = sayHi2.bind({
+//   name: "John",
+// });
+
+// // alert(bound.test); // undefined
+
+// 浏览器 script 中
+
+window.ff = ff;
+
+function ff() {
+  console.log(this);
 }
 
 let user = {
+  firstName: "John",
   sayHi() {
-    // 被忽略
-    alert("Hello");
+    console.log(`Hello, `, this);
   },
-  [Symbol("id")]: 123, // 被忽略
-  something: undefined, // 被忽略
 };
 
-console.log(JSON.stringify(user)); // {}（空对象）
+setTimeout(user.sayHi, 1000); // Hello, Window
 
-let room = {
-  number: 23,
-};
+setTimeout(() => {
+  user.sayHi(); // Hello, user
+}, 1000);
 
-let meetup = {
-  title: "Conference",
-  participants: [{ name: "John" }, { name: "Alice" }],
-  place: room, // meetup 引用了 room
-};
+setTimeout(ff, 1000); // Window
 
-room.occupiedBy = meetup; // room 引用了 meetup
+setTimeout(() => {
+  ff(); // undefined
+}, 1000);
 
-Object.prototype.toString = function () {
-  return "[" + Object.keys(this).join(", ") + "]";
-};
-
-// 映射函数
-console.log(
-  "result:",
-  JSON.stringify(
-    meetup,
-    function replacer(key, value) {
-      console.log(`${key}: ${value}`);
-      return key == "occupiedBy" ? undefined : value;
-    },
-    "****"
-  )
-);
+setTimeout(function () {
+  // console.log(this); // Window
+  window.ff(); // Window
+}, 1000);
