@@ -1245,7 +1245,7 @@ for..of 循环：
 2. 这个方法必须返回一个迭代器（iterator）即一个有 next 方法的对象；
 3. 此后，for..of 仅适用于这个被返回的对象；
 4. 然后通过调用返回对象的 next() 方法 for..of 循环取得下一个数值；
-5. next() 方法返回的结果的格式必须是 {done: Boolean, value: any}；
+5. next() 方法返回的结果的格式必须是 { done: Boolean, value: any }；
 6. 当 done = true 时，表示循环结束，否则 value 是下一个值；
 
 ```js
@@ -2709,7 +2709,7 @@ configurable: false 防止更改和删除属性标志，但是允许更改对象
 
 或者使用 Object.defineProperties(obj, descriptors) 方法同时定义多个属性；
 
-> Tips: 克隆对象的“标志感知”方式：`let clone = Object.defineProperties({}, Object.getOwnPropertyDescriptors(obj))`，
+> Tips: 克隆对象的“标志感知”方式，但无法克隆原型链：`let clone = Object.defineProperties({}, Object.getOwnPropertyDescriptors(obj))`，
 
 ```js
 let user = {
@@ -2812,4 +2812,229 @@ for(let key in user) alert(key); // _name
 
 alert(user.name); // John
 user.name = ""; // alert ...
+```
+
+#### 原型继承
+
+在 JavaScript 中，对象有一个特殊的隐藏属性 [[Prototype]]（如规范中所命名的），它要么为 null，要么就是对另一个对象的引用，该对象被称为“原型”；
+
+当从 object 中读取一个缺失的属性时，JavaScript 会自动从原型中获取该属性；在编程中，这被称为“原型继承”（Prototypal inheritance）；
+
+原型链有两个限制：一是引用不能形成闭环，否则 JavaScript 会抛出错误；另一个是忽略对象类型，null 之外的其他类型；
+
+> Note: `__proto__` 是 `[[Prototype]]` 因历史原因保留下来的 `getter / setter`；虽然已经过时，但实际上，包括服务端在内的所有环境都支持它，因此使用它是非常安全的；现代编程语言建议应该使用函数 `Object.getPrototypeOf/Object.setPrototypeOf` 来取代 `__proto__` 去 `get/set` 原型；
+
+原型仅用于读取属性，对于写入/删除操作可以直接在对象上进行；访问器（accessor）属性有点特殊，因为分配（assignment）操作是由 setter 函数处理的；因此，写入此类属性实际上与调用函数相同；
+
+```js
+let user = {
+  name: "John",
+  surname: "Smith",
+
+  set fullName(value) {
+    [this.name, this.surname] = value.split(" ");
+  },
+
+  get fullName() {
+    return `${this.name} ${this.surname}`;
+  }
+};
+
+let admin = {
+  __proto__: user,
+  isAdmin: true
+};
+
+alert(admin.fullName); // John Smith (*)
+
+// setter triggers!
+// admin.fullName = "Alice Cooper"; // (**)
+admin.name = "Coley48";
+
+alert(admin.fullName); // Coley48 Cooper，admin 的内容被修改了
+alert(user.fullName);  // John Smith，user 的内容被保护了
+
+// for..in
+for (const key in admin) {
+  console.log(key); // isAdmin, surname, name, fullName
+
+  // 过滤继承属性
+  if (Object.hasOwnProperty.call(admin, key)) {
+    console.warn(key); // isAdmin, name
+  }
+}
+
+// Object.keys 只返回自己的 key
+alert(Object.keys(admin)); // ['isAdmin', 'name']
+
+delete admin.fullName // 无效，无法通过 admin 删除原型中的属性
+delete user.fullName // user，admin 中 fullName 均被删除
+```
+
+无论在一个对象还是在原型中获取到的方法；在一个方法调用中，this 始终是点符号 . 前面的对象；因此可以实现不同对象共享方法，并且私有状态；
+
+> Tips: `obj.hasOwnProperty(key)` 方法可以判断 `key` 是否是 `obj` 具有自己的（非继承的）属性；一般使用转发调用方式 `Object.hasOwnProperty.call(obj, key)`；
+
+> Note: `for..in` 循环也会迭代继承的属性；而几乎所有键/值获取方法，例如 `Object.keys` 和 `Object.values` 等，都会忽略继承的属性；它们只会对对象自身进行操作，不考虑继承自原型的属性；
+
+> 在现代引擎中，从性能的角度来看，从对象还是从原型链获取属性都是没区别的；引擎会记住在哪里找到的该属性，并在下一次请求中重用它；并且一旦有内容更改，它们就会自动更新内部缓存；
+
+#### F.prototype
+
+如果 F.prototype 是一个对象或者 null（赋以其他值会被忽略），那么 new 操作符会使用它为新对象设置 [[Prototype]]；
+
+> Note: 如果在创建之后，F.prototype 属性有了变化（F.prototype = <another object>），那么通过 new F 创建的新对象也将随之拥有新的对象作为 [[Prototype]]，但已经存在的对象将保持旧有的值；
+
+每个函数都有 "prototype" 属性，即使我们没有提供它；默认的 "prototype" 是一个只有属性 constructor 的对象，属性 constructor 指向函数自身；可以使用 constructor 属性来创建一个新对象，该对象使用与现有对象相同的构造器；
+
+```js
+// 默认构造器指向自身
+function F() {}
+
+F.prototype // {constructor: ƒ}
+F.prototype.constructor === F // true
+F.prototype.constructor.name // F
+
+let f = new F();
+let ff = new f.constructor();
+
+// 对原型相关操作的结果
+function Rabbit() {}
+Rabbit.prototype = {
+  eats: true,
+};
+
+// 引用了上面的 prototype
+let rabbit1 = new Rabbit();
+
+Rabbit.prototype = {
+  eats: false,
+};
+
+// 引用了新定义的的 prototype
+let rabbit2 = new Rabbit();
+// 然后删除新定义的 prototype 的 eats
+delete Rabbit.prototype.eats; 
+
+alert(rabbit1.eats); // 从之前引用的 prototype 取值 true
+alert(rabbit2.eats); // 从新的 prototype 取值 undefined
+```
+
+> Note: 为了确保正确的 `constructor`，我们可以选择添加/删除属性到默认 `prototype`，而不是将其整个覆盖；
+
+#### 原生的原型
+
+所有的内建对象都遵循相同的模式（pattern）：方法都存储在 prototype 中，同时对象本身只存储数据；
+
+**Object 和 Object.prototype**
+
+Object 是 JavaScript 的一种数据类型，它用于存储各种键值集合和更复杂的实体；Objects 可以通过 Object() 构造函数或者使用对象字面量的方式创建；Object 构造函数为给定的参数创建一个包装类对象（object wrapper），具体有以下情况：
+
+- 如果给定值是 null 或 undefined，将会创建并返回一个空对象；
+- 如果传进去的是一个基本类型的值，则会构造其包装类型的对象；
+- 如果传进去的是引用类型的值，仍然会返回这个值，经他们复制的变量保有和源对象相同的引用地址；
+- 当以非构造函数形式被调用时，Object 的行为等同于 new Object()，返回一个空对象；
+
+> Note: 按照规范，所有的内建原型顶端都是 `Object.prototype`，这就是为什么说“一切都从对象继承而来”；`Object.prototype` 上方的链中没有更多的 `[[Prototype]]`；
+
+```js
+"".__proto__.__proto__.__proto__; // String Object null
+Object.prototype.__proto__; // null
+```
+
+- [Object MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object)
+
+**基础类型**
+
+如果试图访问基本数据类型的属性，那么临时包装器对象将会通过内建的构造器 String、Number 和 Boolean 被创建，提供给我们操作字符串、数字和布尔值的方法然后消失；
+
+> Note: null 和 undefined 比较特殊，它们没有对象包装器，所以它们没有方法和属性，并且它们也没有相应的原型；
+
+在现代编程中，只有一种情况下允许修改原生原型，那就是 polyfilling；但因为原型是全局的，所以很容易造成冲突；
+
+**借用原型方法**
+
+除了通过复制借用原生原型的方法之外，还可以通过将 `obj.__proto__` 设置为对应内置对象的 prototype，然后可以使用该原型下的所有方法；
+
+```js
+let obj = {
+  0: "Hello",
+  1: "world!",
+  length: 2,
+};
+
+// 只复制某个方法
+obj.join = Array.prototype.join;
+// 或者指定原型
+obj.__proto__ = Array.prototype;
+
+alert( obj.join(',') ); // Hello,world!
+
+// 包装器 + prototype 原型方法
+Function.prototype.defer = function (ms) {
+  let context = this;
+
+  function func() {
+    console.log(this, arguments); // undefined [1, 2]
+    setTimeout(() => {
+      context.apply(this, arguments);
+    }, ms);
+  }
+
+  return func;
+
+  // 或使用箭头函数 
+  // return (...args) => {
+  //   setTimeout(this.apply(this, args), ms);
+  // };
+};
+
+function f(a, b) {
+  console.log(a + b);
+}
+
+f.defer(1000)(1, 2); // 1 秒后显示 3
+```
+
+#### 原型方法，没有 `__proto__` 的对象
+
+JavaScript 规范中规定，proto 必须仅在浏览器环境下才能得到支持，因此 `__proto__` 被认为是过时且不推荐使用的（deprecated）；应该使用以下现代方法代替 `__proto__`：
+
+- Object.create(proto, [descriptors]) 利用给定的 proto 作为 [[Prototype]] 和可选的属性描述来创建一个空对象；
+- Object.getPrototypeOf(obj) 返回对象 obj 的 [[Prototype]]；
+- Object.setPrototypeOf(obj, proto) 将对象 obj 的 [[Prototype]] 设置为 proto；
+
+使用 Object.create 来实现比复制 for..in 循环中的属性更强大的对象克隆方式；以对 obj 进行真正准确地拷贝，包括所有的属性：可枚举和不可枚举的，数据属性和 setters/getters —— 包括所有内容，并带有正确的 [[Prototype]]；
+
+```js
+let clone = Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
+```
+
+> Note: JavaScript 引擎对此进行了高度优化，用 `Object.setPrototypeOf` 或对 `obj.__proto__` 赋值，“即时”更改原型是一个非常缓慢的操作，因为它破坏了对象属性访问操作的内部优化；
+
+**very plain object**
+
+在对象中 `__proto__` 属性很特别：它必须是对象或者 null，其他原始类型的赋值会被忽略；而使用 Object.create(null) 创建了一个空对象，这个对象没有原型（[[Prototype]] 是 null），所以 `__proto__` 没有继承 Object.prototype 的 getter/setter，因此可以被赋以任何原始类型值；这样的对象称为 “very plain” 或 “pure dictionary” 对象；
+
+**其他静态方法**
+
+- Object.keys(obj) / Object.values(obj) / Object.entries(obj) 返回一个可枚举的由自身的字符串属性名/值/键值对组成的数组；
+- Object.getOwnPropertySymbols(obj) 返回一个由自身所有的 symbol 类型的键组成的数组；
+- Object.getOwnPropertyNames(obj) 返回一个由自身所有的字符串键组成的数组；
+- Reflect.ownKeys(obj) 返回一个由自身所有键组成的数组；
+
+```js
+function Rabbit(name) {
+  this.name = name;
+}
+Rabbit.prototype.sayHi = function() {
+  alert(this.name);
+};
+
+let rabbit = new Rabbit("Rabbit");
+
+rabbit.sayHi(); // Rabbit
+Rabbit.prototype.sayHi(); // undefined
+Object.getPrototypeOf(rabbit).sayHi(); // undefined
+rabbit.__proto__.sayHi(); // undefined
 ```
