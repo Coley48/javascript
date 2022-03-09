@@ -448,15 +448,11 @@ JavaScript 中主要的内存管理概念是可达性（Reachability），及存
 
 JavaScript 中的 this 可以用于任何函数，即使它不是对象的方法；this 的值是在代码运行时计算出来的，它取决于代码上下文；
 
-在全局函数中的 this，严格模式下的值为 undefined，非严格模式的情况下，this 将会是 全局对象（浏览器为 window）；
-
-箭头函数没有自己的 this，其 this 值取决于外部“正常的”函数；
+在普通函数中的 this，严格模式下的值为 undefined，非严格模式的情况下，this 将会是全局对象（浏览器为 window）；箭头函数没有自己的 this，其 this 值取决于外部“正常的”函数；
 
 #### 构造器和操作符 new
 
-从技术上讲，构造函数也是一个常规函数；但一般以大写字母开头并只用 new 操作符执行；
-
-当一个函数被使用 new 操作符执行时，它按照以下步骤：
+从技术上讲，构造函数也是一个常规函数；但一般以大写字母开头并只用 new 操作符执行；当一个函数被使用 new 操作符执行时，它按照以下步骤：
 
 1. 一个新的空对象被创建并分配给 this；
 2. 函数体执行，通常它会修改 this，为其添加新的属性；
@@ -1146,10 +1142,54 @@ arr.sort 方法对数组进行原位（in-place） 排序，并更改元素的�
 arr.sort(fn) 方法实现了通用的排序算法，在内部大多数情况下都是经过快速排序或 Timsort 算法优化的；比较函数 fn 可以返回任何数字，实际上，比较函数只需要返回一个正数表示“大于”，一个负数表示“小于”；
 
 ```js
+// 基本使用
 let arr = [1, -2, 15, 2, 0, 8];
 
 arr.sort((a, b) => a - b); // [-2, 0, 1, 2, 8, 15]
 ```
+
+快速排序是对冒泡排序的一种改进，由 C.A.R.Hoare（Charles Antony Richard Hoare，东尼·霍尔）在 1962 年提出；这种算法实际上是一种分治法思想，也就是分而治之，把问题分为一个个的小部分来分别解决，再把结果组合起来；
+
+```js
+// 快速排序 js 实现
+function QuickSort(arr, start, end) {
+  if (start > end) {
+    return;
+  }
+
+  let i = start;
+  let j = end;
+  let key = arr[i];
+
+  while (i < j) {
+    // 往前找小于的数
+    while (i < j && arr[j] > key) {
+      j--;
+    }
+    if (i < j) {
+      arr[i++] = arr[j];
+    }
+    // 往后找大于的数
+    while (i < j && arr[i] < key) {
+      i++;
+    }
+    if (i < j) {
+      arr[j--] = arr[i];
+    }
+  }
+
+  arr[i] = key;
+  QuickSort(arr, start, i - 1);
+  QuickSort(arr, i + 1, end);
+}
+
+let arr = [72, 6, 57, 88, 60, 42, 83, 73, 48, 85];
+QuickSort(arr, 0, arr.length - 1);
+console.log(arr); // [6, 42, 48, 57, 60, 72, 73, 83, 85, 88]
+```
+- [快速排序算法详解（原理、实现和时间复杂度）](http://data.biancheng.net/view/117.html)
+- [Timsort原理学习](https://sikasjc.github.io/2018/07/25/timsort/)
+- [Getting things sorted in V8](https://v8.dev/blog/array-sort#timsort)
 
 **reverse**
 
@@ -2140,17 +2180,27 @@ let arrCopy = [...arr];
 
 在 JavaScript 中，每个运行的函数，代码块 {...} 以及整个脚本，都有一个被称为词法环境（Lexical Environment） 的内部（隐藏）的关联对象；
 
-其中，词法环境对象由两部分组成：一个存储所有局部变量作为其属性（包括一些其他信息，如 this 的值）的对象，也称为环境记录（Environment Record）；另一个是对外部词法环境的引用，与外部代码相关联；全局词法环境没有外部引用；
+其中，词法环境对象由两部分组成：一个存储所有局部变量作为其属性（包括一些其他信息，如 this 的值）的对象，也称为环境记录（Environment Record）；另一个是对外部词法环境的引用，与外部代码相关联；全局词法环境没有外部引用（其引用为 null）；
 
-> Note: “词法环境”是一个规范对象（specification object）：它仅仅是存在于编程语言规范中的“理论上”存在的，用于描述事物如何运作的对象，我们无法在代码中获取该对象并直接对其进行操作；
+> Note: “词法环境”是一个规范对象（specification object）：它仅仅是存在于编程语言规范中的“理论上”存在的，用于描述事物如何运作的对象，无法在代码中获取该对象并直接对其进行操作；
 
 > Note: 一个“变量”只是环境记录这个特殊的内部对象的一个属性；“获取或修改变量”意味着“获取或修改词法环境的一个属性”；
 
+> Environment Record is an abstract class with three concrete subclasses: declarative Environment Record, object Environment Record, and global Environment Record. Function Environment Records and module Environment Records are subclasses of declarative Environment Record.
+> Every Environment Record has an [[OuterEnv]] field, which is either null or a reference to an outer Environment Record. 
+> A var statement declares variables that are scoped to the running execution context's VariableEnvironment. Within the scope of any VariableEnvironment a common BindingIdentifier may appear in more than one VariableDeclaration but those declarations collectively define only one variable.
+
+> A function Environment Record is a declarative Environment Record that is used to represent the top-level scope of a function and, if the function is not an ArrowFunction, provides a this binding. [[ThisBindingStatus]] filed value should be lexical, initialized, or uninitialized, If the value is lexical, this is an ArrowFunction and does not have a local this value.
+
+> The value of the Function component of the running execution context is also called the `active function object`.
+
+> The LexicalEnvironment and VariableEnvironment components of an execution context are always Environment Records.
+
+执行上下文主要包括，Realm、code evaluation state、Function、ScriptOrModule 和词法环境、变量环境（var 关键字声明的变量）、私有环境（包含 class 私有变量）；
+
 **函数声明**
 
-函数其实也是一个值，就像变量一样，不同之处在于函数声明的初始化会被立即完成（函数声明提升），当创建了一个词法环境时，函数声明会立即变为即用型函数，因此可以在（函数声明）的定义之前调用函数声明；
-
-正常来说，这种行为仅适用于函数声明，而不适用于将函数分配给变量的函数表达式；
+函数其实也是一个值，就像变量一样，不同之处在于函数声明的初始化会被立即完成（函数声明提升），当创建了一个词法环境时，函数声明会立即变为即用型函数，因此可以在（函数声明）的定义之前调用函数声明；正常来说，这种行为仅适用于函数声明，而不适用于将函数分配给变量的函数表达式；
 
 **内部和外部词法环境**
 
@@ -2168,28 +2218,30 @@ let arrCopy = [...arr];
 
 ```js
 // 解释阶段
-// 1. 脚本开始执行，创建全局词法环境；
-// 2. 全局词法环境填充所有声明的变量（未初始化），同时完成函数的声明；
+// 1. 脚本开始执行，创建全局执行上下文；
+// 2. 创建一个全局词法环境填充所有（let、const、function）声明的变量（未初始化）以及函数；
+// 3. 创建一个全局变量环境，填充所有 var 关键字定义的变量，并初始化为 undefined
+// 4. 将外部环境置为 null；
 
 // 执行阶段
-// 3. 此时，先定义 counter，值为 undefined；
-// 4. 然后执行 makeCounter 后，为 counter 赋值；
+// 5. 此时，先定义 counter，值为 undefined；
+// 6. 然后执行 makeCounter 后，为 counter 赋值；
 let counter = makeCounter();
 
 
-// 5. 进入函数，创建新的函数词法环境，并存储这个调用的局部变量和参数；
-// 6. 同时将外部词法环境的引用指向全局词法环境；
+// 7. 创建新的执行上下文函数，创建函数的词法环境，并存储这个调用的局部变量和参数；
+// 8. 同时将外部环境指向全局词法环境；
 function makeCounter() {
   let count = 0;
 
-  // 7. 返回时，创建一个嵌套函数，并将嵌套函数的外部词法环境指向 makeCounter；
+  // 9. 返回时，创建一个嵌套函数，并将嵌套函数的外部词法环境指向 makeCounter；
   return function() {
-    // 9. 执行 count++ 时，从自身词法环境中查找 count，然后查找 makeCounter 词法环境中的变量，完成修改后返回；
+    // 11. 执行 count++ 时，从自身词法环境中查找 count，然后查找 makeCounter 词法环境中的变量，完成修改后返回；
     return count++;
   }
 }
 
-// 8. 执行 counter 函数，创建一个新的词法环境，并从 [[Environment]] 中获取其外部词法环境引用；
+// 10. 执行 counter 函数，创建一个新的词法环境，并从 [[Environment]] 中获取其外部词法环境引用；
 counter();
 ```
 
@@ -2218,8 +2270,6 @@ function func() {
 func();
 ```
 
-> Tips: 可以将词法环境/执行上下文理解为一个特殊内部对象 `{ VO / AO, this, [scope] }`；而环境记录则表示 `VO / AO` 和 `this`；`[scope]` 用于记录作用域；
-
 > Note: `AO` 类似于是函数被调用时创建的一个特殊 `VO`，它在 `VO` 的基础上添加了实际调用函数时传入的参数和 `arguments` 对象，还有添加 `this` 对象；`VO` 和 `AO` 被创建时会先后执行著名的函数声明提升和变量声明提升，提升上来的变量和函数挂载到 `VO / AO` 对象的上，其实是作为它的属性存在的；
 
 > Tips: 在调试函数时，`Scope` 的最上层是 `Local`，也就是当前执行上下文的变量对象，下面就是函数的`[[Scopes]]` 属性里保存的父级层级链；点击 `Call Stack` 栏中的函数，还可以切换当前执行上下文，观察下面 `Scope` 的变化；
@@ -2228,9 +2278,11 @@ func();
 
 - [变量作用域，闭包文档传送门](https://zh.javascript.info/closure)
 - [深入 js——作用域链](https://juejin.cn/post/6844904050824052744)
-- [JS 编译过程，VO，AO](https://www.jianshu.com/p/edb2be5866eb)
 - [JS 规范中的 Execution Context 和 Scope 概念有什么区别？](https://www.zhihu.com/question/51336888)
 - [了解 JS 中的ECStack、EC、VO 和 AO](https://zhuanlan.zhihu.com/p/311196297)
+- [JS夯实之执行上下文与词法环境](https://juejin.cn/post/6844904145372053511)
+- [Lexical environment and function scope](https://stackoverflow.com/questions/12599965/lexical-environment-and-function-scope)
+- [Executable Code and Execution Contexts](https://tc39.es/ecma262/#sec-executable-code-and-execution-contexts)
 
 #### 旧时的 var
 
@@ -2500,6 +2552,10 @@ for(let j = 0; j < 100000000; j++) {
 }
 ```
 
+> Note: `setTimeout()` 和 `setInterval()` 共用一个编号池，技术上，`clearTimeout()` 和 `clearInterval()` 可以互换；但是，为了避免混淆，不要混用取消定时函数；
+
+- [window.setTimeout MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/API/setTimeout)
+
 #### 装饰器模式和转发，call/apply
 
 **装饰器**
@@ -2534,9 +2590,13 @@ slow = cachingDecorator(slow);
 
 特殊的内建函数方法 func.call(context, arg1, arg2, ...)，它允许调用一个显式设置 this 的函数；另一个内建方法 func.apply(context, args)，它与 func.call 区别在第二个参数使用类数组对象 args 作为参数列表（arguments）；
 
+> Note: `func.call` 在 `func` 函数运行时使用的 `this` 值可能不是该方法看到的实际值：如果这个函数处于非严格模式下，则指定为 `null` 或 `undefined`（缺省时） 时会自动替换为指向全局对象，原始值会被包装；
+
 > Note: `Spread` 语法 `...` 允许将可迭代对象 `args` 作为列表传递给 `func.call`，而 `func.apply` 只接受类数组 `args`；
 
 > Tips: 即可迭代又是类数组的对象，使用 call 或 apply 均可，但是 apply 可能会更快，因为大多数 JavaScript 引擎在内部对其进行了优化；
+
+- [Function.prototype.call MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/call)
 
 **呼叫转移**
 
@@ -2594,9 +2654,9 @@ function throttle(func, ms) {
 
 #### 函数绑定
 
-浏览器中的 setTimeout 方法有些特殊：它为函数调用设定了 this=window（对于 Node.js，this 则会变为计时器（timer）对象；在其他类似的情况下，通常 this 会变为 undefined；
+浏览器中的 setTimeout 方法有些特殊：它为函数调用设定了 this=window（对于 Node.js，this 则会变为计时器（timer）对象；即使是在严格模式下，setTimeout() 的回调函数里面的 this 仍然默认指向 window 对象，并不是 undefined；
 
-函数提供了一个内建方法 bind，它可以绑定 this；func.bind(context) 的结果是一个特殊的类似于函数的“外来对象（exotic object）”，它可以像函数一样被调用，并且透明地（transparently）将调用传递给 func 并设定 this=context；
+函数提供了一个内建方法 bind，可以绑定 this；func.bind(context) 的结果是一个特殊的类似于函数的“外来对象（exotic object）”，它可以像函数一样被调用，并且透明地（transparently）将调用传递给 func 并设定 this=context；
 
 ```js
 let user = {
@@ -2629,7 +2689,7 @@ user = {
 
 > Note: 绑定函数的上下文是硬绑定（hard-fixed）的，无法再修改它；因此被绑定函数内部的 this 指向，或者对象的属性值会被固定，即会使用预先绑定（pre-bound）的值；
 
-> Note: 一个函数不能被重绑定（re-bound），二次绑定的值无效；在非严格模式下，ES5 标准会将值为 `null` 的 `this` 绑定到全局对象，也就是 `this=window`；
+> Note: 一个函数不能被重绑定（re-bound），二次绑定的值无效；在非严格模式下，ES5 标准会将值为 `null` 或 `undefined` 的 `this` 绑定到全局对象，也就是 `this=window`；
 
 ```js
 // 一个偏函数的例子
@@ -2669,7 +2729,204 @@ f(); // John
 
 > Note: 箭头函数不具有 `this` 自然也就意味着另一个限制：箭头函数不能用作构造器（constructor），因此不能用 `new` 调用它们；
 
-> Note: 相较与 `func.bind(this)`，前者创建了一个该函数的“绑定版本”；而箭头函数 `=>` 没有创建任何绑定，箭头函数只是没有 `this`；`this` 的查找与常规变量的搜索方式完全相同：在外部词法环境中查找；
+> Note: 箭头函数 `=>` 没有创建任何绑定，箭头函数只是没有 `this`；`this` 的查找与常规变量的搜索方式完全相同：在外部词法环境中查找；ES6 中的箭头函数并不会创建其自身的执行上下文，所以箭头函数中的 this 取决于它的外部函数；箭头函数内部的 this 会指向声明箭头函数时所在作用域的 this；
+
+> Note: In modules, like `<script type="module">` or `node`, the value of `this` is always `undefined` in the global context. Modules are implicitly in `strict mode`.
+
+**this 绑定**
+
+在绝大多数情况下，函数的调用方式决定了 this 的值（运行时绑定），this 不能在执行期间被赋值，并且在每次函数被调用时 this 的值也可能会不同；在不同情况下，this 值的表现有所不同；
+
+> A regular declarative Environment Record (i.e., one that is neither a function Environment Record nor a module Environment Record) does not provide a this binding.
+> Function Environment Records if envRec.[[ThisBindingStatus]] is not lexical, then Return envRec.[[ThisValue]].
+> Object Environment Records do not provide a this binding. 
+> Module Environment Records always provide a this binding.
+> Global Environment Record Return envRec.[[GlobalThisValue]].
+
+规范环境记录中的 this：
+
+1. 全局环境记录，返回 envRec.[[GlobalThisValue]]；
+2. 对象环境记录，没有 this；
+3. 声明环境记录，
+   - 常规声明环境记录，没有 this；
+   - 函数环境记录，非箭头函数返回 envRec.[[ThisValue]]；
+   - 模块环境记录，返回 undefined；
+
+| 环境 | 非严格模式 | 严格模式 |
+| :----- | :----- | :----- |
+| 全局上下文 | 全局对象 | 全局对象 |
+| 函数上下文 | 全局对象 | undefined |
+| 对象上下文 | 调用的对象 | 调用的对象 |
+| 模块上下文 | 自动开启严格模式 | 在 `<script type="module">` 中为 undefined，在 node 模块中为导出对象 |
+| bind, call, apply | 传入的 thisArg，非对象 thisArg 会被转为对象 | 传入的 thisArg，不会进行对象转换 |
+| 箭头函数 | 从创建的执行上下文获取，顶级为全局变量 | 从创建的执行上下文获取，顶级为 undefined |
+| eval | 直接调用同箭头函数；间接调用为全局对象 | 直接调用同箭头函数，间接调用为全局对象 |
+| setTimeout, setInterval | 将普通函数的 this 绑定为 window 或 Timeout 对象 | 同非严格模式 |
+
+```js
+// 全局环境中
+// 无论是否在严格模式下，在任何函数体外部的 this 都指向全局对象
+console.log(this === globalThis); // true
+"use strict";console.log(this === globalThis); // true
+
+// 函数环境中，this 的值取决于函数被调用的方式
+// 1. 直接调用
+function func() {
+  console.log(this); // window / global
+}
+func();
+"use strict";function func() {
+  console.log(this); // undefined
+}
+func();
+// 2. 作为对象方法调用，无关严格模式与否
+let user = {
+  say() {
+    console.log(this);
+  }
+}
+user.say(); // user
+
+// 函数绑定和转移 bind, call, apply
+// 如果 thisArg 不是对象，则会被尝试转换为对象；null 和 undefined 被转换为全局对象；
+let obj = { name: "obj" };
+user.say.bind()(); // window / global
+user.say.bind(null)(); // window / global
+user.say.bind("str")(); // String {'str'} / [String: 'str']
+user.say.bind(obj); // { name: "obj" }
+user.say.call(); // window / global
+user.say.call(null); // window / global
+user.say.call(1234); // Number {1234} / [Number: 1234]
+user.say.call(obj); // { name: "obj" }
+"use strict";
+user.say.bind()(); // undefined
+user.say.bind(null)(); // null
+user.say.bind("str")(); // str
+user.say.bind(obj); // { name: "obj" }
+user.say.call(); // undefined
+user.say.call(null); // null
+user.say.call(1234); // 1234
+user.say.call(obj); // { name: "obj" }
+
+// 箭头函数中
+// this 与封闭词法环境的 this 保持一致；在全局代码中，它将被设置为全局对象；
+let fn = () => { console.log(this) }
+// return by function
+let returnFunc = function() {
+  return () => { console.log(this) };
+}
+// inside function
+let outerFunc = function() {
+  let _f = () => { console.log(this) };
+  _f();
+}
+// inside object
+const obj = {
+  myFun: () => console.log(this),
+};
+// class
+class MyCls{
+  arrow = () => console.log(this === MyCls, this instanceof MyCls)
+  static staticArrow = () => console.log(this === MyCls, this instanceof MyCls)
+}
+
+fn(); // window / global
+returnFunc()(); // window / global
+outerFunc(); // window / global
+obj.myFun(); // window / global
+
+"use strict";
+fn(); // window / global
+returnFunc()(); // undefined
+outerFunc(); // undefined
+obj.myFun(); // window / global
+// class auto use strict mode
+new MyCls().arrow(); // false true (instance)
+MyCls.staticArrow(); // true false (MyCls)
+
+// Eval
+// 1. 直接调用，eval 代码段中的 this 取决于当前执行上下文
+eval("console.log(this)"); // window / global
+(eval)("console.log(this)"); // window / global
+eval("!(() => {console.log(this)})()"); // window / global
+eval("!function() {console.log(this)}()"); // window / global
+function evalOuter() {
+  eval("console.log(this)");
+}
+evalOuter(); // window / global
+let obj = {
+  evalOuter,
+};
+obj.evalOuter(); // obj
+
+"use strict";
+// 其余例子结果相同，略
+function evalOuter() {
+  eval("console.log(this)");
+}
+evalOuter(); // undefined
+let obj = {
+  evalOuter,
+};
+obj.evalOuter(); // obj
+
+// 2. 间接调用，eval 代码段中的 this 指向全局执行上下文，严格模式同
+eval?.("console.log(this)") // window / global
+window.eval("console.log(this)"); // window
+global.eval("console.log(this)"); // global
+eval.call(null, "console.log(this)"); // window / global
+eval.bind(null, "console.log(this)")(); // window / global
+let originalEval = (code) => eval(code);
+originalEval("console.log(this)"); // window / global
+
+// setTimeout, setInterval
+// 将传入的普通函数 this 设为全局对象，对箭头函数或 bind 生成的函数无效
+function func() {
+  console.log(this);
+}
+let arrowFunc = () => console.log(this);
+let obj = {
+  func() {
+    console.log(this);
+  },
+  arrowFunc : () => console.log(this);
+}
+
+setTimeout(func, 100); // window / Timeout
+setTimeout(arrowFunc, 100); // window / global
+setTimeout(obj.func, 100); // window / Timeout
+setTimeout(obj.arrowFunc, 100); // window / global
+setTimeout(() => {func(); obj.func()}, 100); // window + obj / global
+setTimeout(() => {arrowFunc(); obj.arrowFunc();}, 100); // window + window / global + global
+setTimeout(func.bind(null), 100); // window + window / global + global
+
+"use strict";
+setTimeout(() => {func(); obj.func()}, 100); // undefined + obj / undefined + obj
+setTimeout(() => {arrowFunc(); obj.arrowFunc();}, 100); // window + window / global + global
+
+// 引用丢失
+let obj = {
+  refFunc(){
+    console.log(this);
+  }
+}
+const g = (f) => f();
+const h = obj.refFunc;
+const j = () => obj.refFunc;
+g(obj.refFunc); // No base ref.
+h(); // No base ref.
+j()(); // No base ref.
+(0, obj.refFunc)(); // Another common pattern to remove the base ref.
+```
+
+- [ES6 箭头函数的 this 指向详解](https://zhuanlan.zhihu.com/p/57204184)
+- [箭头函数和 this 指向](https://www.jianshu.com/p/59be0fc4f4a6)
+- [浅谈箭头函数和 setTimeout 中的 this](https://cnblogs.com/jeodeng/p/10658590.html)
+- [JavaScript 的 this 原理](http://www.ruanyifeng.com/blog/2018/06/javascript-this.html)
+- [How does the "this" keyword work?](https://stackoverflow.com/questions/3127429/how-does-the-this-keyword-work?rq=1)
+- [this MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this)
+- [eval() MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval)
+- [window.setTimeout MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/API/setTimeout)
 
 #### 属性标志和属性描述符
 
@@ -2885,7 +3142,7 @@ delete user.fullName // user，admin 中 fullName 均被删除
 
 > Note: 如果在创建之后，F.prototype 属性有了变化（F.prototype = <another object>），那么通过 new F 创建的新对象也将随之拥有新的对象作为 [[Prototype]]，但已经存在的对象将保持旧有的值；
 
-每个函数都有 "prototype" 属性，即使我们没有提供它；默认的 "prototype" 是一个只有属性 constructor 的对象，属性 constructor 指向函数自身；可以使用 constructor 属性来创建一个新对象，该对象使用与现有对象相同的构造器；
+每个函数都有 prototype 属性，即使我们没有提供它；默认的 prototype 是一个只有属性 constructor 的对象，属性 constructor 指向函数自身；可以使用 constructor 属性来创建一个新对象，该对象使用与现有对象相同的构造器；
 
 ```js
 // 默认构造器指向自身
