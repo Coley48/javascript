@@ -395,7 +395,7 @@ alert( "blabla" in user ); // false
 
 > Tips: JavaScript 变量复制，原始类型可类比为“搬家”，对象类型类比为“配钥匙”；
 
-使用 `Object.assign(dest, [src1, src2, src3...])` 方法深拷贝对象；
+使用 `Object.assign(dest, [src1, src2, src3...])` 方法拷贝对象；
 
 - 第一个参数 dest 是指目标对象；
 - 一个或多个源对象 src1, ..., srcN；
@@ -425,7 +425,7 @@ function cloneDeep(object) {
 
 #### 垃圾回收
 
-JavaScript 中主要的内存管理概念是可达性（Reachability），及存储在内存中并以某种方式可访问或可用的值，类似于引用计数；
+JavaScript 中主要的内存管理概念是可达性（Reachability），及存储在内存中并以某种方式可访问或可用的值；
 
 固有的可达值的基本集合，也成为根（roots），包括：
 
@@ -436,13 +436,15 @@ JavaScript 中主要的内存管理概念是可达性（Reachability），及存
 
 如果一个值可以通过引用或引用链从根访问任何其他值，则认为该值是可达的；
 
-垃圾回收的基本算法被称为 “mark-and-sweep”；标记算法类似于广度优先遍历；
+垃圾回收的基本算法被称为 “mark-and-sweep”，即标记清除；现代浏览器均使用此机制，老浏览器使用引用计数机制；标记算法类似于广度优先遍历；
 
 优化建议：
 
 - 分代收集（Generational collection）：对象被分成两组：“新的”和“旧的”；许多对象出现，完成它们的工作并很快死去，它们可以很快被清理；那些长期存活的对象会变得“老旧”，而且被检查的频次也会减少；
 - 增量收集（Incremental collection）：如果有许多对象，并且我们试图一次遍历并标记整个对象集，则可能需要一些时间，并在执行过程中带来明显的延迟，所以引擎试图将垃圾收集工作分成几部分来做；然后将这几部分会逐一进行处理，这需要它们之间有额外的标记来追踪变化，但是这样会有许多微小的延迟而不是一个大的延迟；
 - 闲时收集（Idle-time collection）：垃圾收集器只会在 CPU 空闲时尝试运行，以减少可能对代码执行的影响；
+
+- [Javascript 内存机制](https://zhuanlan.zhihu.com/p/111324373)
 
 #### 对象方法，this
 
@@ -2585,7 +2587,7 @@ function cachingDecorator(func) {
   };
 }
 
-slow = cachingDecorator(slow);
+let newSlow = cachingDecorator(slow);
 ```
 
 特殊的内建函数方法 func.call(context, arg1, arg2, ...)，它允许调用一个显式设置 this 的函数；另一个内建方法 func.apply(context, args)，它与 func.call 区别在第二个参数使用类数组对象 args 作为参数列表（arguments）；
@@ -3295,3 +3297,407 @@ Rabbit.prototype.sayHi(); // undefined
 Object.getPrototypeOf(rabbit).sayHi(); // undefined
 rabbit.__proto__.sayHi(); // undefined
 ```
+
+#### Class 基本语法
+
+在现代 JavaScript 中，还有一个更高级的“类（class）”构造方式；而 new 操作符会自动调用 constructor() 方法，因此我们可以在 constructor() 中初始化对象；
+
+```js
+// 类的定义实际上声明了一个函数，然后存储类中的方法
+class User {
+  constructor(name) {
+    this.name = name;
+  }
+
+  sayHi() {
+    console.log(this.name);
+  }
+
+  // getter
+  get name() {
+    return this._name;
+  }
+
+  // setter
+  set name(value) {
+    if (value.length < 4) {
+      alert("Name is too short.");
+      return;
+    }
+    this._name = value;
+  }
+}
+
+// 用法：
+let user = new User("John");
+user.sayHi();
+
+// 类其实是一个 constructor 方法
+console.log(typeof User); // function
+console.log(User.prototype.constructor.name); // User
+console.log(Object.getOwnPropertyNames(User.prototype)); // ['constructor', 'sayHi']
+
+// class 类与 function 类的差异
+User(); // Cannot call a class as a function
+// 打印 User 方法的标识符对象
+Object.getOwnPropertyDescriptors(User.prototype);
+```
+
+class 不是语法糖，class 与直接使用 function 定义的类有很大差异：
+
+1. 通过 class 创建的函数具有特殊的内部属性标记 [[IsClassConstructor]]: true；
+2. 类方法不可枚举，类定义将 "prototype" 中的所有方法的 enumerable 标志设置为 false；
+3. 类总是使用 use strict；在类构造中的所有代码都将自动进入严格模式；
+
+<!-- class类是方法，原型是对象；构造器是方法类；原型对象用于存储实例方法和属性，class类用于存储静态方法和属性； -->
+
+**类表达式**
+
+就像函数一样，类可以在另外一个表达式中被定义，被传递，被返回，被赋值等；类似于命名函数表达式（Named Function Expressions），类表达式也可以有一个名字，如果类表达式有名字，那么该名字仅在类内部可见；
+
+同对象字面量，类可能包括 getters/setters，计算属性（computed properties）等；
+
+“类字段”是一种允许添加任何属性的语法，与类方法不同，类字段在每个独立对象中被设好，而不是设在 User.prototype；类字段还可以解决丢失 this 的问题；
+
+```js
+class Button {
+  constructor(value) {
+    this.value = value;
+  }
+  click = () => {
+    alert(this.value);
+  }
+}
+
+let button = new Button("hello");
+
+setTimeout(button.click, 1000); // hello
+```
+
+#### 类继承
+
+类继承是一个类扩展另一个类的一种方式，可以在现有功能之上创建新功能；
+
+在内部，关键字 extends 使用了旧的原型机制进行工作；它将子类的 prototype.[[Prototype]] 设置为父类的 prototype；
+
+> Tips: 类语法不仅允许指定一个类，在 `extends` 后可以指定任意表达式，例如一个生成父类的函数调用；
+
+```js
+function f(phrase) {
+  return class {
+    sayHi() { alert(phrase); }
+  };
+}
+
+class User extends f("Hello") {}
+
+new User().sayHi(); // Hello
+```
+
+在子类中可以重写父类同名方法，然后可以使用 super 关键字调用父类方法；箭头函数没有 super，有则会从外部获取；
+
+根据规范，如果一个类扩展了另一个类并且没有 constructor，那么将生成一个只调用 super 的“空” constructor；继承类的 constructor 必须调用 super(...)，并且 (!) 一定要在使用 this 之前调用；
+
+> 在 JavaScript 中，继承类（所谓的“派生构造器”，英文为 “derived constructor”）的构造函数与其他函数之间是有区别的；派生构造器具有特殊的内部属性 [[ConstructorKind]]:"derived"；当通过 new 执行一个常规函数时，它将创建一个空对象，并将这个空对象赋值给 this；但是当继承的 constructor 执行时，它不会执行此操作，而是期望父类的 constructor 来完成这项工作；
+
+```js
+class Animal {
+  constructor(name) {
+    this.speed = 0;
+    this.name = name;
+  }
+}
+
+class Rabbit extends Animal {
+
+  constructor(name, earLength) {
+    // super(name);
+    this.speed = 0;
+    this.name = name;
+    this.earLength = earLength;
+  }
+}
+
+let rabbit = new Rabbit("White Rabbit", 10); // Error: this is not defined.
+```
+
+字段初始化的顺序是基类（还未继承任何东西的那种），在构造函数调用前初始化；派生类，在 super() 后立刻初始化；
+
+父类构造器总是会使用它自己字段的值，而不是被子类重写的那一个类字段；可以通过使用方法或者 getter/setter 替代类字段，来修复这个问题；
+
+JavaScript 为函数添加了一个特殊的内部属性：[[HomeObject]]；当一个函数被定义为类或者对象方法时，它的 [[HomeObject]] 属性就成为了该对象；[[HomeObject]] 不能被更改，所以这个绑定是永久的，[[HomeObject]] 是为类和普通对象中的方法定义的，但是对于对象而言，方法必须确切指定为 method()，而不是 "method: function()"；
+
+```js
+
+let animal = {
+  name: "Animal",
+  eat() {
+    // animal.eat.[[HomeObject]] == animal
+    console.warn(`${this.name} eats.`);
+  },
+  jump: function () {
+    console.log(`${this.name} jump.`);
+  },
+};
+
+let rabbit = {
+  __proto__: animal,
+  name: "Rabbit",
+  eat() {
+    // rabbit.eat.[[HomeObject]] == rabbit
+    super.eat();
+  },
+  jump: function () {
+    // super.jump(); // 'super' is only allowed in object methods and classes.
+  },
+};
+
+let longEar = {
+  __proto__: rabbit,
+  name: "Long Ear",
+  eat() {
+    // longEar.eat.[[HomeObject]] == longEar
+    super.eat();
+  },
+};
+
+// 正确执行
+longEar.eat(); // Long Ear eats.
+// rabbit.jump();
+```
+
+#### 静态属性和静态方法
+
+可以把一个方法赋值给类的函数本身，而不是赋给它的 "prototype"，这样的方法被称为 静态的（static）；静态方法和属性可以被继承；
+
+```js
+class User {
+  static staticProperty = 10;
+
+  static staticMethod() {
+    alert(this === User);
+  }
+}
+User.staticMethod(); // true
+
+// 结果相同
+class User { }
+User.staticMethod = function() {
+  alert(this === User);
+};
+User.staticProperty = 10;
+User.staticMethod(); // true
+
+// extends 创建两个 [[prototype]]，一个是类本身的，另一个是类原型的
+class VipUser extends User {}
+
+console.warn(VipUser.__proto__ === User); // true
+console.warn(VipUser.prototype.__proto__ === User.prototype); // true
+```
+
+#### 私有的和受保护的属性和方法
+
+在面向对象的编程中，属性和方法分为两组：
+
+- 内部接口：可以通过该类的其他方法访问，但不能从外部访问的方法和属性；
+- 外部接口：也可以从类的外部访问的方法和属性；
+
+为了隐藏内部接口，我们使用受保护的或私有的属性；
+- 受保护的字段以 _ 开头，这是一个众所周知的约定，不是在语言级别强制执行的；
+- 私有字段以 # 开头，JavaScript 确保我们只能从类的内部访问它们；
+
+```js
+// 定义私有变量
+class User {
+  _name = "any";
+  #age = 18;
+  static #secret = 10;
+  static get secret() {
+    return this.#secret;
+  }
+  #whisper() {
+    console.log(111);
+  }
+}
+console.log(User.secret); // 10
+// console.log(User.#secret); // Property '#secret' is not accessible outside class 'User' because it has a private identifier
+```
+
+#### 扩展内建类
+
+通常使用 extends 继承内建类，可以扩展内建类的一些方法，或者可以在内建类的原型对象上添加自定义的字段以实现扩展；
+
+> Note: 内建类相互间不继承静态方法；
+
+#### 类检查：instanceof
+
+instanceof 操作符用于检查一个对象是否属于某个特定的 class，通常，instanceof 在检查中会将原型链考虑在内；
+
+```js
+class Rabbit {}
+let rabbit = new Rabbit();
+console.log( rabbit instanceof Rabbit ); // true
+
+// 这里是构造函数，而不是 class
+function Rabbit() {}
+console.log( new Rabbit() instanceof Rabbit ); // true
+
+let arr = [1, 2, 3];
+arr instanceof Array; // true
+arr instanceof Object; // true
+({}) instanceof Object;
+```
+
+**Symbol.hasInstance**
+
+自定义 instanceof，可以在静态方法 Symbol.hasInstance 中设置自定义逻辑；
+
+```js
+// 设置 instanceOf 检查
+// 并假设具有 canEat 属性的都是 animal
+class Animal {
+  static [Symbol.hasInstance](obj) {
+    return true
+  }
+}
+
+let obj = { canEat: true };
+
+alert(obj instanceof Animal); // true：Animal[Symbol.hasInstance](obj) 被调用
+```
+
+**Object.prototype.isPrototypeOf()**
+
+另一个方法：objA.isPrototypeOf(objB) 判断 objA 处在 objB 的原型链中，返回布尔值；但如果中途修改了原型，则之前创建的实例无法被正确判断；
+
+```js
+let obj = {};
+Object.prototype.isPrototypeOf(obj); // true
+
+// 改变原型指向
+obj.__proto__ = null;
+Object.prototype.isPrototypeOf(obj); // false
+```
+
+[Object.prototype.isPrototypeOf() MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/object/isPrototypeOf)
+
+**Object.prototype.toString()**
+
+使用 Object.prototype.toString 方法来可以揭示类型：按照规范，内建的 toString 方法可以被从对象中提取出来，并在任何其他值的上下文中执行，其结果取决于该值；如果我们想要获取内建对象的类型，并希望把该信息以字符串的形式返回，而不只是检查类型的话，我们可以用 {}.toString.call 替代 instanceof；
+
+```js
+// 方便起见，将 toString 方法复制到一个变量中
+let objectToString = Object.prototype.toString;
+
+let arr = [];
+alert( objectToString.call(arr) ); // [object Array]
+```
+
+对象的 toString 方法可以使用特殊的对象属性 Symbol.toStringTag 被自定义；
+
+```js
+let user = {
+  [Symbol.toStringTag]: "User"
+};
+
+alert( {}.toString.call(user) ); // [object User]
+
+// 特定于环境的对象和类的 toStringTag：
+alert( window[Symbol.toStringTag]); // Window
+alert( XMLHttpRequest.prototype[Symbol.toStringTag] ); // XMLHttpRequest
+
+alert( {}.toString.call(window) ); // [object Window]
+alert( {}.toString.call(new XMLHttpRequest()) ); // [object XMLHttpRequest]
+```
+
+| 类型检查 | 用于 |	返回值 |
+| :----- | :----- | :----- |
+| typeof | 原始数据类型 |	string |
+| instanceof | 对象 |	true/false |
+| {}.toString	| 原始数据类型，内建对象，包含 Symbol.toStringTag 属性的对象 | string |
+
+#### Mixin 模式
+
+Mixin 是一个通用的面向对象编程术语：一个包含可被其他类使用而无需继承的方法的类；Mixin 提供了实现特定行为的方法，但是我们不单独使用它，而是使用它来将这些行为添加到其他类中；
+
+```js
+let sayHiBase = {
+  say() {
+    console.log(1);
+  }
+}
+
+let sayHiMixin = {
+  // 设置原型
+  __proto__: sayHiBase,
+
+  say() {
+    super.say();
+  },
+  sayHi() {
+    alert(`Hello ${this.name}`);
+  },
+  sayBye() {
+    alert(`Bye ${this.name}`);
+  }
+};
+class Person {}
+class User extends Person {
+  constructor(name) {
+    super();
+    this.name = name;
+  }
+}
+
+// mixin
+Object.assign(User.prototype, sayHiMixin);
+new User('Coley').sayHi(); // coley
+new User('Hush').say(); // 1
+```
+
+> Note: 在 `sayHiMixin` 内部对父类方法 `super.say()` 的调用会在 `mixin` 的原型中查找方法，而不是在 class 中查找；因为方法 `say` 最初是在 `sayHiMixin` 中创建的，因此，即使复制了它们，但是 `say` 的 `[[HomeObject]]` 内部属性仍引用的是 sayHiMixin；当 `super` 在 `[[HomeObject]].[[Prototype]]` 中寻找父方法时，意味着它搜索的是 `sayHiMixin.[[Prototype]]`，而不是 `User.[[Prototype]]`；
+
+```js
+let eventMixin = {
+  /**
+   * 订阅事件，用法：
+   *  menu.on('select', function(item) { ... }
+  */
+  on(eventName, handler) {
+    if (!this._eventHandlers) this._eventHandlers = {};
+    if (!this._eventHandlers[eventName]) {
+      this._eventHandlers[eventName] = [];
+    }
+    this._eventHandlers[eventName].push(handler);
+  },
+
+  /**
+   * 取消订阅，用法：
+   *  menu.off('select', handler)
+   */
+  off(eventName, handler) {
+    let handlers = this._eventHandlers?.[eventName];
+    if (!handlers) return;
+    for (let i = 0; i < handlers.length; i++) {
+      if (handlers[i] === handler) {
+        handlers.splice(i--, 1);
+      }
+    }
+  },
+
+  /**
+   * 生成具有给定名称和数据的事件
+   *  this.trigger('select', data1, data2);
+   */
+  trigger(eventName, ...args) {
+    if (!this._eventHandlers?.[eventName]) {
+      return; // 该事件名称没有对应的事件处理程序（handler）
+    }
+
+    // 调用事件处理程序（handler）
+    this._eventHandlers[eventName].forEach(handler => handler.apply(this, args));
+  }
+};
+```
+
+- [Mixin 模式](https://zh.javascript.info/mixins)
