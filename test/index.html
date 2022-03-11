@@ -20,5 +20,14 @@
                 console.log(this); // What is `this` here?
             }
 
+            // 在现代浏览器中，当我们处于一个 module 中时，那么在顶层使用 await 也是被允许的；
+            let result = await new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    console.clear();
+                    resolve("result");
+                }, 2000);
+            });
+
+            console.log(result);
         </script>
     </head><body></body></html>

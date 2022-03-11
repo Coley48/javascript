@@ -19,6 +19,7 @@ npm i -D webpack webpack-dev-server webpack-cli
 ```sh
 # 生产环境中使用 babel-loader；
 npm i -D @babel/core @babel/preset-env babel-loader
+npm i -D @babel/plugin-transform-runtime # async/await
 
 # 根据需要安装其他 loader 和 plugin；
 npm i -D style-loader css-loader html-webpack-plugin
@@ -3701,3 +3702,375 @@ let eventMixin = {
 ```
 
 - [Mixin 模式](https://zh.javascript.info/mixins)
+
+#### 错误处理，try...catch
+
+try...catch 仅对运行时的 error 有效；这类错误被称为“运行时的错误（runtime errors）”，有时被称为“异常（exceptions）”；
+
+如果在“计划的（scheduled）”代码中发生异常，例如在 setTimeout 中，则 try...catch 不会捕获到异常：为了捕获到计划的（scheduled）函数中的异常，那么 try...catch 必须在这个函数内；
+
+```js
+setTimeout(function() {
+  try {
+    noSuchVariable; // try...catch 处理 error 了！
+  } catch {
+    alert( "error is caught here!" );
+  }
+}, 1000);
+```
+
+对于所有内建的 error，error 对象具有两个主要属性和其他非标准的属性：
+
+- name：Error 名称；
+- message：关于 error 的详细文字描述；
+- stack：当前的调用栈：用于调试目的的一个字符串，其中包含有关导致 error 的嵌套调用序列的信息；
+
+使用 throw <error object> 会生成一个 error 对象；技术上讲，我们可以将任何东西用作 error 对象。甚至可以是一个原始类型数据，例如数字或字符串，但最好使用对象，最好使用具有 name 和 message 属性的对象（某种程度上保持与内建 error 的兼容性
+
+```js
+// 完整语法
+try {
+  //  ... 尝试执行的代码 ...
+} catch (err) {
+  //  ... 处理 error ...
+} finally {
+  //  ... 总是会执行的代码 ...
+}
+```
+
+> Note: `finally` 子句适用于 `try...catch` 的任何出口，这包括显式的 `return`；
+
+规范中没有全局 catch 的相关内容，但是代码的执行环境一般会提供这种机制；Node.JS 有 process.on("uncaughtException")；在浏览器中，可以将一个函数赋值给特殊的 window.onerror 属性，该函数将在发生未捕获的 error 时执行；
+
+```js
+window.onerror = function(message, url, line, col, error) {
+  // message：Error 信息；
+  // url；发生 error 的脚本的 URL；
+  // line，col：发生 error 处的代码的行号和列号；
+  // error：Error 对象；
+};
+```
+
+全局错误处理程序 window.onerror 的作用通常不是恢复脚本的执行，如果发生编程错误，那这几乎是不可能的，它的作用是将错误信息发送给开发者；
+
+#### 自定义 Error，扩展 Error
+
+JavaScript 允许将 throw 与任何参数一起使用，所以从技术上讲，我们自定义的 error 不需要从 Error 中继承。但是，如果我们继承，那么就可以使用 obj instanceof Error 来识别 error 对象；
+
+```js
+class MyError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
+
+class ValidationError extends MyError { }
+
+class PropertyRequiredError extends ValidationError {
+  constructor(property) {
+    super("No property: " + property);
+    this.property = property;
+  }
+}
+
+// name 是对的
+alert( new PropertyRequiredError("field").name ); // PropertyRequiredError
+```
+
+包装异常是一项广泛应用的技术：用于处理低级别异常并创建高级别 error 而不是各种低级别 error 的函数，低级别异常有时会成为该对象的属性；
+
+#### 回调简介
+
+异步执行某项功能的函数应该提供一个 callback 参数用于在相应事件完成时调用，这被称为“基于回调”的异步编程风格；
+
+```js
+// 动态加载脚本
+function loadScript(src, callback) {
+  // 创建一个 <script> 标签，并将其附加到页面
+  // 这将使得具有给定 src 的脚本开始加载，并在加载完成后运行
+  let script = document.createElement('script');
+  script.src = src;
+  script.onload = () => callback(script);
+  script.onerror = () => callback(new Error(`Script load error for ${src}`));
+  document.head.append(script);
+}
+```
+
+#### Promise
+
+传递给 new Promise 的函数被称为 executor，当 new Promise 被创建，executor 会自动运行；它的参数 resolve 和 reject 是由 JavaScript 自身提供的回调；
+- resolve(value) 如果任务成功完成并带有结果 value；
+- reject(error) 如果出现了 error，error 即为 error 对象；
+
+由 new Promise 构造器返回的 promise 对象具有以下内部属性：
+- state 最初是 "pending"，然后在 resolve 被调用时变为 "fulfilled"，或者在 reject 被调用时变为 "rejected"；
+- result 最初是 undefined，然后在 resolve(value) 被调用时变为 value，或者在 reject(error) 被调用时变为 error；
+
+Promise 可以通过使用 .then、.catch 和 .finally 方法接收处理结果：
+- .then 的第一个参数是一个函数，该函数将在 promise resolved 后运行并接收结果；.then 的第二个参数也是一个函数，该函数将在 promise rejected 后运行并接收 error；
+- .catch(f) 调用是 .then(null, f) 的完全的模拟，它只是一个简写形式；如果错误在前面以及被处理，该部分不会执行；
+- .finally(f) 处理程序（handler）没有参数，在某种意义上，f 总是在 promise 被 settled 时运行：即 promise 被 resolve 或 reject；finally 处理程序将结果和 error 传递给下一个处理程序；
+
+```js
+new Promise(function (resolve, reject) {
+        // executor
+        setTimeout(() => {
+            resolve("Done.");
+            reject(new Error("Whoops!"));
+        }, 1000);
+    }).then(
+          (result) => {
+              console.log(result); // Done.
+              throw new Error("Unexpected error.");
+          },
+          (error) => {
+              console.warn(error); // Whoops!
+          }
+      ).catch((err) => {
+          // 可以接收之前 .then 中的错误
+          console.warn(err); // Unexpected error.
+      }).finally(() => {
+          console.log("Finished.");
+      });
+```
+
+> Note: `executor` 只能调用一个 `resolve` 或一个 `reject`，任何状态的更改都是最终的；所有其他的再对 `resolve` 和 `reject` 的调用都会被忽略；此外，直接受一个参数，多余的参数也会被忽略；
+
+> Note: 通常以 `Error` 对象 `reject`；实际上，`executor` 中还可以立即调用 `resolve` 或 `reject`；
+
+> Tips: 如果 `promise` 为 `pending` 状态，`.then/catch/finally` 处理程序（handler）将等待它。否则，如果 `promise` 已经是 `settled` 状态，它们就会立即运行；
+
+```js
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+delay(3000).then(() => alert('runs after 3 seconds'));
+```
+
+#### Promise 链
+
+每个对 .then 的调用都会返回了一个新的 promise，因此我们可以在其之上调用下一个 .then；形成一个 .then 处理程序（handler）链，也即 Promise 链；
+
+同时 .then(handler) 中所使用的处理程序（handler）可以创建并返回一个 promise，其后的处理程序（handler）将等待它 settled 后再获得其结果（result）；
+
+```js
+new Promise((resolve, reject) => {
+  setTimeout(() => resolve(1), 1000);
+}).then((result) => {
+  alert(result); // 1
+  return new Promise((resolve, reject) => { // (*)
+    setTimeout(() => resolve(result * 2), 1000);
+  });
+}).then((result) => {
+  alert(result); // 2
+  return result * 2;
+});
+```
+
+> Note: 确切地说，处理程序（handler）返回的不完全是一个 `promise`，而是返回的被称为 `thenable` 对象 — 一个具有方法 `.then` 的任意对象，它会被当做一个 `promise` 来对待；
+
+```js
+class Thenable {
+  constructor(num) {
+    this.num = num;
+  }
+  // 实现 .then 方法
+  then(resolve, reject) {
+    alert(resolve); // function() { native code }
+    // 1 秒后使用 this.num*2 进行 resolve
+    setTimeout(() => resolve(this.num * 2), 1000); // (**)
+  }
+}
+```
+
+#### 使用 promise 进行错误处理
+
+Promise 的执行者（executor）和 promise 的处理程序（handler）周围有一个“隐式的 try..catch”；如果发生异常，就会被捕获，并被视为 rejection 进行处理；控制权移交至最近的 error 处理程序（handler）；
+
+在浏览器中，我们可以使用 unhandledrejection 事件来捕获这类 error；这个事件是 HTML 标准 的一部分；
+
+```js
+window.addEventListener('unhandledrejection', function(event) {
+  // 这个事件对象有两个特殊的属性：
+  alert(event.promise); // [object Promise] - 生成该全局 error 的 promise
+  alert(event.reason); // Error: Whoops! - 未处理的 error 对象
+});
+
+new Promise(function() {
+  throw new Error("Whoops!");
+}); // 没有用来处理 error 的 catch
+```
+
+有一个浏览器技巧，是从 finally 返回零延时（zero-timeout）的 promise；这是因为一些浏览器（比如 Chrome）需要“一点时间”的 promise 处理程序来绘制文档的更改；因此它确保在进入链下一步之前，指示在视觉上是停止的；
+
+函数代码周围有个“隐式的 try..catch”，所以，所有同步错误都会得到处理，但是无法捕获异步的错误；try...catch 是同步工作的；
+
+```js
+new Promise(function (resolve, reject) {
+    // throw new Error("Sync error.") // 可以捕获
+    setTimeout(() => {
+        // reject(new Error("No")); // 可以处理
+        // throw new Error("Async error."); // 无法捕获
+    }, 2000);
+}).catch(alert);
+```
+
+#### Promise API
+
+在 Promise 类中，有 6 种静态方法；
+
+**Promise.all**
+
+并行执行多个 promise，并等待所有 promise 都准备就绪；Promise.all 接受一个 promise 数组作为参数（从技术上讲，它可以是任何可迭代对象，但通常是一个数组）并返回一个新的 promise；
+
+结果数组中元素的顺序与其在源 promise 中的顺序相同，即使第一个 promise 花费了最长的时间才 resolve，但它仍是结果数组中的第一个；
+
+```js
+Promise.all([
+    new Promise((resolve) => setTimeout(() => resolve(1), 3000)), // 1
+    new Promise((resolve) => setTimeout(() => resolve(2), 2000)), // 2
+    new Promise((resolve) => setTimeout(() => resolve(3), 1000)) // 3
+]).then((value) => {
+    console.log(value);
+}); // 1,2,3 当上面这些 promise 准备好时：每个 promise 都贡献了数组中的一个元素
+```
+
+> Tips: 一个常见的技巧是，将一个任务数据数组映射（map）到一个 `promise` 数组，然后将其包装到 `Promise.all`；
+
+如果任意一个 promise 被 reject，由 Promise.all 返回的 promise 就会立即 reject，并且带有的就是这个 error；Promise.all 也会立即被 reject，完全忽略列表中其他的 promise，它们的结果也被忽略；
+
+Promise.all(iterable) 允许在 iterable 中使用 non-promise 的“常规”值；常规值将被“按原样”传递给结果数组；
+
+**Promise.allSettled**
+
+Promise.allSettled 等待所有的 promise 都被 settle，无论结果如何；结果数组有两种数据：
+
+- {status:"fulfilled", value:result} 对于成功的响应；
+- {status:"rejected", reason:error} 对于 error；
+
+**Promise.race**
+
+与 Promise.all 类似，但只等待第一个 settled 的 promise 并获取其结果（或 error）；第一个 settled 的 promise “赢得了比赛”之后，所有进一步的 result/error 都会被忽略；
+
+**Promise.any**
+
+与 Promise.race 类似，区别在于 Promise.any 只等待第一个 fulfilled 的 promise，并将这个 fulfilled 的 promise 返回；如果给出的 promise 都 rejected，那么则返回 rejected 的 promise 和 AggregateError（一个特殊的 error 对象），在其 errors 属性中存储着所有 promise error；
+
+**Promise.resolve**
+
+Promise.resolve(value) 用结果 value 创建一个 resolved 的 promise；当可以直接从缓存中获取了当前操作的结果 value，但是期望返回的是一个 promise 时，可以使用 Promise.resolve(value) 将 value “封装”进 promise，以满足期望返回一个 promise 的这个需求；
+
+**Promise.reject**
+
+与 Promise.resolve 类似 Promise.reject(error) 用 error 创建一个 rejected 的 promise；
+
+#### Promisification
+
+promisify(f)：接受一个需要被 promisify 的函数 f，并返回一个包装（wrapper）函数；
+
+```js
+function promisify(f) {
+  return function (...args) { // 返回一个包装函数（wrapper-function） (*)
+    return new Promise((resolve, reject) => {
+      function callback(err, result) { // 我们对 f 的自定义的回调 (**)
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      }
+
+      args.push(callback); // 将我们的自定义的回调附加到 f 参数（arguments）的末尾
+
+      f.call(this, ...args); // 调用原始的函数
+    });
+  };
+}
+
+// 用法：
+let loadScriptPromise = promisify(loadScript);
+loadScriptPromise(...).then(...);
+```
+
+#### 微任务（Microtask）
+
+Promise 的处理程序（handlers）.then、.catch 和 .finally 都是异步的；而异步任务需要适当的管理，为此，ECMA 标准规定了一个内部队列 PromiseJobs，通常被称为“微任务队列（microtask queue）”（V8 术语）；
+
+如规范中所述：队列（queue）是先进先出的：首先进入队列的任务会首先运行；同时，只有在 JavaScript 引擎中没有其它任务在运行时，才开始执行任务队列中的任务；
+
+如果一个 promise 的 error 未被在微任务队列的末尾进行处理，则会出现“未处理的 rejection”；
+
+```js
+let promise = Promise.reject(new Error("Promise Failed!"));
+setTimeout(() => promise.catch(err => alert('caught')), 1000);
+
+// Error: Promise Failed!
+window.addEventListener('unhandledrejection', event => alert(event.reason));
+```
+
+#### async/await
+
+async 函数总是返回一个 promise，其他值将自动被包装在一个 resolved 的 promise 中；
+
+```js
+async function f() {
+  return 1;
+}
+
+f().then(alert); // 1
+```
+
+await 的关键词，只在 async 函数内工作；await 让 JavaScript 引擎等待直到 promise 完成（settle）并返回结果；
+
+await 实际上会暂停函数的执行，直到 promise 状态变为 settled，然后以 promise 的结果继续执行；这个行为不会耗费任何 CPU 资源，因为 JavaScript 引擎可以同时处理其他任务：执行其他脚本，处理事件等；
+
+> Tips: 在现代浏览器中，当我们处于一个 `module` 中时，那么在顶层使用 `await` 也是被允许的；实测只在 `<script type="module">` 标签中可用；或者可以使用立即执行函数；
+
+```js
+(async () => {
+  let response = await fetch('/article/promise-chaining/user.json');
+  let user = await response.json();
+  ...
+})();
+```
+
+await 允许使用 thenable 对象；如果 await 接收了一个非 promise 的 Thenable 对象，它就会调用这个 .then 方法，并将内建的函数 resolve 和 reject 作为参数传入（就像它对待一个常规的 Promise executor 时一样）；然后 await 等待直到这两个函数中的某个被调用，然后使用得到的结果继续执行后续任务；
+
+```js
+class Thenable {
+  constructor(num) {
+    this.num = num;
+  }
+  then(resolve, reject) {
+    alert(resolve);
+    // 1000ms 后使用 this.num*2 进行 resolve
+    setTimeout(() => resolve(this.num * 2), 1000); // (*)
+  }
+}
+
+async function f() {
+  // 等待 1 秒，之后 result 变为 2
+  let result = await new Thenable(1);
+  alert(result);
+}
+
+f();
+```
+
+如果一个 promise 正常 resolve，await promise 返回的就是其结果。但是如果 promise 被 reject，它将 throw 这个 error；这时可以在 async 函数中用 try..catch 来捕获上面提到的那个 error，与常规的 throw 使用的是一样的方式；
+
+```js
+async function f() {
+  await Promise.reject(new Error("Whoops!"));
+  // 等价于 throw new Error("Whoops!");
+
+  try {
+    let response = await fetch('http://no-such-url');
+  } catch(err) {
+    alert(err); // TypeError: failed to fetch
+  }
+}
+```
+
+> Tips: `async/await` 可以和 `Promise.all` 一起使用；
