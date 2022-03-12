@@ -4074,3 +4074,319 @@ async function f() {
 ```
 
 > Tips: `async/await` 可以和 `Promise.all` 一起使用；
+
+#### Generator
+
+ Generator 可以按需一个接一个地返回（“yield”）多个值；它们可与 iterable 完美配合使用，从而可以轻松地创建数据流；在此类函数被调用时，它不会运行其代码，而是返回一个被称为 “generator object” 的特殊对象，来管理执行流程；
+
+ ```js
+function* generateSequence() {
+  yield 1;
+  yield 2;
+  return 3;
+}
+
+let generator = generateSequence();
+console.log(generator); // Generator {_invoke: ƒ}
+
+let one = generator.next();
+let two = generator.next();
+let three = generator.next();
+console.log(one, two, three);
+// {value: 1, done: false} {value: 2, done: false} {value: 3, done: true}
+ ```
+
+ 一个 generator 的主要方法就是 next()，当 next 被调用时，它会恢复上图所示的运行，执行直到最近的 yield <value> 语句（value 可以被省略，默认为 undefined），然后函数执行暂停，并将产出的（yielded）值返回到外部代码；
+
+Generator 是可迭代的，但当 done: true 时，for..of 循环会忽略最后一个 value；因此，如果我们想要通过 for..of 循环显示所有的结果，必须使用 yield 返回它们；
+
+```js
+function* generateSequence() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+
+let generator = generateSequence();
+
+for(let value of generator) {
+  alert(value); // 1，然后是 2，然后是 3
+}
+
+let sequence = [0, ...generateSequence()];
+alert(sequence); // 0, 1, 2, 3
+```
+
+可以通过提供一个 generator 函数作为 Symbol.iterator，来使用 generator 进行迭代；
+
+```js
+let range = {
+  from: 1,
+  to: 5,
+
+  // [Symbol.iterator]: function*() 的简写形式
+  *[Symbol.iterator]() {
+    for(let value = this.from; value <= this.to; value++) {
+      yield value;
+    }
+  }
+};
+
+alert( [...range] ); // 1,2,3,4,5
+```
+
+对于 generator 而言，我们可以使用 yield* 这个特殊的语法来将一个 generator “嵌入”（组合）到另一个 generator 中；yield* 指令将执行委托给另一个 generator，这个术语意味着 yield* gen 在 generator gen 上进行迭代，并将其产出（yield）的值透明地（transparently）转发到外部；执行结果与我们内联嵌套 generator 中的代码获得的结果相同；
+
+```js
+function* generateSequence(start, end) {
+  for (let i = start; i <= end; i++) yield i;
+}
+
+function* generatePasswordCodes() {
+
+  // 0..9
+  yield* generateSequence(48, 57);
+
+  // A..Z
+  yield* generateSequence(65, 90);
+
+  // a..z
+  yield* generateSequence(97, 122);
+
+}
+
+let str = '';
+
+for(let code of generatePasswordCodes()) {
+  str += String.fromCharCode(code);
+}
+
+alert(str); // 0..9A..Za..z
+```
+
+与常规函数不同，generator 和调用 generator 的代码可以通过在 next/yield 中传递值来交换结果；yield 不仅可以向外返回结果，而且还可以将外部的值传递到 generator 内；调用 generator.next(arg)，就能将参数 arg 传递到 generator 内部，这个 arg 参数会变成 yield 的结果；
+
+此外，调用 generator.throw(err) 向 yield 传递一个 error，在这种情况下，err 将被抛到对应的 yield 所在的那一行；如果我们没有在那里捕获这个 error，那么，通常，它会掉入外部调用代码（如果有），如果在外部也没有被捕获，则会杀死脚本；
+
+还可以通过 generator.return(value) 完成 generator 的执行并返回给定的 value；如果我们在已完成的 generator 上再次使用 generator.return()，它将再次返回该值；通常只用于在特定条件下停止 generator；
+
+```js
+function* gen() {
+  // 向外部代码传递一个问题并等待答案
+  let result = yield "2 + 2 = ?"; // (*)
+
+  alert(result);
+}
+
+let generator = gen();
+
+let question = generator.next().value; // <-- yield 返回的 value
+
+
+// 将结果传递到 generator 中
+generator.next(4);
+// 抛出错误
+generator.throw(new Error("The answer is not found in my database"));
+// 主动返回
+g.return('foo'); // { value: "foo", done: true }
+```
+
+#### 异步迭代和 generator
+
+异步迭代允许我们对按需通过异步请求而得到的数据进行迭代：
+
+- 使用 Symbol.asyncIterator 取代 Symbol.iterator；next() 方法；
+- 应该返回一个 promise（带有下一个值，并且状态为 fulfilled），关键字 async 也可以实现这一点，我们可以简单地使用 async next()；
+- 我们应该使用 for await (let item of iterable) 循环来迭代这样的对象；
+
+> Note: 需要常规的同步 `iterator` 的功能，无法与异步 `iterator` 一起使用，因为它期望找到 `Symbol.iterator`，而不是 `Symbol.asyncIterator`；因此 `Spread` 语法 `...` 和 `for..of` 无法异步工作；
+
+```js
+// 异步 generator
+async function* generateSequence(start, end) {
+  for (let i = start; i <= end; i++) {
+    // 可以使用 await 了！
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    yield i;
+  }
+}
+
+(async () => {
+  let generator = generateSequence(1, 5);
+  for await (let value of generator) {
+    alert(value); // 1，然后 2，然后 3，然后 4，然后 5（在每个 alert 之间有延迟）
+  }
+})();
+```
+
+常规的 generator 可用作 Symbol.iterator 以使迭代代码更短，异步 generator 可用作 Symbol.asyncIterator 来实现异步迭代；
+
+```js
+let range = {
+  from: 1,
+  to: 5,
+  // 这一行等价于 [Symbol.asyncIterator]: async function*() {
+  async *[Symbol.asyncIterator]() {
+    for(let value = this.from; value <= this.to; value++) {
+      // 在 value 之间暂停一会儿，等待一些东西
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      yield value;
+    }
+  }
+};
+
+(async () => {
+  for await (let value of range) {
+    alert(value); // 1，然后 2，然后 3，然后 4，然后 5
+  }
+})();
+```
+
+#### 模块 Module
+
+简单讲，一个模块（module）就是一个文件，一个脚本就是一个模块；一个模块可以包含用于特定目的的类或函数库；
+
+- AMD 最古老的模块系统之一，最初由 require.js 库实现；
+- CommonJS 为 Node.js 服务器创建的模块系统；
+- UMD 另外一个模块系统，建议作为通用的模块系统，它与 AMD 和 CommonJS 都兼容；
+
+语言级的模块系统在 2015 年的时候出现在了标准（ES6）中，此后逐渐发展，现在已经得到了所有主流浏览器和 Node.js 的支持；
+
+模块可以相互加载，并可以使用特殊的指令 export 和 import 来交换功能，从另一个模块调用一个模块的函数；
+
+- export 关键字标记了可以从当前模块外部访问的变量和函数；
+- import 关键字允许从其他模块导入功能；
+
+> Note: 由于模块支持特殊的关键字和功能，因此我们必须通过使用 `<script type="module">` 特性（attribute）来告诉浏览器，此脚本应该被当作模块（module）来对待；同时模块只通过 `HTTP(s)` 工作，而非本地；
+
+对浏览器和服务端的 JavaScript 来说都有效的模块**核心功能**：
+
+- 模块始终在严格模式下运行，始终使用 "use strict"；
+- 每个模块都有自己的顶级作用域（top-level scope）；一个模块中的顶级作用域变量和函数在其他脚本中是不可见的；模块应该 export 想要被外部访问的内容，并 import 所需要的内容；
+- 模块代码仅在第一次导入时被解析，如果同一个模块被导入到多个其他位置，那么它的代码只会执行一次，即在第一次被导入时，然后将其导出（export）的内容提供给进一步的导入（importer）；
+- import.meta 对象包含关于当前模块的信息，其内容取决于其所在的环境；在浏览器环境中，它包含当前脚本的 URL，或者如果它是在 HTML 中的话，则包含当前页面的 URL；
+- 在一个模块中，顶级 this 是 undefined；非模块脚本的顶级 this 是全局对象；
+
+> Note: 在浏览器中，可以通过将变量显式地分配给 `window` 的一个属性，使其成为窗口级别的全局变量，无论脚本是否带有 `type="module"`；但对于模块，应该使用导入/导出而不是依赖全局变量；
+
+> Note: 顶层模块代码应该用于初始化，创建模块特定的内部数据结构；如果需要多次调用某些东西，则应该将其以函数的形式导出；
+
+只对浏览器中拥有 type="module" 标识脚本有效的**特定功能**：
+
+- 模块脚本总是被延迟的，与 defer 特性对外部脚本和内联脚本的影响相同；
+- 对于非模块脚本，async 特性（attribute）仅适用于外部脚本；异步脚本会在准备好后立即运行，独立于其他脚本或 HTML 文档；对于模块脚本，它也适用于内联脚本；
+- 具有 type="module" 的外部脚本（external script），相同 src 的外部脚本仅运行一次；且从另一个源获取的脚本，远程服务器必须提供表示允许获取的 header Access-Control-Allow-Origin；
+- 在浏览器中，import 必须给出相对或绝对的 URL 路径，import 中不允许没有任何路径的模块，这种模块被称为“裸（bare）”模块；
+- 旧时的浏览器不理解 type="module"，未知类型的脚本会被忽略；
+
+> Note: 下载外部模块脚本 `<script type="module" src="...">` 不会阻塞 `HTML` 的处理，它们会与其他资源并行加载；模块脚本会等到 `HTML` 文档完全准备就绪（即使它们很小并且比 `HTML` 加载速度更快），然后才会运行；
+
+> Note: 使用 nomodule 特性来提供一个后备：`<script nomodule>...</script>`；
+
+- [Cannot use import statement outside a module](https://www.jianshu.com/p/60a8a74f5eee)
+
+#### 导出和导入
+
+通常要明确列出需要导入的内容：
+
+- 打包工具中优化器（optimizer）就会从打包好的代码中删除那些未被使用的函数，从而使构建更小，这就是所谓的摇树（tree-shaking）；
+- 导入的显式列表可以更好地概述代码结构：使用的内容和位置；使得代码支持重构，并且重构起来更容易；
+- 明确列出要导入的内容会使得名称较短；
+
+模块提供了一个特殊的默认导出 export default 语法，以使“一个模块只做一件事”的方式看起来更好；每个文件最多只能有一个默认的导出，因此导出的实体可能没有名称；
+
+| 命名的导出 | 默认的导出 |
+| :----- | :----- |
+| export class User {...} |	export default class User {...} |
+| import {User} from ... | import User from ... |
+
+从技术上讲，我们可以在一个模块中同时有默认的导出和命名的导出，但是通常不会混合使用它们，模块要么是命名的导出要么是默认的导出；
+
+在某些情况下，default 关键词被用于引用默认的导出；默认引入可以使用不同的名称来导入相同的内容；
+
+“重新导出（Re-export）”语法 export ... from ... 允许导入内容，并立即将其导出；export ... from 与 import/export 相比的显著区别是重新导出的模块在当前文件中不可用；
+
+> Note: 重新导出时，默认导出需要单独处理；
+
+> Note: 在代码块 `{...}` 中的 `import/export` 语句无效；
+
+导出方式：
+
+```js
+// utils.js
+// 导出数组
+export let months = ['Jan', 'Feb', 'Mar','Apr', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// 导出 const 声明的变量
+export const MODULES_YEAR = 2015;
+
+// 导出类
+export class User {
+  constructor(name) {
+    this.name = name;
+  }
+}
+
+// 或者统一导出
+export { months, MODULES_YEAR, User }; // 导出变量列表
+
+// 导出为其他名字
+export { sayHi as hi, sayBye as bye };
+
+// 默认导出
+export default sayHi;
+export { sayHi as default };
+
+// 重新导出
+export { sayHi } from './say.js'; // 重新导出 sayHi
+export { default as User } from './user.js'; // 重新导出 default
+// 效果同，区别是在当前模块下重新导出无法使用
+import User from './user.js';
+export { User as default };
+
+// 重新导出含有默认导出的模块
+export * from './user.js'; // 重新导出命名的导出
+export { default } from './user.js'; // 重新导出默认的导出
+```
+
+导入方式：
+
+```js
+// index.js
+import { months, User } from './utils.js'
+
+// 将所有内容导入为一个对象
+import * as say from './utils.js';
+
+// 用 as 让导入具有不同的名字
+import { sayHi as hi, sayBye as bye } from './say.js';
+
+// 默认导入
+import { default as User, sayHi } from './user.js';
+
+// 有默认导入时导入为对象
+import * as user from './user.js';
+let User = user.default; // 默认的导出
+
+// 导入模块（其代码，并运行），但不要将其任何导出赋值给变量
+import "module";
+```
+
+**动态导入**
+
+import(module) 表达式加载模块并返回一个 promise，该 promise resolve 为一个包含其所有导出的模块对象，可以在代码中的任意位置调用这个表达式；
+
+```js
+import(modulePath)
+  .then(obj => {})
+  .catch(err => err);
+
+// 使用 await
+let module = await import(modulePath);
+
+// 含默认导出
+let obj = await import('./say.js');
+let say = obj.default;
+```
+
+> Note: 动态导入在常规脚本中工作时，它们不需要 script type="module"；import 不是一个函数，只是一种特殊语法，恰好使用了括号；

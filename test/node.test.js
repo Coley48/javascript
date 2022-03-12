@@ -5,17 +5,10 @@
 //   console.warn(this); // What is `this` here?
 // }
 
-function func() {
-    console.log(this == globalThis);
-    console.log(this);
-}
-
-// func();
-
-module.exports = {
-    func,
-    a: 1234
-};
+// module.exports = {
+//     func,
+//     a: 1234
+// };
 
 // SyntaxError: await is only valid in async function
 // let result = await new Promise((resolve, reject) => {
@@ -26,3 +19,15 @@ module.exports = {
 // });
 
 // console.log(result);
+
+// console.log(import.meta);
+// package.json { "type": "module" }
+// node.test.mjs
+// [Object: null prototype] {
+//   url: 'file:///E:/javascript/test/node.test.js'
+// }
+
+export function func() {
+    console.log(this == globalThis);
+    console.log(this);
+}
