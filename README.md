@@ -2400,7 +2400,7 @@ console.warn(funcArr[1].name); // func
 
 length 是函数的另一个内建属性，它返回函数入参的个数；
 
-> Tips: rest 参数不参与计数，属性 length 有时在操作其它函数的函数中用于做 内省/运行时检查（introspection）；
+> Tips: rest 参数不参与计数，属性 length 有时在操作其它函数的函数中用于做内省/运行时检查（introspection）；
 
 ```js
 // 根据函数参数个数的不同做不同处理，也属于多态的一种
@@ -3034,6 +3034,10 @@ console.log(descriptors);
 
 从外表看，访问器属性看起来就像一个普通属性，这就是访问器属性的设计思想；不以函数的方式调用 getter / setter 属性，当读取 / 设置属性时，getter / setter 会在幕后运行；
 
+> Getters 给你一种方法来定义一个对象的属性，但是在访问它们之前不会计算属性的值。 getter 延迟计算值的成本，直到需要此值，如果不需要，您就不用支付成本；
+
+> 一种额外的优化技术是用智能(或称记忆化)getters 延迟属性值的计算并将其缓存以备以后访问。该值是在第一次调用getter 时计算的，然后被缓存，因此后续访问返回缓存值而不重新计算它。这在以下情况下很有用：
+
 **访问器描述符**
 
 访问器属性的描述符与数据属性的不同，没有 value 和 writable，但是有 get 和 set 函数；
@@ -3073,6 +3077,8 @@ for(let key in user) alert(key); // _name
 alert(user.name); // John
 user.name = ""; // alert ...
 ```
+
+- [getter MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/get)
 
 #### 原型继承
 
@@ -4390,3 +4396,444 @@ let say = obj.default;
 ```
 
 > Note: 动态导入在常规脚本中工作时，它们不需要 script type="module"；import 不是一个函数，只是一种特殊语法，恰好使用了括号；
+
+#### Proxy 和 Reflect
+
+一个 Proxy 对象包装另一个对象并拦截诸如读取/写入属性和其他操作，可以选择自行处理它们，或者透明地允许该对象处理它们；
+
+```js
+let proxy = new Proxy(target, handler);
+```
+
+- target 是要包装的对象，可以是任何东西，包括函数；
+- handler 代理配置：带有“捕捉器”（“traps”，即拦截操作的方法）的对象；
+
+对 proxy 进行操作，如果在 handler 中存在相应的捕捉器，则它将运行，并且 Proxy 有机会对其进行处理，否则将直接对 target 进行处理；Proxy 是一种特殊的“奇异对象（exotic object）”，它没有自己的属性；如果 handler 为空，则透明地将操作转发给 target；
+
+对于对象的大多数操作，JavaScript 规范中有一个所谓的“内部方法”，它描述了最底层的工作方式，对于每个内部方法，此表中都有一个捕捉器，Proxy 捕捉器会拦截这些方法的调用；
+
+| 内部方法 |	Handler 方法 |	何时触发 |
+| :----- | :----- | :----- |
+| [[Get]] | get	| 读取属性 |
+| [[Set]] | set	| 写入属性 |
+| [[HasProperty]] | has |	in 操作符 |
+| [[Delete]] | deleteProperty |	delete 操作符 |
+| [[Call]] | apply | 函数调用 |
+| [[Construct]] | construct |	new 操作符|
+| [[GetPrototypeOf]] | getPrototypeOf |	Object.getPrototypeOf |
+| [[SetPrototypeOf]] | setPrototypeOf	| Object.setPrototypeOf |
+| [[IsExtensible]] | isExtensible |	Object.isExtensible |
+| [[PreventExtensions]] | preventExtensions |	Object.preventExtensions |
+| [[DefineOwnProperty]] | defineProperty | Object.defineProperty, Object.defineProperties |
+| [[GetOwnProperty]] | getOwnPropertyDescriptor |	Object.getOwnPropertyDescriptor, for..in, Object.keys/values/entries |
+| [[OwnPropertyKeys]] | ownKeys |	Object.getOwnPropertyNames, Object.getOwnPropertySymbols, for..in, Object.keys/values/entries |
+
+**get 捕获器**
+
+要拦截读取操作，可以添加 get(target, property, receiver) 捕获器；
+
+- target 是目标对象，该对象被作为第一个参数传递给 new Proxy；
+- property 目标属性名；
+- receiver 如果目标属性是一个 getter 访问器属性，则 receiver 就是本次读取属性所在的 this 对象，通常是 proxy 对象本身；
+
+```js
+let numbers = [0, 1, 2];
+
+numbers = new Proxy(numbers, {
+  get(target, prop) {
+    if (prop in target) {
+      return target[prop];
+    } else {
+      return 0; // 默认值
+    }
+  }
+});
+
+alert( numbers[1] ); // 1
+alert( numbers[123] ); // 0（没有这个数组项）
+```
+
+> Note: 代理应该在所有地方都完全替代目标对象，目标对象被代理后，任何人都不应该再引用目标对象；
+
+**set 捕获器**
+
+set(target, property, value, receiver)，当写入属性时 set 捕捉器被触发，其中 value 为目标属性的值；如果写入操作（setting）成功，set 捕捉器应该返回 true，否则返回 false（触发 TypeError）；
+
+```js
+let onlyNumbers = [];
+
+onlyNumbers = new Proxy(onlyNumbers, {
+    set(target, prop, val) {
+        // 拦截写入属性操作
+        if (typeof val == "number") {
+            target[prop] = val;
+            return true;
+        } else {
+            return false;
+        }
+    }
+});
+
+onlyNumbers.push(1); // 添加成功
+onlyNumbers.push(2); // 添加成功
+console.log("Length is: " + onlyNumbers.length); // 2
+
+// TypeError: 'set' on proxy: trap returned falsish for property '2
+onlyNumbers.push("test");
+```
+
+**ownKeys 和 getOwnPropertyDescriptor 捕获器**
+
+Object.keys，for..in 循环和大多数其他遍历对象属性的方法都使用内部方法 [[OwnPropertyKeys]]（由 ownKeys 捕捉器拦截) 来获取属性列表；
+
+- Object.getOwnPropertyNames(obj) 返回非 Symbol 键；
+- Object.getOwnPropertySymbols(obj) 返回 Symbol 键；
+- Object.keys/values() 返回带有 enumerable 标志的非 Symbol 键/值；
+- for..in 循环遍历所有带有 enumerable 标志的非 Symbol 键，以及原型对象的键；
+
+```js
+let user = { name: "Coley", age: 18 };
+
+user = new Proxy(user, {
+    // 使用 ownKeys 捕捉器拦截 for..in 对 user 的遍历
+    // 一旦要获取属性列表就会被调用，可以返回不相干的属性
+    ownKeys(target) {
+        // return Object.keys(target).filter(key => !key.startsWith('_'));
+        return ["a", "b", "c"];
+        // 返回没有的属性，其描述符为空，没有 enumerable 标志，会被略过，需要 getOwnPropertyDescriptor 返回 enumerable 为 true；
+    },
+
+    getOwnPropertyDescriptor(target, prop) {
+        // 被每个属性调用
+        return {
+            enumerable: true, // false 屏蔽，使属性不可迭代
+            configurable: true
+            /* ...其他标志，可能是 "value:..." */
+        };
+    }
+});
+
+console.log(Object.keys(user)); // a, b, c
+```
+
+**deleteProperty 捕获器**
+
+```js
+let user = {
+    _password: "***",
+    checkPassword(value) {
+        //对象方法必须能读取 _password
+        return value === this._password;
+    }
+};
+
+user = new Proxy(user, {
+    get(target, prop) {
+        if (prop.startsWith("_")) {
+            throw new Error("Access denied");
+        }
+        let value = target[prop];
+        // 内部方法可以读取内部属性
+        return typeof value === "function" ? value.bind(target) : value;
+    },
+    deleteProperty(target, prop) {
+        // 拦截属性删除
+        if (prop.startsWith("_")) {
+            throw new Error("Access denied");
+        } else {
+            delete target[prop];
+            return true;
+        }
+    },
+    // ...
+});
+
+// "get" 不允许读取 _password
+try {
+    console.log(user._password); // Error: Access denied
+} catch (e) {
+    console.log(e.message);
+}
+
+// "deleteProperty" 不允许删除 _password
+try {
+    delete user._password; // Error: Access denied
+} catch (e) {
+    console.log(e.message);
+}
+```
+
+**has 捕获器**
+
+has 捕捉器会拦截 in 调用，因此可以实现 in 操作符来检查一个数字是否在 range 范围内；
+
+```js
+let range = {
+    start: 1,
+    end: 10
+};
+
+range = new Proxy(range, {
+    has(target, prop) {
+        return prop >= target.start && prop <= target.end;
+    }
+});
+
+console.log(5 in range); // true
+console.log(50 in range); // false
+```
+
+**apply 捕获器**
+
+apply(target, thisArg, args) 捕捉器能使代理以函数的方式被调用；
+
+- target 是目标对象（函数也是对象）；
+- thisArg 是 this 的值；
+- args 是参数列表；
+
+普通的包装函数不会转发属性读取/写入操作或者任何其他操作；进行包装后，就失去了对原始函数属性的访问，例如 name，length 和其他属性；使用 Proxy 可以将所有操作都能被转发到原始函数；
+
+```js
+function delay(f, ms) {
+    return new Proxy(f, {
+        apply(target, thisArg, args) {
+            setTimeout(() => target.apply(thisArg, args), ms);
+        }
+    });
+}
+
+function sayHi(user) {
+    console.log(`Hello, ${user}!`);
+}
+
+sayHi = delay(sayHi, 3000);
+
+console.log(sayHi.length); // 1 (*) proxy 将“获取 length”的操作转发给目标对象
+
+sayHi("John"); // Hello, John!（3 秒后）
+```
+
+Reflect 是一个内建对象，可简化 Proxy 的创建；Reflect 对象使调用这些内部方法成为了可能，它的方法是内部方法的最小包装；
+
+尤其是，Reflect 允许我们将操作符（new，delete，……）作为函数（Reflect.construct，Reflect.deleteProperty，……）执行调用；
+
+此外，对于每个可被 Proxy 捕获的内部方法，在 Reflect 中都有一个对应的方法，其名称和参数与 Proxy 捕捉器相同；所以，如果一个捕捉器想要将调用转发给对象，则只需使用相同的参数调用 `Reflect.<method>` 就足够了；
+
+```js
+let user = { age: 0 };
+
+Reflect.set(user, "name", "John");
+console.log(user.name); // John
+
+Reflect.deleteProperty(user, "no-such-prop");
+Reflect.deleteProperty(user, "name");
+console.log(user); // {}
+
+user = new Proxy(user, {
+    get(target, prop, receiver) {
+        console.warn(`GET ${prop}`);
+        return Reflect.get(target, prop, receiver); // (1)
+    },
+    set(target, prop, val, receiver) {
+        console.warn(`SET ${prop}=${val}`);
+        return Reflect.set(target, prop, val, receiver); // (2)
+    }
+});
+
+let name = user.name; // 显示 "GET name"
+user.name = "Pete"; // 显示 "SET name=Pete"
+```
+
+当存在原型继承时，特别是访问继承对象的 get 访问器属性时，需要用到 receiver 参数，保证将正确的 this 传递给 getter；
+
+```js
+let user = {
+  _name: "Guest",
+  get name() {
+    return this._name;
+  }
+};
+
+let userProxy = new Proxy(user, {
+  get(target, prop, receiver) { // receiver = admin
+    return Reflect.get(target, prop, receiver); // (*)
+    // 或者 return Reflect.get(...arguments);
+  }
+});
+
+let admin = {
+  __proto__: userProxy,
+  _name: "Admin"
+};
+
+alert(admin.name); // Admin
+```
+
+Proxy 存在一些局限性：
+- 内建对象具有“内部插槽”，对这些对象的访问无法被代理；
+- 私有类字段也是如此，因为它们也是在内部使用插槽实现的；因此，代理方法的调用必须具有目标对象作为 this 才能访问它们；
+- 对象的严格相等性检查 === 无法被拦截；
+- 性能：基准测试（benchmark）取决于引擎，但通常使用最简单的代理访问属性所需的时间也要长几倍；
+
+
+```js
+// 使用了“内部插槽”存储数据，而不通过 [[Get]]/[[Set]] 内部方法
+let map = new Map();
+
+let proxy = new Proxy(map, {
+  get(target, prop, receiver) {
+    let value = Reflect.get(...arguments);
+    // 会将将原始对象暴露给该方法，可能使其进一步传递并破坏其他代理功能；
+    return typeof value == 'function' ? value.bind(target) : value;
+  }
+});
+
+proxy.set('test', 1);
+alert(proxy.get('test')); // 1（工作了！）
+```
+
+> Note: 出于历史原因，内建 `Array` 没有使用内部插槽，所以，代理数组时没有这种问题；
+
+一个可撤销的代理是可以被禁用的代理，`let {proxy, revoke} = Proxy.revocable(target, handler)`；该调用返回一个带有 proxy 和 revoke 函数的对象以将其禁用；这样的代理会将操作转发给对象，并且我们可以随时将其禁用；
+
+```js
+let object = {
+  data: "Valuable data"
+};
+
+let {proxy, revoke} = Proxy.revocable(object, {});
+
+// 将 proxy 传递到其他某处，而不是对象...
+alert(proxy.data); // Valuable data
+
+// 稍后，在我们的代码中
+revoke();
+
+// proxy 不再工作（revoked）
+alert(proxy.data); // Error
+```
+
+```js
+let arr = [..."abcde"];
+
+arr = new Proxy(arr, {
+    get(target, prop, receiver) {
+        if (prop < 0) {
+            prop = +prop + target.length;
+        }
+        return Reflect.get(target, prop, receiver);
+    }
+});
+```
+
+- [Proxy MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+- [Proxy 和 Reflect](https://zh.javascript.info/proxy)
+
+#### eval
+
+调用 eval(code) 会运行代码字符串，并返回最后一条语句的结果；
+
+严格模式下，eval 有属于自己的词法环境，因此我们不能从外部访问在 eval 中声明的函数和变量；
+
+```js
+// script 中
+console.log(eval("this")); // window
+eval("console.log(this); let x = 6"); // window
+
+let obj = {
+    func() {
+        console.log(eval("this")); // obj
+        eval("console.log(this); let x = 8;"); // obj
+
+        console.log(window.eval("this")); // window
+        window.eval("console.log(this); let x = 10;"); // window
+
+        console.log(x); // ReferenceError: x is not defined
+    }
+}
+
+obj.func();
+console.log(x); // ReferenceError: x is not defined
+```
+
+不建议使用 eval：
+
+- 如果 eval 中的代码没有使用外部变量，请以 window.eval(...) 的形式调用 eval；
+- 如果 eval 中的代码需要访问局部变量，我们可以使用 new Function 替代 eval，并将它们作为参数传递；
+
+```js
+let f = new Function('a', 'alert(a)');
+
+f(5); // 5
+```
+
+#### 柯里化（Currying）
+
+柯里化（Currying）是一种关于函数的高阶技术，柯里化是一种函数的转换，它是指将一个函数从可调用的 f(a, b, c) 转换为可调用的 f(a)(b)(c)；柯里化不会调用函数，它只是对函数进行转换；
+
+柯里化更高级的实现，如 lodash 库的 [_.curry](https://lodash.com/docs#curry)，会返回一个包装器，该包装器允许函数被正常调用或者以偏函数（partial）的方式调用；
+
+```js
+// 高级柯里化实现
+function curry(func) {
+  return function curried(...args) {
+    if (args.length >= func.length) {
+      return func.apply(this, args);
+    } else {
+      return function(...args2) {
+        return curried.apply(this, args.concat(args2));
+      }
+    }
+  };
+}
+
+function sum(a, b, c) {
+  return a + b + c;
+}
+let curriedSum = curry(sum);
+
+alert( curriedSum(1, 2, 3) ); // 6，仍然可以被正常调用
+alert( curriedSum(1)(2,3) ); // 6，对第一个参数的柯里化
+alert( curriedSum(1)(2)(3) ); // 6，全柯里化
+```
+
+#### Reference Type
+
+为确保 obj.methed() 调用正常运行，JavaScript 中点 '.' 返回的不是一个函数，而是一个特殊的 Reference Type 的值；
+
+Reference Type 是 ECMA 中的一个“规范类型”，被用在 JavaScript 语言内部，因此不能直接使用它；
+
+Reference Type 的值是一个三个值的组合 (base, name, strict)，其中：
+
+- base 是对象；
+- name 是属性名；
+- strict 在 use strict 模式下为 true；
+
+当 () 被在 Reference Type 上调用时，它们会接收到关于对象和对象的方法的完整信息，然后可以设置正确的 this；Reference Type 是一个特殊的“中间人”内部类型，目的是从 . 传递信息给 () 调用；
+
+任何例如赋值 func = obj.func 等其他的操作，都会将 Reference Type 作为一个整体丢弃掉，而会取 obj.func（一个函数）的值并继续传递，所以任何后续操作都“丢失”了 this；
+
+this 的值仅在函数直接被通过点符号 obj.method() 或方括号 obj['method']() 语法（此处它们作用相同）调用时才被正确传递；除了方法调用之外的任何操作（如赋值 = 或 ||），都会把它转换为一个不包含允许设置 this 信息的普通值；
+
+#### BigInt
+
+BigInt 是一种特殊的数字类型，它提供了对任意长度整数的支持；创建 bigint 的方式有两种：在一个整数字面量后面加 n 或者调用 BigInt 函数，该函数从字符串、数字等中生成 bigint；
+
+```js
+const bigint = 1234567890123456789012345678901234567890n;
+
+const sameBigint = BigInt("1234567890123456789012345678901234567890");
+
+const bigintFromNumber = BigInt(10); // 与 10n 相同
+```
+
+> Note: 对 `bigint` 的所有操作，返回的结果也是 `bigint`；不可以把 `bigint` 和常规数字类型混合使用；`BigInt` 不支持一元加法；
+
+> Note: 转换操作始终是静默的，绝不会报错，但是如果 `bigint` 太大而数字类型无法容纳，则会截断多余的位，因此我们应该谨慎进行此类转换；
+
+> Note: 由于 `number` 和 `bigint` 属于不同类型，它们可能在进行 `==` 比较时相等，但在进行 `===`（严格相等）比较时不相等；
+
+当在 if 或其他布尔运算中时，bigint 的行为类似于 number，在 if 中，bigint 0n 为假，其他值为 true；
+
+目前并没有一个众所周知的好用的 polyfill，不过，[JSBI](https://github.com/GoogleChromeLabs/jsbi) 库提出了另一种解决方案，该库使用自己的方法实现了大的数字，可以使用它们替代原生的 bigint；
+

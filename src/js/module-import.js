@@ -16,5 +16,5 @@ console.log("import.js");
 // export * from "./export.js";
 
 // 3. 正确用法
-export * from "./export.js";
-export { default } from "./export";
+export * from "./module-export";
+export { default } from "./module-export";

@@ -12,24 +12,45 @@
         }</style>
         
         <!-- <script defer="defer" src="../src/index.js"></script> -->
-        <script type="module">
+        <!-- <script type="module">
             "use strict";
-            export default {}
-            console.log(this)
-            if(true){
-                console.log(this); // What is `this` here?
+            // export default {}
+            // console.log(this)
+            // if(true){
+            //     console.log(this); // What is `this` here?
+            // }
+
+            // // 在现代浏览器中，当我们处于一个 module 中时，那么在顶层使用 await 也是被允许的；
+            // let result = await new Promise((resolve, reject) => {
+            //     setTimeout(() => {
+            //         console.clear();
+            //         resolve("result");
+            //     }, 2000);
+            // });
+
+            // console.log(result);
+            // // 模块
+            // console.log(import.meta); // { url: "http://127.0.0.1:5500/test/index.html" }
+
+            // eval
+        </script> -->
+        <script type="module">
+            console.log(eval("this")); // window
+            eval("console.log(this); let x = 6"); // window
+
+            let obj = {
+                func() {
+                    console.log(eval("this")); // obj
+                    eval("console.log(this); let x = 8;"); // obj
+
+                    console.log(window.eval("this")); // window
+                    window.eval("console.log(this); let x = 10;"); // window
+
+                    console.log(x); // ReferenceError: x is not defined
+                }
             }
-
-            // 在现代浏览器中，当我们处于一个 module 中时，那么在顶层使用 await 也是被允许的；
-            let result = await new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    console.clear();
-                    resolve("result");
-                }, 2000);
-            });
-
-            console.log(result);
-            // 模块
-            console.log(import.meta); // { url: "http://127.0.0.1:5500/test/index.html" }
+            
+            obj.func();
+            console.log(x); // ReferenceError: x is not defined
         </script>
     </head><body></body></html>
