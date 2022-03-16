@@ -5703,3 +5703,460 @@ function showVisible() {
 window.addEventListener('scroll', showVisible);
 showVisible();
 ```
+
+#### 表单属性和方法
+
+文档中的表单是特殊集合 document.forms 的成员，既可以使用名字，也可以使用在文档中的编号来获取表单；在表单中，其中的任何元素都可以通过命名的集合 form.elements 来获取到；
+
+```html
+<form name="my">
+  <input name="one" value="1">
+  <input name="two" value="2">
+</form>
+
+<script>
+  // 获取表单
+  let form = document.forms.my; // <form name="my"> 元素
+
+  // 获取表单中的元素
+  let elem = form.elements.one; // <input name="one"> 元素
+  // let elem = form.elements["one"];
+  // let elem = form.elements[0];
+
+  alert(elem.value); // 1
+</script>
+```
+
+对于相同 name 字段的 input 单选按钮，form.elements[name] 将会是一个集合；这些导航（navigation）属性并不依赖于标签的结构，所有的控件元素，无论它们在表单中有多深，都可以通过 form.elements 获取到；
+
+一个表单内会有一个或多个 `<fieldset>` 元素，它们也具有 elements 属性，该属性列出了 `<fieldset>` 中的表单控件；
+
+> Tips: `elements` 可以省略，可以通过 `form[index/name]` 来访问元素；
+
+对于任何元素，其对应的表单都可以通过 element.form 访问到；
+
+```html
+<form id="form">
+  <input type="text" name="login">
+</form>
+
+<script>
+  // form -> element
+  let login = form.login;
+
+  // element -> form
+  alert(login.form); // HTMLFormElement
+</script>
+```
+
+**表单元素**
+
+一个 `<select>` 元素有 3 个重要的属性：
+- select.options `<option>` 的子元素的集合；
+- select.value 当前所选择的 `<option>` 的 value；
+- select.selectedIndex 当前所选择的 `<option>` 的编号；
+
+并提供了三种为 `<select>` 设置 value 的不同方式：
+- 找到对应的 `<option>` 元素，并将 option.selected 设置为 true；
+- 将 select.value 设置为对应的 value；
+- 将 select.selectedIndex 设置为对应 `<option>` 的编号；
+
+如果 `<select>` 具有 multiple 特性（attribute），则允许多选；
+
+在规范中，有一个很好的简短语法可以创建 `<option>` 元素：`new Option(text, value, defaultSelected, selected)`；其中参数：
+- text `<option>` 中的文本；
+- value `<option>` 的 value；
+- defaultSelected 如果为 true，那么 selected HTML-特性（attribute）就会被创建；
+- selected 如果为 true，那么这个 `<option>` 就会被选中；
+
+`<option>` 元素具有以下属性：
+- option.selected `<option>` 是否被选择；
+- option.index `<option>` 在其所属的 `<select>` 中的编号；
+- option.text `<option>` 的文本内容（可以被访问者看到）；
+
+#### 聚焦：focus/blur
+
+当用户点击某个元素或使用键盘上的 Tab 键选中时，该元素将会获得聚焦（focus），还有一个 HTML 特性（attribute）autofocus 可以让焦点在网页加载时默认落在一个元素上，此外还有其它途径可以获得焦点；
+
+当元素聚焦时，会触发 focus 事件，当元素失去焦点时，会触发 blur 事件；elem.focus() 和 elem.blur() 方法可以设置和移除元素上的焦点；
+
+无法通过在 onblur 事件处理程序中调用 event.preventDefault() 来“阻止失去焦点”，因为 onblur 事件处理程序是在元素失去焦点 之后 运行的；
+
+> Note: `alert` 会将焦点移至自身，因此会导致元素失去焦点（触发 blur 事件），而当 `alert` 对话框被取消时，焦点又回重新回到原元素上（触发 focus 事件）；如果一个元素被从 DOM 中移除，那么也会导致焦点丢失，如果稍后它被重新插入到 DOM，焦点也不会回到它身上；
+
+任何具有 tabindex 特性的元素，都会变成可聚焦的，该特性的 value 是当使用 Tab（或类似的东西）在元素之间进行切换时，元素的顺序号；可以使用 elem.tabIndex 通过 JavaScript 来添加 tabindex；
+
+特殊值：
+- tabindex="0" 会使该元素被与那些不具有 tabindex 的元素放在一起。也就是说，当我们切换元素时，具有 tabindex="0" 的元素将排在那些具有 tabindex ≥ 1 的元素的后面；
+- tabindex="-1" 只允许以编程的方式聚焦于元素。Tab 键会忽略这样的元素，但是 elem.focus() 有效；
+
+focus 和 blur 事件不会向上冒泡，但会在捕获阶段向下传播，因此可以在捕获阶段进行事件委托；也可以使用冒泡事件 focusin 和 focusout，但必须使用 elem.addEventListener 来分配它们；
+
+#### 事件：change，input，cut，copy，paste
+
+当元素更改完成时，将触发 change 事件，对于文本输入框，当其失去焦点时，就会触发 change 事件；
+
+每当用户对输入值进行修改后，就会触发 input 事件；与键盘事件不同，只要值改变了，input 事件就会触发，即使那些不涉及键盘行为（action）的值的更改也是如此：使用鼠标粘贴，或者使用语音识别来输入文本；
+
+ClipboardEvent 类，并提供了对剪切/拷贝/粘贴的数据的访问方法；
+
+#### 表单：事件和方法提交
+
+提交表单时，会触发 submit 事件，它通常用于在将表单发送到服务器之前对表单进行校验，或者中止提交，并使用 JavaScript 来处理表单；form.submit() 方法允许从 JavaScript 启动表单发送，我们可以使用此方法动态地创建表单，并将其发送到服务器；
+
+提交表单主要有两种方式：
+- 点击 `<input type="submit">` 或 `<input type="image">`；
+- 在 input 字段中按下 Enter 键；
+
+> Note: 在输入框中使用 Enter 发送表单时，会在 `<input type="submit">`上触发一次 click 事件；
+
+#### 页面生命周期
+
+**DOMContentLoaded**
+
+浏览器已完全加载 HTML，并构建了 DOM 树，但像 `<img>` 和样式表之类的外部资源可能尚未加载完成；此时处理程序可以查找 DOM 节点，并初始化接口；
+
+DOMContentLoaded 事件发生在 document 对象上，且必须使用 addEventListener 来捕获；
+
+具有 async 特性（attribute）的脚本，以及使用 document.createElement('script') 动态生成并添加到网页的脚本也不会阻塞 DOMContentLoaded；
+
+外部样式表不会影响 DOM，因此 DOMContentLoaded 不会等待它们，但如果在样式后面有一个脚本，那么该脚本必须等待样式表加载完成；
+
+```html
+<link type="text/css" rel="stylesheet" href="style.css">
+<script>
+  // 在样式表加载完成之前，脚本都不会执行
+  alert(getComputedStyle(document.body).marginTop);
+</script>
+```
+
+Firefox，Chrome 和 Opera 都会在 DOMContentLoaded 中自动填充表单，如果 DOMContentLoaded 被需要加载很长时间的脚本延迟触发，那么自动填充也会等待；
+
+**window.load**
+
+当整个页面，包括样式、图片和其他资源被加载完成时，会触发 window 对象上的 load 事件；此时外部资源已加载完成，样式已被应用，图片大小也已知了；
+
+**window.onbeforeunload**
+
+如果访问者触发了离开页面的导航（navigation）或试图关闭窗口，beforeunload 处理程序将要求进行更多确认；
+
+```js
+window.onbeforeunload = function() {
+  // 在某些旧浏览器中返回非空字符串也被视为取消事件；
+  return false;
+};
+```
+
+
+**window.unload**
+
+当访问者离开页面时，window 对象上的 unload 事件就会被触发，如果希望通过 unload 事件将数据保存到服务器上，可以使用 navigator.sendBeacon(url, data) 方法；该方法在后台发送数据，转换到另外一个页面不会有延迟：浏览器离开页面，但仍然在执行 sendBeacon；
+
+```js
+let analyticsData = { /* 带有收集的数据的对象 */ };
+
+window.addEventListener("unload", function() {
+  // 也可以发送表单以及其他格式的数据，数据大小限制在 64kb
+  navigator.sendBeacon("/analytics", JSON.stringify(analyticsData));
+});
+```
+
+**readystatechange 和 document.readyState**
+
+document.readyState 属性可以提供当前加载状态的信息，它有三个值：
+- loading —— 文档正在被加载；
+- interactive —— 文档被全部读取；
+- complete —— 文档被全部读取，并且所有资源（例如图片等）都已加载完成；
+
+readystatechange 事件是跟踪文档加载状态的另一种机制，它会在状态发生改变时触发；
+
+```html
+<script>
+  log('readyState:' + document.readyState);
+
+  document.addEventListener('readystatechange', () => log('readyState:' + document.readyState));
+  document.addEventListener('DOMContentLoaded', () => log('DOMContentLoaded'));
+
+  window.onload = () => log('window onload');
+</script>
+
+<iframe src="iframe.html" onload="log('iframe onload')"></iframe>
+
+<img src="http://en.js.cx/clipart/train.gif" id="img">
+<script>
+  img.onload = () => log('img onload');
+</script>
+```
+
+包含 `<iframe>`，`<img>` 和记录事件的处理程序的文档完整的事件流：
+1. readyState:loading
+1. readyState:interactive
+2. DOMContentLoaded
+3. iframe onload
+4. img onload
+5. readyState:complete
+6. window onload
+
+在 DOMContentLoaded 之前，document.readyState 会立即变成 interactive，它们的意义实际上是相同的；当所有资源（iframe 和 img）都加载完成后，document.readyState 变成 complete；转换到 complete 状态的意义与 window.onload 相同，区别在于 window.onload 始终在所有其他 load 处理程序之后运行；
+
+**脚本：async，defer**
+
+当浏览器加载 HTML 时遇到 `<script>` 标签，浏览器就不能继续构建 DOM，它必须立刻执行此脚本，对于外部脚本也是一样的：浏览器必须等脚本下载完，并执行结束，之后才能继续处理剩余的页面；
+
+通常把脚本放在页面底部，可以访问到页面上面的元素，并且不会阻塞页面显示内容；但是当遇到长的 HTML 文档时，则可能会造成明显的延迟；
+
+**defer**
+
+defer 特性告诉浏览器不要等待脚本，浏览器将继续处理 HTML，构建 DOM。脚本会“在后台”下载，然后等 DOM 构建完成后，脚本才会执行；
+
+具有 defer 特性的脚本不会阻塞页面，总是要等到 DOM 解析完毕，但在 DOMContentLoaded 事件之前执行；
+
+浏览器扫描页面寻找 defer 脚本，然后并行下载它们，以提高性能，且它们保持其相对顺序执行；
+
+**async**
+
+async 脚本就是一个会在加载完成时执行的完全独立的脚本，其他脚本不会等待 async 脚本加载完成，同样，async 脚本也不会等待其他脚本；浏览器也不会因 async 脚本而阻塞（与 defer 类似）；
+
+DOMContentLoaded 和异步脚本不会彼此等待：
+- 如果异步脚本在页面完成后才加载完成，则 DOMContentLoaded 可能会发生在异步脚本之前；
+- 如果异步脚本很短，或者是从 HTTP 缓存中加载的，则 DOMContentLoaded 也可能发生在异步脚本之后；
+
+**动态脚本**
+
+可以使用 JavaScript 动态地创建一个脚本，并将其附加（append）到文档（document）中，当脚本被附加到文档时，脚本就会立即开始加载；
+
+```js
+let script = document.createElement('script');
+script.src = "/article/script-async-defer/long.js";
+document.body.append(script); // 添加到文档
+```
+
+默认情况下，动态脚本的行为是“异步”的，即效果同 async；可以显式地设置 script.async=false，改变这个规则，使执行效果同 defer；
+
+> Tips: 在实际开发中，`defer` 用于需要整个 DOM 的脚本，和/或脚本的相对执行顺序很重要的时候；`async` 用于独立脚本，例如计数器或广告，这些脚本的相对执行顺序无关紧要；
+
+#### 资源加载：onload，onerror
+
+浏览器允许跟踪外部资源的加载，如脚本，iframe，图片等；readystatechange 事件也适用于资源，但很少被使用；
+
+对于加载脚本 onload/onerror 事件仅跟踪加载本身；在脚本处理和执行期间可能发生的 error 超出了这些事件跟踪的范围；也就是说：如果脚本成功加载，则即使脚本中有编程 error，也会触发 onload 事件；
+
+load 和 error 事件也适用于其他资源，基本上（basically）适用于具有外部 src 的任何资源；
+
+大多数资源在被添加到文档中后，便开始加载，但是 `<img>` 是个例外，它要等到获得 src 后才开始加载；对于 `<iframe>` 来说，iframe 加载完成时会触发 iframe.onload 事件，无论是成功加载还是出现 error；
+
+如果我们使用的是来自其他域的脚本，并且该脚本中存在 error，那么我们无法获取 error 的详细信息；
+
+要允许跨源访问，`<script>` 标签需要具有 crossorigin 特性（attribute），并且远程服务器必须提供特殊的 header；这里有三个级别的跨源访问：
+
+- 无 crossorigin 特性 —— 禁止访问；
+- crossorigin="anonymous" 如果服务器的响应带有包含 * 或我们的源（origin）的 header Access-Control-Allow-Origin，则允许访问，浏览器不会将授权信息和 cookie 发送到远程服务器；
+- crossorigin="use-credentials" 如果服务器发送回带有我们的源的 header Access-Control-Allow-Origin 和 Access-Control-Allow-Credentials: true，则允许访问。浏览器会将授权信息和 cookie 发送到远程服务器；
+
+#### DOM 变动观察器（Mutation observer）
+
+MutationObserver 是一个内建对象，它观察 DOM 元素，并在检测到更改时触发回调；
+
+```js
+// 创建一个带有回调函数的观察器
+let observer = new MutationObserver(callback);
+// 将其附加到一个 DOM 节点
+observer.observe(node, config);
+```
+
+config 是一个具有布尔选项的对象，该布尔选项表示“将对哪些更改做出反应”：
+- childList node 的直接子节点的更改；
+- subtree node 的所有后代的更改；
+- attributes node 的特性（attribute）；
+- attributeFilter 特性名称数组，只观察选定的特性；
+- characterData 是否观察 node.data（文本内容）；
+- attributeOldValue 如果为 true，则将特性的旧值和新值都传递给回调，否则只传新值（需要 attributes 选项）；
+- characterDataOldValue 如果为 true，则将 node.data 的旧值和新值都传递给回调，否则只传新值（需要 characterData 选项）；
+
+在发生任何更改后，将执行“回调”：更改被作为一个 MutationRecord 对象列表传入第一个参数，而观察器自身作为第二个参数，MutationRecord 对象具有以下属性：
+- type 变动类型，以下类型之一：
+  - "attributes"：特性被修改了；
+  - "characterData"：数据被修改了，用于文本节点；
+  - "childList"：添加/删除了子元素；
+- target 更改发生在何处："attributes" 所在的元素，或 "characterData" 所在的文本节点，或 "childList" 变动所在的元素；
+- addedNodes/removedNodes 添加/删除的节点；
+- previousSibling/nextSibling 添加/删除的节点的上一个/下一个兄弟节点；
+- attributeName/attributeNamespace 被更改的特性的名称/命名空间（用于 XML）；
+- oldValue 之前的值，仅适用于特性或文本更改，如果设置了相应选项 attributeOldValue/characterDataOldValue
+
+方法 observer.disconnect() 可以停止观察，但这时观察器可能尚未处理某些更改；observer.takeRecords() 方法可以获取尚未处理的变动记录列表，表中记录的是已经发生，但回调暂未处理的变动；
+
+> Note: 观察器在内部对节点使用弱引用，也就是说，如果一个节点被从 DOM 中移除了，并且该节点变得不可访问，那么它就可以被垃圾回收；
+
+#### 选择（Selection）和范围（Range）
+
+选择的基本概念是 Range：本质上是一对“边界点”：范围起点和范围终点；每个点都被表示为一个带有相对于起点的相对偏移（offset）的父 DOM 节点，如果父节点是元素节点，则偏移量是子节点的编号（子节点数），对于文本节点，则是文本中的位置（字符数）；
+
+使用 new Range() 创建一个范围，Range 是一个无参的构造函数；使用 range.setStart(node, offset) 和 range.setEnd(node, offset) 来设置选择边界；
+
+```html
+<p id="p">Example: <i>italic</i> and <b>bold</b></p>
+
+From <input id="start" type="number" value=1> – To <input id="end" type="number" value=4>
+<button id="button">Click to select</button>
+<script>
+  button.onclick = () => {
+    let range = new Range();
+
+    range.setStart(p, start.value);
+    range.setEnd(p, end.value);
+
+    // 应用选择，后文有解释
+    document.getSelection().removeAllRanges();
+    document.getSelection().addRange(range);
+  };
+</script>
+```
+
+> Note: 一个范围可能跨越许多不相关的节点，所以不必在 `setStart` 和 `setEnd` 中使用相同的节点，唯一要注意的是终点要在起点之后；
+
+range 对象具有以下属性：
+- startContainer，startOffset 起始节点和偏移量；
+- endContainer，endOffset 结束节点和偏移量；
+- collapsed 布尔值，如果范围在同一点上开始和结束（所以范围内没有内容）则为 true；
+- commonAncestorContainer 在范围内的所有节点中最近的共同祖先节点；
+
+Range 方法：
+
+- setStart(node, offset) 将起点设置在：node 中的位置 offset；
+- setStartBefore(node) 将起点设置在：node 前面；
+- setStartAfter(node) 将起点设置在：node 后面；
+
+- setEnd(node, offset) 将终点设置为：node 中的位置 offset；
+- setEndBefore(node) 将终点设置为：node 前面；
+- setEndAfter(node) 将终点设置为：node 后面；
+
+- selectNode(node) 设置范围以选择整个 node；
+- selectNodeContents(node) 设置范围以选择整个 node 的内容；
+- collapse(toStart) 如果 toStart=true 则设置 end=start，否则设置 start=end，从而折叠范围；
+- cloneRange() 创建一个具有相同起点/终点的新范围；
+
+- deleteContents() 从文档中删除范围内容；
+- extractContents() 从文档中删除范围内容，并将删除的内容作为 DocumentFragment 返回；
+- cloneContents() 复制范围内容，并将复制的内容作为 DocumentFragment 返回；
+- insertNode(node) 在范围的起始处将 node 插入文档；
+- surroundContents(node) 使用 node 将所选范围内容包裹起来，该范围必须包含其中所有元素的开始和结束标签；
+
+文档选择是由 Selection 对象表示的，可通过 window.getSelection() 或 document.getSelection() 来获取；Selection API 规范描述了一个选择可以包括零个或多个范围，但实际上，在除 Firefox 之外的所有浏览器中，范围最多是 1；
+
+选择属性：
+- anchorNode 选择的起始节点；
+- anchorOffset 选择开始的 anchorNode 中的偏移量；
+- focusNode 选择的结束节点；
+- focusOffset 选择开始处 focusNode 的偏移量；
+- isCollapsed 如果未选择任何内容（空范围）或不存在，则为 true ；
+- rangeCount 选择中的范围数，除 Firefox 外，其他浏览器最多为 1；
+
+> Tips: 可以通过 `elem.onselectstart` 跟踪当选择从 elem 上开始的事件，阻止默认行为会使选择无法开始；document.onselectionchange 当选择变动时触发；
+
+获取整个选择：
+- 作为文本：只需调用 document.getSelection().toString()；
+- 作为 DOM 节点：获取底层的（underlying）范围，并调用它们的 cloneContents() 方法；
+
+选择方法：
+- getRangeAt(i) 获取从 0 开始的第 i 个范围，在除 Firefox 之外的所有浏览器中，仅使用 0；
+- addRange(range) 将 range 添加到选择中，如果选择已有关联的范围，则除 Firefox 外的所有浏览器都将忽略该调用；
+- removeRange(range) 从选择中删除 range；
+- removeAllRanges() 删除所有范围；
+- empty() removeAllRanges 的别名；
+
+- collapse(node, offset) 用一个新的范围替换选定的范围，该新范围从给定的 node 处开始，到偏移 offset 处结束；
+- setPosition(node, offset) collapse 的别名；
+- collapseToStart() 折叠（替换为空范围）到选择起点；
+- collapseToEnd() 折叠到选择终点；
+- extend(node, offset) 将选择的焦点（focus）移到给定的 node，位置偏移 offset；
+- setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset) 用给定的起点 anchorNode/anchorOffset 和终点 focusNode/focusOffset 来替换选择范围，选中它们之间的所有内容；
+- selectAllChildren(node) 选择 node 的所有子节点；
+- deleteFromDocument() 从文档中删除所选择的内容；
+- containsNode(node, allowPartialContainment = false) 检查选择中是否包含 node（特别是如果第二个参数是 true 的话）；
+
+> Note: 如果选择已存在，需要先使用 `removeAllRanges()` 将其清空，然后添加范围；否则，除 Firefox 外的所有浏览器都将忽略新范围；
+
+**表单控件中的选择**
+
+诸如 input 和 textarea 等表单元素提供了 专用的选择 API，没有 Selection 或 Range 对象；
+
+- 属性：
+  - input.selectionStart 选择的起始位置（可写）；
+  - input.selectionEnd 选择的结束位置（可写）；
+  - input.selectionDirection 选择方向，其中之一：“forward”，“backward” 或 “none”；
+- 事件：
+  - input.onselect 当某个东西被选择时触发；
+- 方法：
+  - input.select() 选择文本控件中的所有内容；
+  - input.setSelectionRange(start, end, [direction]) 在给定方向上（可选），从 start 一直选择到 end；input.setRangeText(replacement, [start], [end], [selectionMode]) 用新文本替换范围中的文本；
+
+input.setRangeText() 方法如果提供的话可选参数 start 和 end，则设置范围的起点和终点，否则使用用户的选择，最后一个可选参数 selectionMode 决定替换文本后如何设置选择，可能的值为：
+- "select" 将选择新插入的文本；
+- "start" 选择范围将在插入的文本之前折叠（光标将在其之前）；
+- "end" 选择范围将在插入的文本之后折叠（光标将紧随其后）；
+- "preserve" 尝试保留选择，默认值；
+
+> Note: 根据规范，发表单控件内的选择不应该触发 `document.onselectionchange` 事件，因为它与 `document` 选择和范围不相关；
+
+> Tips: 一个重要的边界情况是 selectionStart 和 selectionEnd 彼此相等，也正是光标位置；通过将 selectionStart 和 selectionEnd 设置为相同的值，可以实现移动光标的效果；
+
+```html
+<style>
+  /* CSS 样式 */
+  #el {
+    user-select: none;
+  }
+</style>
+
+<div class="el">Unselectable text.</div>
+
+<script>
+// 取消选择默认事件
+el.onselectstart = () => false;
+
+// 或者在选择发生后清除选择
+document.getSelection().empty() 
+</script>
+```
+
+#### 事件循环：微任务和宏任务
+
+浏览器中 JavaScript 的执行流程和 Node.js 中的流程都是基于事件循环的；事件循环是一个在 JavaScript 引擎等待任务，执行任务和进入休眠状态等待更多任务这几个状态之间转换的无限循环；
+
+一个任务到来时，引擎可能正处于繁忙状态，那么这个任务就会被排入队列；多个任务组成了一个队列，即所谓的“宏任务队列”（v8 术语）；例如以下宏任务：
+
+- 当外部脚本 `<script src="...">` 加载完成时，任务就是执行它
+- 当用户移动鼠标时，任务就是派生出 mousemove 事件和执行处理程序；
+- 当安排的（scheduled）setTimeout 时间到达时，任务就是执行其回调；
+
+引擎执行任务时永远不会进行渲染（render），如果任务执行需要很长一段时间也没关系，仅在任务完成后才会绘制对 DOM 的更改；如果一项任务执行花费的时间过长，浏览器将无法执行其他任务，通常浏览器会抛出一个如“页面未响应”之类的警报；
+
+当引擎忙于语法高亮时，它就无法处理其他 DOM 相关的工作，它甚至可能会导致浏览器“中断（hiccup）”甚至“挂起（hang）”一段时间；可以通过将大任务拆分成多个小任务来避免这个问题；对浏览器脚本中的过载型任务进行拆分的另一个好处是，可以显示进度指示；
+
+> Tips: 在事件处理程序中，可能会推迟某些行为，直到事件冒泡并在所有级别上得到处理后；可以通过将该代码包装到零延迟的 `setTimeout` 中来做到这一点；
+
+```js
+menu.onclick = function() {
+  // 创建一个具有被点击的菜单项的数据的自定义事件
+  let customEvent = new CustomEvent("menu-open", {
+    bubbles: true
+  });
+
+  // 异步分派（dispatch）自定义事件
+  setTimeout(() => menu.dispatchEvent(customEvent));
+};
+```
+
+微任务仅来自于我们的代码，它们通常是由 promise 创建的：对 .then/catch/finally 处理程序的执行会成为微任务；微任务也被用于 await 的“幕后”，因为它是 promise 处理的另一种形式；
+
+还有一个特殊的函数 queueMicrotask(func)，它对 func 进行排队，以在微任务队列中执行；
+
+微任务会在执行任何其他事件处理，或渲染，或执行任何其他宏任务之前完成；如果我们想要异步执行（在当前代码之后）一个函数，但是要在更改被渲染或新事件被处理之前执行，那么我们可以使用 queueMicrotask 来对其进行安排（schedule）；
+
+简化的事件循环算法：
+1. 从宏任务队列中出队（dequeue）并执行最早的任务；
+2. 执行所有微任务：当微任务队列非空时：出队（dequeue）并执行最早的微任务；
+3. 如果有变更，则将变更渲染出来；
+4. 如果宏任务队列为空，则休眠直到出现宏任务；
+5. 转到步骤 1；
