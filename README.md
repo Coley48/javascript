@@ -2279,7 +2279,7 @@ func();
 
 > Tips: 使用 `console.dir` 可以打印出函数的 `length`、`name`，甚至作用域链 [[Scopes]] 等隐藏属性；严格模式下无法获取 `caller`，`callee`，`arguments` 等属性；
 
-- [变量作用域，闭包文档传送门](https://zh.javascript.info/closure)
+- [JavaScript 现代教程-变量作用域，闭包文档](https://zh.javascript.info/closure)
 - [深入 js——作用域链](https://juejin.cn/post/6844904050824052744)
 - [JS 规范中的 Execution Context 和 Scope 概念有什么区别？](https://www.zhihu.com/question/51336888)
 - [了解 JS 中的ECStack、EC、VO 和 AO](https://zhuanlan.zhihu.com/p/311196297)
@@ -3707,7 +3707,7 @@ let eventMixin = {
 };
 ```
 
-- [Mixin 模式](https://zh.javascript.info/mixins)
+- [JavaScript 现代教程-Mixin 模式](https://zh.javascript.info/mixins)
 
 #### 错误处理，try...catch
 
@@ -4727,7 +4727,7 @@ arr = new Proxy(arr, {
 ```
 
 - [Proxy MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
-- [Proxy 和 Reflect](https://zh.javascript.info/proxy)
+- [JavaScript 现代教程-Proxy 和 Reflect](https://zh.javascript.info/proxy)
 
 #### eval
 
@@ -5227,7 +5227,7 @@ offsetParent 是最接近的 CSS 定位的祖先，或者是 td，th，table，b
 
 > Tips: 可以创建一个带有滚动条的元素，但是没有边框（border）和内边距（padding），其全宽度 `offsetWidth` 和内部内容宽度 `clientWidth` 之间的差值就是滚动条的宽度；
 
-- [元素大小和滚动文档](https://zh.javascript.info/size-and-scroll)
+- [JavaScript 现代教程-元素大小和滚动文档](https://zh.javascript.info/size-and-scroll)
 
 #### Window 大小和滚动
 
@@ -6160,3 +6160,1017 @@ menu.onclick = function() {
 3. 如果有变更，则将变更渲染出来；
 4. 如果宏任务队列为空，则休眠直到出现宏任务；
 5. 转到步骤 1；
+
+#### 弹窗和 window 的方法
+
+如果弹窗是在用户触发的事件处理程序（如 onclick）之外调用的，大多数浏览器都会阻止此类弹窗；
+
+**window.open**
+
+打开一个弹窗的语法是 window.open(url, name, params)：
+- url 要在新窗口中加载的 URL；
+- name 新窗口的名称，每个窗口都有一个 window.name，在这里我们可以指定哪个窗口用于弹窗，如果已经有一个这样名字的窗口，将在该窗口打开给定的 URL，否则会打开一个新窗口；
+- params 新窗口的配置字符串，用逗号分隔，参数之间不能有空格；
+
+params 的设置项：
+- left/top屏幕上窗口的左上角的坐标；这有一个限制：不能将新窗口置于屏幕外；
+- width/height 新窗口的宽度和高度；宽度/高度的最小值是有限制的，因此不可能创建一个不可见的窗口；
+- menubar（yes/no）显示或隐藏新窗口的浏览器菜单；
+- toolbar（yes/no）显示或隐藏新窗口的浏览器导航栏（后退，前进，重新加载等）；
+- location（yes/no）显示或隐藏新窗口的 URL 字段。Firefox 和 IE 浏览器不允许默认隐藏它；
+- status（yes/no）显示或隐藏状态栏；大多数浏览器都会强制显示它；
+- resizable（yes/no）允许禁用新窗口大小调整，不建议使用；
+- scrollbars（yes/no）允许禁用新窗口的滚动条，不建议使用；
+
+设置中的省略规则：
+- 如果 open 调用中没有第三个参数，或者它是空的，则使用默认的窗口参数；
+- 如果这里有一个参数字符串，但是某些 yes/no 功能被省略了，那么被省略的功能则被默认值为 no；
+- 如果参数中没有 left/top，那么浏览器会尝试在最后打开的窗口附近打开一个新窗口；
+- 如果没有 width/height，那么新窗口的大小将与上次打开的窗口大小相同；
+
+open 调用会返回对新窗口的引用，它可以用来操纵弹窗的属性，更改位置，甚至更多操作；弹窗也可以使用 window.opener 来访问 opener 窗口；除了弹窗之外，对其他所有窗口来说，window.opener 均为 null；
+
+> Note: 只有在窗口是同源的时，窗口才能自由访问彼此的内容；
+
+通过 win.close() 方法关闭一个窗口，使用 win.closed 属性检查一个窗口是否被关闭；
+
+- [JavaScript 现代教程-弹窗和 window 的方法](https://zh.javascript.info/popup-windows)
+
+#### 跨窗口通信
+
+如果两个 URL 具有相同的协议，域和端口，则称它们是“同源”的；“同源（Same Origin）”策略限制了窗口（window）和 frame 之间的相互访问；非同源窗口引用只能更改其 location；
+
+**iframe**
+
+一个 `<iframe>` 标签承载了一个单独的嵌入的窗口，它具有自己的 document 和 window；
+
+- iframe.contentWindow 来获取 `<iframe>` 中的 window；
+- iframe.contentDocument 来获取 `<iframe>` 中的 document，是 iframe.contentWindow.document 的简写形式；
+
+> Tips: 通过运行脚本设置拥有二级子域名子窗口的 `document.domain` 属性为主窗口的主域名，可以实现子窗口和主窗口无限制通信；
+
+获取 `<iframe>` 的 window 对象的另一个方式是从命名集合 window.frames 中获取：
+- 通过索引获取：window.frames[0] 文档中的第一个 iframe 的 window 对象；
+- 通过名称获取：window.frames.iframeName 获取 name="iframeName" 的 iframe 的 window 对象；
+
+多层嵌套 iframe：
+- window.frames “子”窗口的集合（用于嵌套的 iframe）；
+- window.parent 对“父”（外部）窗口的引用；
+- window.top 对最顶级父窗口的引用；
+
+> Tips: 可以使用 `top` 属性来检查当前的文档是否是在 `iframe` 内打开的：`window == window.top`；
+
+sandbox 特性（attribute）允许在 `<iframe>` 中禁止某些特定行为，以防止其执行不被信任的代码；它通过将 iframe 视为非同源的，或者应用其他限制来实现 iframe 的“沙盒化”；
+
+对于 `<iframe sandbox src="...">`，有一个应用于其上的默认的限制集，一个空的 "sandbox" 特性会施加最严格的限制，但是我们用一个以空格分隔的列表，列出要移除的限制；包括以下限制：
+- allow-same-origin：默认情况下，"sandbox" 会为 iframe 强制实施“不同来源”的策略；
+- allow-top-navigation：允许 iframe 更改 parent.location；
+- allow-forms：允许在 iframe 中提交表单；
+- allow-scripts：允许在 iframe 中运行脚本；
+- allow-popups：允许在 iframe 中使用 window.open 打开弹窗；
+- allow-popups：允许在 iframe 中使用 window.open 打开弹窗；
+
+> Note: `sandbox` 特性的目的仅是添加更多限制，它无法移除这些限制；尤其是，如果 `iframe` 来自其他源，则无法放宽同源策略；
+
+postMessage 接口允许窗口之间相互通信，无论它们来自什么源；win.postMessage(data, targetOrigin) 方法，data 是要发送的数据，可以是任何对象，数据会被通过使用“结构化序列化算法（structured serialization algorithm）”进行克隆；targetOrigin 指定目标窗口的源，以便只有来自给定的源的窗口才能获得该消息；
+
+targetOrigin 是一种安全措施，如果目标窗口是非同源的，我们无法在发送方窗口读取它的 location；如果不希望做这个检查，可以将 targetOrigin 设置为 *；
+
+为了接收消息，目标窗口应该在 message 事件上有一个处理程序；当 postMessage 被调用时触发该事件（并且 targetOrigin 检查成功）；回调参数 event 对象具有特殊属性：
+- data 从 postMessage 传递来的数据；
+- origin 发送方的源；
+- source 对发送方窗口的引用，可以通过 source.postMessage(...) 立即回复；
+
+> Note: `message` 事件只能通过 `addEventListener` 分配处理程序；
+
+#### ArrayBuffer，二进制数组
+
+ArrayBuffer 是 JavaScript 中基本的二进制对象，是对固定长度的连续内存空间的引用；
+
+```js
+// 分配一个 16 字节的连续内存空间，并用 0 进行预填充
+let buffer = new ArrayBuffer(16); 
+```
+
+如要操作 ArrayBuffer，需要使用“视图”对象；视图对象本身并不存储任何东西；它是一副“眼镜”，透过它来解释存储在 ArrayBuffer 中的字节；
+
+- Uint8Array 将 ArrayBuffer 中的每个字节视为 0 到 255 之间的单个数字，这称为 “8 位无符号整数”；
+- Uint16Array 将每 2 个字节视为一个 0 到 65535 之间的整数，这称为 “16 位无符号整数”；
+- Uint32Array 将每 4 个字节视为一个 0 到 4294967295 之间的整数，这称为 “32 位无符号整数”；
+- Float64Array 将每 8 个字节视为一个 5.0x10^324 到 1.8x10^308 之间的浮点数；
+- Uint8ClampedArray 用于 8 位整数，在赋值时便“固定“其值；
+- Int8Array，Int16Array，Int32Array 用于有符号整数（可以为负数）；
+- Float32Array，Float64Array 用于 32 位和 64 位的有符号浮点数；
+
+所有这些视图（Uint8Array，Uint32Array 等）的通用术语是 TypedArray，它们都享有同一组方法和属性；构造方式：
+
+```js
+// 如果给定的是 ArrayBuffer 参数，则会在其上创建视图
+// 给定起始位置 byteOffset（默认为 0）以及 length（默认至 buffer 的末尾），视图仅涵盖 buffer 的一段
+// new TypedArray(buffer, [byteOffset], [length]);
+let buffer = new ArrayBuffer(16); // 创建一个长度为 16 的 buffer
+let view = new Uint32Array(buffer); // 将 buffer 视为一个 32 位整数的序列
+
+// 如果给定的是 Array，或任何类数组对象，则会创建一个相同长度的类型化数组，并复制其内容
+// new TypedArray(object);
+let arr = new Uint8Array([0, 1, 2, 3]);
+alert( arr.length ); // 4，创建了相同长度的二进制数组
+alert( arr[1] ); // 1，用给定值填充了 4 个字节（无符号 8 位整数）
+
+// 如果给定的是另一个 TypedArray，也是如此：创建一个相同长度的类型化数组，并复制其内容；
+// 如果需要的话，数据在此过程中会被转换为新的类型
+// new TypedArray(typedArray);
+let arr16 = new Uint16Array([1, 1000]);
+let arr8 = new Uint8Array(arr16);
+
+// 对于数字参数 length —— 创建类型化数组以包含这么多元素；
+// 它的字节长度将是 length 乘以单个 TypedArray.BYTES_PER_ELEMENT 中的字节数
+// new TypedArray(length);
+let arr = new Uint16Array(4); // 为 4 个整数创建类型化数组
+alert( Uint16Array.BYTES_PER_ELEMENT ); // 每个整数 2 个字节
+alert( arr.byteLength ); // 8（字节中的大小）
+
+// 不带参数的情况下，创建长度为零的类型化数组
+new TypedArray();
+```
+
+可以直接创建一个 TypedArray，而无需提及 ArrayBuffer，除第一种情况（已提供 ArrayBuffer）外，其他所有情况都会自动创建 ArrayBuffer；可以通过 buffer 属性，访问 ArrayBuffer，byteLength 属性获取 ArrayBuffer 的长度；
+
+如果尝试将越界值写入类型化数组，多余的位被切除；Uint8ClampedArray 在这方面比较特殊，它的表现不太一样；对于大于 255 的任何数字，它将保存为 255，对于任何负数，它将保存为 0，此行为对于图像处理很有用；
+
+TypedArray 具有常规的 Array 方法：
+- 可以遍历（iterate），map，slice，find 和 reduce 等；
+- 没有 splice 和 concat；
+- arr.set(fromArr, [offset]) 从 offset（默认为 0）开始，将 fromArr 中的所有元素复制到 arr；
+- arr.subarray([begin, end]) 创建一个从 begin 到 end（不包括）相同类型的新视图，不复制任何内容；
+
+DataView 是在 ArrayBuffer 上的一种特殊的超灵活“未类型化”视图；它允许以任何格式访问任何偏移量（offset）的数据；
+
+对于类型化的数组，构造器决定了其格式，整个数组应该是统一的，第 i 个数字是 arr[i]；通过 DataView，我们可以使用 .getUint8(i) 或 .getUint16(i) 之类的方法访问数据；可以在调用方法时选择格式，而不是在构造的时候；
+
+通过调用 new DataView(buffer, [byteOffset], [byteLength]) 创建一个 dataView 视图；
+
+- buffer 底层的 ArrayBuffer；与类型化数组不同，DataView 不会自行创建缓冲区（buffer）；
+- byteOffset 视图的起始字节位置（默认为 0）；
+- byteLength 视图的字节长度（默认至 buffer 的末尾）；
+
+> Note: 还有另外两个术语，用于对二进制数据进行操作的方法的描述：`ArrayBufferView` 是所有这些视图的总称，`BufferSource` 是 `ArrayBuffer` 和 `ArrayBufferView` 的总称；
+
+#### TextDecoder 和 TextEncoder
+
+内建的 TextDecoder 对象在给定缓冲区（buffer）和编码格式（encoding）的情况下，能够将值读取到实际的 JavaScript 字符串中；
+
+decoder 通过 new TextDecoder([label], [options]) 创建：
+- label 编码格式，默认为 utf-8，但同时也支持 big5，windows-1251 等许多其他编码格式；
+- options 可选对象；
+  - fatal 布尔值，如果为 true 则为无效（不可解码）字符抛出异常，否则（默认）用字符 \uFFFD 替换无效字符 ；
+  - ignoreBOM 布尔值，如果为 true 则 BOM（可选的字节顺序 unicode 标记），很少需要使用；
+
+通过 decoder.decode([input], [options]) 方法解码：
+- input 要被解码的 BufferSource；
+- options 可选对象：
+  - stream 对于解码流，为 true，则将传入的数据块（chunk）作为参数重复调用 decoder；
+
+stream 为 true 时，多字节的字符可能偶尔会在块与块之间被分割，这个选项告诉 TextDecoder 记住“未完成”的字符，并在下一个数据块来的时候进行解码；
+
+
+```js
+let uint8Array = new Uint8Array([72, 101, 108, 108, 111]);
+
+alert( new TextDecoder().decode(uint8Array) ); // Hello
+```
+
+TextEncoder 做相反的事情：将字符串转换为字节；通过 new TextEncoder() 创建；encoder 有两个方法：
+
+- encode(str) 从字符串返回 Uint8Array；
+- encodeInto(str, destination) 将 str 编码到 destination 中，该目标必须为 Uint8Array；
+
+```js
+let encoder = new TextEncoder();
+
+let uint8Array = encoder.encode("Hello");
+alert(uint8Array); // 72,101,108,108,111
+```
+
+#### Blob
+
+arrayBuffer 和视图（view）都是 ECMA 标准的一部分，是 JavaScript 的一部分；浏览器还有一个二进制类型大对象 Blob，Blob 对象表示一个不可变、原始数据的类文件对象，由可选的字符串 type（通常是 MIME 类型）和 blobParts 组成；
+
+new Blob(blobParts, options) 创建一个 Blob；
+- blobParts 是 Blob/BufferSource/String 类型的值的数组；
+- options 可选对象；
+  - type Blob 类型，通常是 MIME 类型；
+  - endings 是否转换换行符，使 Blob 对应于当前操作系统的换行符（\r\n 或 \n）；默认为 "transparent"（不转换），或者 "native"（转换）；
+
+可以用 blob.slice([byteStart], [byteEnd], [contentType]) 方法来提取 Blob 片段：
+- byteStart 起始字节，默认为 0；
+- byteEnd 最后一个字节（专有，默认为最后）；
+- contentType 新 blob 的 type，默认与源 blob 相同；
+
+> Note: 无法直接在 `Blob` 中更改数据，但我们可以通过 `slice` 获得 `Blob` 的多个部分，从这些部分创建新的 `Blob` 对象，将它们组成新的 `Blob`；
+
+**Blob 作为 URL**
+
+Blob 可以很容易用作 `<a>`、`<img>` 或其他标签的 URL，来显示它们的内容；
+
+```js
+// download 特性（attribute）强制浏览器下载而不是导航
+// <a download="hello.txt" href="blob:http://localhost:8000/c2d14ed6-c271-46be-9164-06042e419312">hello.txt</a>
+let blob = new Blob(["Hello, world!"], { type: "text/plain" });
+let link = document.createElement("a");
+link.download = "hello.txt";
+link.href = URL.createObjectURL(blob);
+link.innerHTML = "hello.txt";
+
+// 添加到 DOM
+document.body.append(link);
+// 或者模拟点击，自动下载
+link.click();
+// 从内部映射中移除引用
+URL.revokeObjectURL(link.href);
+```
+
+URL.createObjectURL 取一个 Blob，并为其创建一个唯一的 URL，形式为 `blob:<origin>/<uuid>`；浏览器内部为每个通过 URL.createObjectURL 生成的 URL 存储了一个 URL -> Blob 映射，生成的 URL（即其链接）仅在当前文档打开的状态下才有效；
+
+> Note: 如果我们创建一个 `URL`，那么即使我们不再需要该 `Blob` 了，它也会被挂在内存中；`URL.revokeObjectURL(url)` 从内部映射中移除引用，因此允许 `Blob` 被删除（如果没有其他引用的话），并释放内存；
+
+**Blob 转为 base64**
+
+URL.createObjectURL 的一个替代方法是，将 Blob 转换为 base64-编码的字符串；这种编码将二进制数据表示为一个由 0 到 64 的 ASCII 码组成的字符串，非常安全且“可读”；
+
+可以在 “data-url” 中使用此编码，“data-url” 的形式为 `data:[<mediatype>][;base64],<data>`，并且可以在任何地方和“常规” url 一样使用这种 url；
+
+```js
+let blob = new Blob(['Hello, world!'], {type: 'text/plain'});
+
+// 内建的 FileReader 对象可以将 Blob 转换为 base64；
+let reader = new FileReader();
+reader.readAsDataURL(blob); 
+
+// 调用 onload
+reader.onload = function() {
+  link.href = reader.result; // data url
+  link.click();
+};
+```
+
+> Note: `Blob` 转换为 `data url`，当对大的 `Blob` 进行编码时，性能和内存会有损耗；
+
+**Image 转为 blob**
+
+可以创建一个图像（image）的、图像的一部分、或者甚至创建一个页面截图的 Blob；
+
+```js
+// 获取任何图像
+let img = document.querySelector('img');
+
+// 生成同尺寸的 <canvas>
+let canvas = document.createElement('canvas');
+canvas.width = img.clientWidth;
+canvas.height = img.clientHeight;
+
+let context = canvas.getContext('2d');
+
+// 向其中复制图像（此方法允许剪裁图像）
+context.drawImage(img, 0, 0);
+// 我们 context.rotate()，并在 canvas 上做很多其他事情
+
+// toBlob 是异步操作，结束后会调用 callback
+let blob = await new Promise(resolve => canvasElem.toBlob(resolve, 'image/png'));
+  // blob 创建完成，下载它
+let link = document.createElement('a');
+link.download = 'example.png';
+
+link.href = URL.createObjectURL(blob);
+link.click();
+
+// 删除内部 blob 引用，这样浏览器可以从内存中将其清除
+URL.revokeObjectURL(link.href);
+```
+
+**Blob 转为 arrayBuffer**
+
+Blob 构造器允许从几乎所有东西创建 blob，包括任何 BufferSource；如果需要执行低级别的操作的话，则可以使用 blob.arrayBuffer() 从 blob 中获取最低级别的 arrayBuffer；
+
+```js
+// 从 blob 获取 arrayBuffer
+const bufferPromise = await blob.arrayBuffer();
+
+// 或者
+blob.arrayBuffer().then(buffer => /* 处理 arrayBuffer */);
+```
+
+**Blob 转为 stream**
+
+当读取和写入超过 2 GB 的 blob 时，将其转换为 arrayBuffer 的使用对我们来说会更加占用内存；这种情况下，可以直接将 blob 转换为 stream 进行处理；stream 是一种特殊的对象，我们可以从它那里逐部分地读取（或写入）；
+
+```js
+// 从 blob 获取可读流（readableStream）
+const readableStream = blob.stream();
+const stream = readableStream.getReader();
+
+while (true) {
+  // 对于每次迭代：data 是下一个 blob 数据片段
+  let { done, data } = await stream.read();
+  if (done) {
+    // 读取完毕，stream 里已经没有数据了
+    console.log('all blob processed.');
+    break;
+  }
+
+  // 对刚从 blob 中读取的数据片段做一些处理
+  console.log(data);
+}
+```
+
+#### File 和 FileReader
+
+File 对象继承自 Blob，并扩展了与文件系统相关的功能；
+
+File 对象可以通古构造器创建 new File(fileParts, fileName, [options])；
+
+- fileParts Blob/BufferSource/String 类型值的数组；
+- fileName 文件名字符串；
+- options 可选对象，
+  - lastModified 最后一次修改的时间戳（整数日期）；
+
+或者通常从 `<input type="file">` 或拖放或其他浏览器接口来获取文件；在这种情况下，file 将从操作系统（OS）获得 this 信息；输入（input）可以选择多个文件，因此 input.files 是一个类数组对象；
+
+```js
+    let file = document.createElement("input");
+    file.type = "file";
+    file.onchange = function (e) {
+        console.log(this.files[0]);
+    };
+    document.body.append(file);
+```
+
+FileReader 是一个对象，其唯一目的是从 Blob（因此也从 File）对象中读取数据；但使用事件来传递数据，因为从磁盘读取数据可能比较费时间；
+
+- 创建：
+  - new FileReader() 一个无参构造函数；
+- 方法：
+  - readAsArrayBuffer(blob) 将数据读取为二进制格式的 ArrayBuffer；
+  - readAsText(blob, [encoding]) 将数据读取为给定编码（默认为 utf-8 编码）的文本字符串；
+  - readAsDataURL(blob) 读取二进制数据，并将其编码为 base64 的 data url；
+  - abort() 取消操作；
+- 事件：
+  - loadstart 开始加载；
+  - progress 在读取过程中出现；
+  - load 读取完成，没有 error；
+  - abort 调用了 abort()；
+  - error 出现 error；
+  - loadend 读取完成，无论成功还是失败；
+- 结果：
+  - reader.result 是结果（如果成功）；
+  - reader.error 是 error（如果失败）；
+
+```html
+<input type="file" onchange="readFile(this)">
+
+<script>
+function readFile(input) {
+  let file = input.files[0];
+
+  let reader = new FileReader();
+
+  reader.readAsText(file);
+
+  reader.onload = function() {
+    console.log(reader.result);
+  };
+
+  reader.onerror = function() {
+    console.log(reader.error);
+  };
+
+}
+</script>
+```
+
+> Note: 对于 `Web Worker`，还有一种同步的 `FileReader` 变体，称为 `FileReaderSync`；读取方法 `read*` 不会生成事件，而是会像常规函数那样返回一个结果；
+
+#### Fetch
+
+JavaScript 可以将网络请求发送到服务器，并在需要时加载新信息；fetch() 方法是一种现代通用的方法；
+
+- 语法：
+  - let promise = fetch(url, [options])
+- 参数：
+  - url 要访问的 URL；
+  - options 可选参数：method，header 等；
+- 响应：
+  - status HTTP 状态码；
+  - ok 布尔值，如果 HTTP 状态码为 200-299，则为 true；
+- 方法：
+  - response.text() 读取 response，并以文本形式返回 response；
+  - response.json() 将 response 解析为 JSON；
+  - response.formData() 以 FormData 对象的形式返回 response；
+  - response.blob() 以 Blob（具有类型的二进制数据）形式返回 response；
+  - response.arrayBuffer() 以 ArrayBuffer（低级别的二进制数据）形式返回 response；
+
+没有 options fetch 就是一个简单的 GET 请求，下载 url 的内容；返回一个该调用代码应该用来获取结果的 promise；
+
+获取响应分为两个阶段：第一阶段，当服务器发送了响应头（response header），fetch 返回的 promise 就使用内建的 Response class 对象来对响应头进行解析；第二阶段，需要使用其他的方法调用以获取 response body；
+
+```js
+// await 调用
+let response = await fetch(url, options); // 解析 response header
+let result = await response.json(); // 将 body 读取为 json
+// 或者 promise
+fetch(url, options)
+  .then(response => response.json())
+  .then(result => /* process result */)
+
+// 案例
+fetch("/index.html")
+    .then((res) => {
+        if (res.ok) {
+            console.log(res);
+        }
+        return res;
+    }).then((res) => {
+        res.text().then((text) => {
+            console.log(text);
+        });
+    });
+```
+
+> Note: 如果已经使用了 `response` 读取方法来获取 `response`，那么如果再用另一种 `response` 方法，则不会生效，因为 `body` 内容已经被处理过了；
+
+Response header 位于 response.headers 中的一个类似于 Map 的 header 对象；但不是真正的 Map，只是具有类似的方法，可以按名称（name）获取各个 header，或迭代所有 header；
+
+```js
+let response = await fetch('https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits');
+
+// 获取一个 header
+alert(response.headers.get('Content-Type')); // application/json; charset=utf-8
+
+// 迭代所有 header
+for (let [key, value] of response.headers) {
+  alert(`${key} = ${value}`);
+}
+```
+
+可以使用 headers 选项在 fetch 中设置 request header，它有一个带有输出 header 的对象；但有一些无法设置的 header，参见 [forbidden HTTP headers](https://fetch.spec.whatwg.org/#forbidden-header-name)；
+
+```js
+let response = fetch(protectedUrl, {
+  headers: {
+    Authentication: 'secret'
+  }
+});
+```
+
+通过设置选项中 method 可以创建一个 POST 或者其他类型的请求；此外选项中 body 字段会作为请求体发送，需是以下内容之一：
+
+- 字符串；
+- FormData 对象，以 form/multipart 形式发送数据；
+- Blob/BufferSource 发送二进制数据；
+- URLSearchParams，以 x-www-form-urlencoded 编码形式发送数据，很少使用；
+
+```js
+let user = {
+  name: 'John',
+  surname: 'Smith'
+};
+
+let response = await fetch('/article/fetch/post/user', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json;charset=utf-8'
+  },
+  body: JSON.stringify(user)
+});
+
+let result = await response.json();
+alert(result.message);
+```
+
+> Note: 如果请求的 body 是字符串，则 Content-Type 会默认设置为 text/plain;charset=UTF-8；但要发送 JSON 时，会使用 headers 选项来发送 application/json，这是 JSON 编码的数据的正确的 Content-Type；
+
+#### FormData
+
+FormData 的特殊之处在于网络方法（network methods），例如 fetch 可以接受一个 FormData 对象作为 body；它会被编码并发送出去，带有 Content-Type: multipart/form-data；
+
+- 创建：如果提供了 HTML form 元素，它会自动捕获 form 元素字段
+let formData = new FormData([form])
+- 方法：
+  - formData.append(name, value) 添加具有给定 name 和 value 的表单字段；
+  - formData.append(name, blob, fileName) 添加一个文件字段，相当于 `<input type="file">`，第三个参数 fileName 设置文件名；
+  - formData.delete(name) 移除带有给定 name 的字段；
+  - formData.get(name) 获取带有给定 name 的字段值；
+  - formData.has(name) 如果存在带有给定 name 的字段，则返回 true，否则返回 false；
+  - formData.set(name, value) 类似于 append，但移除所有具有给定 name 的字段，然后附加一个新字段；
+  - formData.set(name, blob, fileName) 类似 append，同名字段值会被新值覆盖；
+
+从技术上来讲，一个表单可以包含多个具有相同 name 的字段，因此，多次调用 append 将会添加多个具有相同名称的字段；而 set 方法确保了只有一个具有这种 name 的字段；
+
+```html
+<form id="formElem">
+  <input type="text" name="name" value="John">
+  <input type="text" name="surname" value="Smith">
+  <input type="submit">
+</form>
+
+<script>
+  formElem.onsubmit = async (e) => {
+    e.preventDefault();
+
+    let response = await fetch('/article/formdata/post/user', {
+      method: 'POST',
+      body: new FormData(formElem)
+    });
+
+    let result = await response.json();
+
+    alert(result.message);
+  };
+</script>
+```
+
+表单始终以 Content-Type: multipart/form-data 来发送数据，这个编码允许发送文件；
+
+#### Fetch：下载进度
+
+fetch 方法允许去跟踪下载进度，但到目前为止，fetch 方法无法跟踪上传进度；
+
+要跟踪下载进度，可以使用 response.body 属性，它是一个可以逐块（chunk）提供 body 的特殊的对象 ReadableStream；
+
+```js
+// 代替 response.json() 以及其他方法
+const reader = response.body.getReader();
+
+// 在 body 下载时，一直为无限循环
+while(true) {
+  // 当最后一块下载完成时，done 值为 true
+  // value 是块字节的 Uint8Array
+  const {done, value} = await reader.read();
+
+  if (done) {
+    break;
+  }
+
+  console.log(`Received ${value.length} bytes`)
+}
+```
+
+其中 await reader.read() 调用的结果是一个具有两个属性的对象：
+- done 当读取完成时为 true，否则为 false；
+- value 字节的类型化数组：Uint8Array；
+
+```js
+// Step 1：启动 fetch，并获得一个 reader
+let response = await fetch('https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits?per_page=100');
+
+const reader = response.body.getReader();
+
+// Step 2：获得总长度（length）
+const contentLength = +response.headers.get('Content-Length');
+
+// Step 3：读取数据
+let receivedLength = 0; // 当前接收到了这么多字节
+let chunks = []; // 接收到的二进制块的数组（包括 body）
+while(true) {
+  const {done, value} = await reader.read();
+
+  if (done) {
+    break;
+  }
+
+  chunks.push(value);
+  receivedLength += value.length;
+
+  console.log(`Received ${receivedLength} of ${contentLength}`)
+}
+
+// Step 4：将块连接到单个 Uint8Array
+let chunksAll = new Uint8Array(receivedLength); // (4.1)
+let position = 0;
+for(let chunk of chunks) {
+  chunksAll.set(chunk, position); // (4.2)
+  position += chunk.length;
+}
+
+// Step 5：解码成字符串
+let result = new TextDecoder("utf-8").decode(chunksAll);
+
+// 我们完成啦！
+let commits = JSON.parse(result);
+alert(commits[0].author.login);
+```
+
+#### Fetch：中止
+
+有一个特殊的内建对象：AbortController；它不仅可以中止 fetch，还可以中止其他异步任务；
+
+- 创建：
+- let controller = new AbortController();
+- 方法：
+- abort() 中止异步操作；
+- 属性：
+- signal 可以在这个属性上设置事件监听器；
+
+```js
+let controller = new AbortController();
+let signal = controller.signal;
+
+// 可取消的操作这一部分
+// 获取 "signal" 对象，
+// 并将监听器设置为在 controller.abort() 被调用时触发
+signal.addEventListener('abort', () => alert("abort!"));
+
+// 另一部分，取消（在之后的任何时候）：
+controller.abort(); // 中止！
+
+// 事件触发，signal.aborted 变为 true
+alert(signal.aborted); // true
+```
+
+为了能够取消 fetch，请将 AbortController 的 signal 属性作为 fetch 的一个可选参数（option）进行传递；fetch 方法知道如何与 AbortController 一起工作，它会监听 signal 上的 abort 事件；当一个 fetch 被中止，它的 promise 就会以一个 error AbortError reject，因此我们应该对其进行处理
+
+```js
+// 1 秒后中止
+let controller = new AbortController();
+setTimeout(() => controller.abort(), 1000);
+
+try {
+  let response = await fetch('/article/fetch-abort/demo/hang', {
+    signal: controller.signal
+  });
+} catch(err) {
+  if (err.name == 'AbortError') { // handle abort()
+    alert("Aborted!");
+  } else {
+    throw err;
+  }
+}
+```
+
+AbortController 是可伸缩的，它允许一次取消多个 fetch；如果我们有自己的与 fetch 不同的异步任务，我们可以使用单个 AbortController 中止这些任务以及 fetch；
+
+```js
+let urls = [...];
+let controller = new AbortController();
+
+let ourJob = new Promise((resolve, reject) => { // 我们的任务
+  ...
+  controller.signal.addEventListener('abort', reject);
+});
+
+let fetchJobs = urls.map(url => fetch(url, { // fetches
+  signal: controller.signal
+}));
+
+// 等待完成我们的任务和所有 fetch
+let results = await Promise.all([...fetchJobs, ourJob]);
+
+// 如果 controller.abort() 被从其他地方调用，
+// 它将中止所有 fetch 和 ourJob
+```
+
+#### Fetch：跨源请求
+
+可以使用 script 标签实现跨域，也成为 jsonp；
+
+有两种类型的跨源请求：
+- 所有其他请求；
+- 简单的请求：
+  - method 为 GET，POST 或 HEAD 类型；
+  - 仅允许自定义这些 header：Accept，Accept-Language，Content-Language，Content-Type 的值为 application/x-www-form-urlencoded，multipart/form-data 或 text/plain；
+
+当尝试发送一个非简单请求时，浏览器会发送一个特殊的“预检（preflight）”请求到服务器，询问服务器，是否接受此类跨源请求，并且，除非服务器明确通过 header 进行确认，否则非简单请求不会被发送；
+
+如果一个请求是跨源的，浏览器始终会向其添加 Origin header；服务器可以检查 Origin，如果同意接受这样的请求，就会在响应中添加一个特殊的 header Access-Control-Allow-Origin；
+
+对于跨源请求，默认情况下，JavaScript 只能访问“简单” response header：Cache-Control，Content-Language，Content-Type，Expires，Last-Modified，Pragma；访问任何其他 response header 都将导致 error；
+
+可能仍然存在有些 Web 服务将非标准方法视为一个信号：“这不是浏览器”；因此，为了避免误解，任何“非标准”请求，浏览器不会立即发出在过去无法完成的这类请求；即在它发送这类请求前，会先发送“预检（preflight）”请求来请求许可；预检请求发生在“幕后”，它对 JavaScript 不可见；
+
+预检请求使用 OPTIONS 方法，它没有 body，但是有两个 header：
+- Access-Control-Request-Method header 带有非简单请求的方法；
+- Access-Control-Request-Headers header 提供一个以逗号分隔的非简单 HTTP-header 列表；
+
+如果服务器同意处理请求，那么它会进行响应，此响应的状态码应该为 200，没有 body，具有 header：
+- Access-Control-Allow-Origin 必须为 * 或进行请求的源才能允许此请求；
+- Access-Control-Allow-Methods 必须具有允许的方法；
+- Access-Control-Allow-Headers 必须具有一个允许的 header 列表；
+- header Access-Control-Max-Age 可以指定缓存此权限的秒数，因此，浏览器不是必须为满足给定权限的后续请求发送预检；
+
+> Note: 服务器不应该忘记在主响应中添加 `Access-Control-Allow-Origin`，成功的预检并不能免除此要求；
+
+默认情况下，由 JavaScript 代码发起的跨源请求不会带来任何凭据，cookies 或者 HTTP 认证（HTTP authentication）；这是因为具有凭据的请求比没有凭据的请求要强大得多，如果被允许，它会使用它们的凭据授予 JavaScript 代表用户行为和访问敏感信息的全部权力；
+
+服务器必须显式地带有允许请求的凭据和附加 header，如果服务器同意接受 带有凭据 的请求，则除了 Access-Control-Allow-Origin 外，服务器还应该在响应中添加 header Access-Control-Allow-Credentials: true；对于具有凭据的请求，禁止 Access-Control-Allow-Origin 使用星号 *；
+
+- [JavaScript 现代教程-Fetch：跨源请求](https://zh.javascript.info/fetch-crossorigin)
+
+#### Fetch API
+
+```js
+let promise = fetch(url, {
+  method: "GET", // POST，PUT，DELETE，等。
+  headers: {
+    // 内容类型 header 值通常是自动设置的
+    // 取决于 request body
+    "Content-Type": "text/plain;charset=UTF-8"
+  },
+  body: undefined // string，FormData，Blob，BufferSource，或 URLSearchParams
+  referrer: "about:client", // 或 "" 以不发送 Referer header，
+  // 或者是当前源的 url
+  referrerPolicy: "no-referrer-when-downgrade", // no-referrer，origin，same-origin...
+  mode: "cors", // same-origin，no-cors
+  credentials: "same-origin", // omit，include
+  cache: "default", // no-store，reload，no-cache，force-cache，或 only-if-cached
+  redirect: "follow", // manual，error
+  integrity: "", // 一个 hash，像 "sha256-abcdef1234567890"
+  keepalive: false, // true keepalive 选项表示该请求可能会在网页关闭后继续存在
+  signal: undefined, // AbortController 来中止请求
+  window: window // null
+});
+```
+
+- [JavaScript 现代教程-长轮询（Long polling）](https://zh.javascript.info/long-polling)
+
+#### URL 对象
+
+内建的 URL 类提供了用于创建和解析 URL 的便捷接口；URL 对象立即允许我们访问其组件，因此这是一个解析 url 的好方法；
+
+- 创建 new URL(url, [base])：
+  - url 完整的 URL，或者仅路径（如果设置了 base）；
+  - base 可选的 base URL：如果设置了此参数，且参数 url 只有路径，则会根据这个 base 生成 URL；
+- 组件：
+  - href 是完整的 URL，与 url.toString() 相同；
+  - protocol 以冒号字符 : 结尾；
+  - search 以问号 ? 开头的一串参数；
+  - hash 以哈希字符 # 开头；
+- 方法：
+  - append(name, value) 按照 name 添加参数；
+  - delete(name) 按照 name 移除参数；
+  - get(name) 按照 name 获取参数；
+  - getAll(name) 获取相同 name 的所有参数；
+  - has(name) 按照 name 检查参数是否存在；
+  - set(name, value) set/replace 参数；
+  - sort() 按 name 对参数进行排序，很少使用；
+
+> Tips: 可以在 `fetch` 或 `XMLHttpRequest` 中使用 `URL` 对象，几乎可以在任何需要 `URL` 字符串的地方都能使用 `URL` 对象，大多数方法都会执行字符串转换，这会将 `URL` 对象转换为具有完整 `URL` 的字符串；
+
+URL 对象会自动处理那些不被允许的字符必须被编码，用其 UTF-8 代码代替；
+
+下面是用于编码/解码 URL 的内建函数：
+- encodeURI 编码整个 URL；
+- decodeURI 解码为编码前的状态；
+- encodeURIComponent 编码 URL 组件，例如搜索参数，或者 hash，或者 pathname；
+- decodeURIComponent 解码为编码前的状态；
+
+> Note: `encodeURI` 仅编码 `URL` 中完全禁止的字符；`encodeURIComponent` 也编码这类字符，此外，还编码 `# $ & + , / : ; = ? @` 字符；因此对于一个 `URL` 整体，可以使用 `encodeURI`，对于 `URL` 参数，应该改用 `encodeURIComponent`；
+
+> Note: `encode*` 与 `URL` 在对 IPv6 地址的编码方式不同，`URL` 可以正确编码；
+
+#### XMLHttpRequest
+
+XMLHttpRequest 是一个内建的浏览器对象，它允许使用 JavaScript 发送 HTTP 请求；XMLHttpRequest 有两种执行模式：同步（synchronous）和异步（asynchronous）；
+
+- 创建：let xhr = new XMLHttpRequest();
+- 初始化：xhr.open(method, URL, [async, user, password])
+  - method HTTP 方法，通常是 "GET" 或 "POST"；
+  - URL 要请求的 URL，通常是一个字符串，也可以是 URL 对象；
+  - async 如果显式地设置为 false，那么请求将会以同步的方式处理；
+  - user，password HTTP 基本身份验证（如果需要的话）的登录名和密码；
+- 发送请求：xhr.send([body])；
+- 监听响应：
+  - load 当请求完成，并且响应已完全下载；
+  - error 当无法发出请求，例如网络中断或者无效的 URL；
+  - progress 在下载响应期间定期触发，报告已经下载了多少；
+- 响应：
+  - status HTTP 状态码（一个数字）：如果出现非 HTTP 错误，则为 0；
+  - statusText HTTP 状态消息（一个字符串）；
+  - response（旧脚本可能是 responseText）：服务器 response body；
+- xhr 属性：
+  - timeout 超时时间，在给定时间内请求没有成功执行，请求就会被取消，并且触发 timeout 事件；
+  - responseType 响应类型，
+    - "" 响应格式为字符串（默认）；
+    - "text" 响应格式为字符串；
+    - "arraybuffer" 响应格式为 ArrayBuffer；
+    - "blob" 响应格式为 Blob；
+    - "document" 响应格式为 XML document；
+    - "json" 响应格式为 JSON（自动解析）；
+  - readyState 请求处理状态，XMLHttpRequest 的状态会随着它的处理进度变化而变化；
+    - 0 UNSENT 初始状态；
+    - 1 OPENED open 被调用；
+    - 2 HEADERS_RECEIVED 接收到 response header；
+    - 3 LOADING 响应正在被加载，每接收到一个数据包会重复一次该状态；
+    - 4 DONE 请求完成；
+  - withCredentials true，将 cookie 和 HTTP 授权发送到其他域，默认 false；
+  - abort() 方法，终止请求；会触发 abort 事件，且 xhr.status 变为 0；
+  - setRequestHeader(name, value) 使用给定的 name 和 value 设置 request header；
+  - getResponseHeader(name) 获取具有给定 name 的 header（Set-Cookie 和 Set-Cookie2 除外）；
+  - getAllResponseHeaders() 返回除 Set-Cookie 和 Set-Cookie2 外的所有 response header；
+- xhr 事件：上传需要专门用于跟踪上传事件的 xhr.upload 对象上监听；
+  - readystatechange 事件，跟踪请求处理状态变化；
+  - loadstart 请求开始；
+  - progress 一个响应数据包到达，此时整个 response body 都在 response 中；
+  - abort 调用 xhr.abort() 取消了请求；
+  - error 发生连接错误，例如，域错误。不会发生诸如 404 这类的 HTTP 错误；
+  - load 请求成功完成；
+  - timeout 由于请求超时而取消了该请求（仅发生在设置了 timeout 的情况下）；
+  - loadend 在 load，error，timeout 或 abort 之后触发；
+
+```js
+// 1. 创建一个 new XMLHttpRequest 对象
+let xhr = new XMLHttpRequest();
+
+// 2. 配置它：从 URL /article/.../load GET-request
+xhr.open('GET', '/article/xmlhttprequest/example/load');
+
+// 3. 通过网络发送请求
+xhr.send();
+
+// 4. 当接收到响应后，将调用此函数
+xhr.onload = function() {
+  if (xhr.status != 200) { // 分析响应的 HTTP 状态
+    alert(`Error ${xhr.status}: ${xhr.statusText}`); // 例如 404: Not Found
+  } else { // 显示结果
+    alert(`Done, got ${xhr.response.length} bytes`); // response 是服务器响应
+  }
+};
+
+xhr.onprogress = function(event) {
+  if (event.lengthComputable) {
+    alert(`Received ${event.loaded} of ${event.total} bytes`);
+  } else {
+    alert(`Received ${event.loaded} bytes`); // 没有 Content-Length
+  }
+
+};
+
+xhr.onerror = function() {
+  alert("Request failed");
+};
+
+// 旧代码中会使用 onreadystatechange 事件监听器
+xhr.onreadystatechange = function() {
+  if (xhr.readyState == 3) {
+    // 加载中
+  }
+  if (xhr.readyState == 4) {
+    // 请求完成
+  }
+};
+```
+
+如果在 open 方法中将第三个参数 async 设置为 false，那么请求就会以同步的方式进行；JavaScript 执行在 send() 处暂停，并在收到响应后恢复执行；
+
+> Note: `XMLHttpRequest` 的另一个特点是不能撤销 `setRequestHeader`；一旦设置了 `header`，就无法撤销了。其他调用会向 `header` 中添加信息，但不会覆盖它；
+
+```js
+// 带有进度指示的文件上传
+<input type="file" onchange="upload(this.files[0])">
+
+<script>
+function upload(file) {
+  let xhr = new XMLHttpRequest();
+
+  // 跟踪上传进度
+  xhr.upload.onprogress = function(event) {
+    console.log(`Uploaded ${event.loaded} of ${event.total}`);
+  };
+
+  // 跟踪完成：无论成功与否
+  xhr.onloadend = function() {
+    if (xhr.status == 200) {
+      console.log("success");
+    } else {
+      console.log("error " + this.status);
+    }
+  };
+
+  xhr.open("POST", "/article/xmlhttprequest/post/upload");
+  xhr.send(file);
+}
+</script>
+```
+
+- [JavaScript 现代教程-可恢复的文件上传](https://zh.javascript.info/resume-upload)
+
+#### WebSocket
+
+WebSocket 协议提供了一种在浏览器和服务器之间建立持久连接来交换数据的方法，数据可以作为“数据包”在两个方向上传递，而不会断开连接和其他 HTTP 请求；
+
+- 创建：let socket = new WebSocket("ws://javascript.info", ["soap", "wamp"]);
+  - 第一个参数为服务器地址；
+  - 第二个参数可选的子协议数组；
+- 事件：
+  - open 连接已建立；
+  - message 接收到数据；
+  - error WebSocket 错误；
+  - close 连接已关闭；
+- 请求头：
+  - Origin 客户端页面的源，允许服务器决定是否使用 WebSocket 与该网站通信；
+  - Connection: Upgrade 表示客户端想要更改协议；
+  - Upgrade: websocket 请求的协议是 “websocket”；
+  - Sec-WebSocket-Key 浏览器随机生成的安全密钥；
+  - Sec-WebSocket-Version WebSocket 协议版本；
+- 数据传输：WebSocket 通信由 frames（即数据片段）组成，可以从任何一方发送，并且有以下几种类型；
+  - text frames 包含各方发送给彼此的文本数据；
+  - binary data frames 包含各方发送给彼此的二进制数据；
+  - ping/pong frames 被用于检查从服务器发送的连接，浏览器会自动响应它们；
+  - connection close frame 以及其他服务 frames；
+- 方法：
+  - send(data) 可以发送文本或二进制数据；
+  - socket.close([code], [reason]) 可以发送一个带有数字码（numeric code）和文本形式的原因的 “connection close frame”；
+- 数字码；
+  - 1000 默认，正常关闭，如果没有指明 code 时使用它；
+  - 1006 没有办法手动设定这个数字码，表示连接丢失（没有 close frame）；
+  - 1001 一方正在离开，例如服务器正在关闭，或者浏览器离开了该页面；
+  - 1009 消息太大，无法处理；
+  - 1011 服务器上发生意外错误；
+- 连接状态：可以通过带有值的 socket.readyState 属性获取；
+  - 0 CONNECTING：连接还未建立；
+  - 1 OPEN：通信中；
+  - 2 CLOSING：连接关闭中；
+  - 3 CLOSED：连接已关闭；
+
+> Note: `wss://` 是基于 TLS 的 WebSocket，类似于 HTTPS 是基于 TLS 的 HTTP，传输安全层在发送方对数据进行了加密，在接收方进行解密；因此，数据包是通过代理加密传输的，它们看不到传输的里面的内容，且会让这些数据通过；
+
+> Note: WebSocket 对象是原生支持跨源的，没有特殊的 header 或其他限制；旧的服务器无法处理 WebSocket，因此不存在兼容性问题；如果服务器同意切换为 WebSocket 协议，服务器应该返回响应码 `101`；
+
+在浏览器里，仅直接使用文本或二进制 frames；socket.send(body) 调用允许 body 是字符串或二进制格式，包括 Blob，ArrayBuffer 等；当我们收到数据时，文本总是以字符串形式呈现，对于二进制数据默认为 "blob"，因此二进制数据通常以 Blob 对象呈现，可以通过 socket.binaryType 属性设置；
+
+> Note: 在网速受限的情况下，反复地调用 `socket.send(data)` 时，数据将会缓冲（储存）在内存中，并且只能在网速允许的情况下尽快将数据发送出去；`socket.bufferedAmount` 属性储存目前已缓冲的字节数，等待通过网络发送；
+
+```js
+// 一个简单的服务器端 WebSocket
+import {
+    WebSocketServer,
+    WebSocket
+} from 'ws';
+
+const wss = new WebSocketServer({
+    port: 8081
+});
+
+console.log("starting...")
+
+wss.on('connection', function connection(ws) {
+    ws.on('message', function incoming(data, isBinary) {
+        console.log('received: %s', data);
+
+        if (data == "online") {
+            ws.send(wss.clients.size);
+        } else {
+            wss.clients.forEach(function each(client) {
+                if (client !== ws && client.readyState === WebSocket.OPEN) {
+                  client.send(data, { binary: isBinary });
+                }
+            });
+        }
+    });
+
+    ws.send("update");
+});
+```
+
+#### Server-Sent Events
+
+Server-Sent Events 规范描述了一个内建的类 EventSource，它能保持与服务器的连接，并允许从中接收事件，与 WebSocket 类似，其连接是持久的；
+
+| WebSocket	| EventSource |
+| :----- | :----- |
+| 双向：客户端和服务端都能交换消息 | 单向：仅服务端能发送消息 |
+| 二进制和文本数据 | 仅文本数据 |
+| WebSocket 协议 | 常规 HTTP 协议 |
+
+- 创建：let source = new EventSource(url, [credentials]);
+  - 第二个参数只有一个可选项 { withCredentials: true }，它允许发送跨源凭证；
+- 事件：默认情况下 EventSource 对象生成三个事件：
+  - message 收到消息，可以用 event.data 访问；
+  - open 连接已打开；
+  - error 无法建立连接，例如，服务器返回 HTTP 500 状态码；
+- 属性：
+  - lastEventId 最后接收到的 id；重新连接后，浏览器在 header Last-Event-ID 中发送此 id；
+  - readyState 连接状态
+    - 0 EventSource.CONNECTING 表示连接中或者重连中
+    - 1 EventSource.OPEN 表示已连接
+    - 2 EventSource.CLOSED 表示连接已关闭
+- 响应：服务器发送由 \n\n 分隔的消息，一条消息可以按任何顺序包含一个或多个字段，但是 id: 通常排在最后；
+  - data: 消息体（body），一系列多个 data 被解释为单个消息，各个部分之间由 \n 分隔；
+  - id: 更新 lastEventId，重连时以 Last-Event-ID 发送此 id；
+  - retry: 建议重连的延迟，以 ms 为单位。无法通过 JavaScript 进行设置；
+  - event: 事件名，必须在 data: 之前；
+
+服务器响应状态码应该为 200，header 为 Content-Type: text/event-stream，然后保持此连接并以一种特殊的格式写入消息；复杂的消息通常是用 JSON 编码后发送；
+
+EventSource 支持跨源请求，就像 fetch 任何其他网络方法，可以使用任何 URL；远程服务器将会获取到 Origin header，并且必须以 Access-Control-Allow-Origin 响应来处理；
+
+**重新连接**
+
+如果与创建连接的服务器，连接断开则会自动重新连接，每次重新连接之间有一点小的延迟，默认为几秒钟；服务器可以使用 retry: 来设置需要的延迟响应时间（以毫秒为单位）；retry: 既可以与某些数据一起出现，也可以作为独立的消息出现；
+
+如果服务器想要浏览器停止重新连接，那么它应该使用 HTTP 状态码 204 进行响应，如果浏览器想要关闭连接，则应该调用 eventSource.close()；当连接最终被关闭时，就无法“重新打开”它；如果想要再次连接，只需要创建一个新的 EventSource；
+
+如果响应具有不正确的 Content-Type 或者其 HTTP 状态码不是 301，307，200 和 204，则不会进行重新连接；在这种情况下，将会发出 "error" 事件，并且浏览器不会重新连接；
+
+**事件**
+
+服务器可以在事件开始时使用 event: ... 指定另一种类型事件，此外还可以通过 addEventListener 监听自定义事件；
