@@ -7174,3 +7174,899 @@ EventSource 支持跨源请求，就像 fetch 任何其他网络方法，可以�
 **事件**
 
 服务器可以在事件开始时使用 event: ... 指定另一种类型事件，此外还可以通过 addEventListener 监听自定义事件；
+
+#### Cookie，document.cookie
+
+Cookie 是直接存储在浏览器中的一小串数据，它们是 HTTP 协议的一部分，Cookie 通常是由 Web 服务器使用响应 Set-Cookie HTTP-header 设置的，然后浏览器使用 Cookie HTTP-header 将它们自动添加到（几乎）每个对相同域的请求中；
+
+document.cookie 的值由 name=value 对组成，以 ; 分隔，每一个都是独立的 cookie；对 document.cookie 的写入操作只会更新其中提到的 cookie，而不会涉及其他 cookie；
+
+> Note: 从技术上讲，`cookie` 的名称和值可以是任何字符，为了保持有效的格式，它们应该使用内建的 `encodeURIComponent` 函数对其进行转义；
+
+> Note: 一个 cookie 最大为 4KB，每个域的 `cookie` 总数不得超过 `20+` 左右，具体限制取决于浏览器；
+
+cookie 的其他选项：
+- path url 路径前缀，该路径下的页面可以访问该 cookie，必须是绝对路径，默认为当前路径；
+- domain 可访问 cookie 的域，无法使 cookie 可以被从另一个二级域访问，但其子域名可以访问；
+- expire cookie 的到期日期，那时浏览器会自动删除它，日期必须完全采用 GMT 时区的这种格式；如果将 expires 设置为过去的时间，则 cookie 会被删除；
+- max-age expires 的替代选项，具指明 cookie 的过期时间距离当前时间的秒数，如果为 0 或负数，则 cookie 会被删除；
+- secure Cookie 应只能被通过 HTTPS 传输，默认情况下，cookie 是基于域的，不区分协议；
+- samesite 用于防止 XSRF（跨网站请求伪造）攻击，samesite=strict 或 samesite 采用严格模式，samesite=lax 宽松模式；
+- httpOnly 服务器端可以设置该选项禁止任何 JavaScript 访问 cookie；那么 document.cookie 看不到 cookie；
+
+默认情况下，如果一个 cookie 没有设置 expire、max-age 这两个参数中的任何一个，那么在关闭浏览器之后，它就会消失，此类 cookie 被称为 "session cookie”
+
+```js
+// 返回具有给定 name 的 cookie，
+// 如果没找到，则返回 undefined
+function getCookie(name) {
+  let matches = document.cookie.match(new RegExp(
+    "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+  ));
+  return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+function setCookie(name, value, options = {}) {
+
+  options = {
+    path: '/',
+    // 如果需要，可以在这里添加其他默认值
+    ...options
+  };
+
+  if (options.expires instanceof Date) {
+    options.expires = options.expires.toUTCString();
+  }
+
+  let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+
+  for (let optionKey in options) {
+    updatedCookie += "; " + optionKey;
+    let optionValue = options[optionKey];
+    if (optionValue !== true) {
+      updatedCookie += "=" + optionValue;
+    }
+  }
+
+  document.cookie = updatedCookie;
+}
+
+function deleteCookie(name) {
+  setCookie(name, "", {
+    'max-age': -1
+  })
+}
+
+// 使用范例：
+setCookie('user', 'John', {secure: true, 'max-age': 3600});
+```
+
+> Note: 如果一个脚本设置了一个 `cookie`，那么无论脚本来自何处这个 `cookie` 都属于当前网页的域；
+
+> Note: 如果 `cookie` 是由用户所访问的页面的域以外的域放置的，则称其为第三方 `cookie`，通常用于跟踪和广告服务；
+
+#### LocalStorage，sessionStorage
+
+Web 存储对象 localStorage 和 sessionStorage 允许我们在浏览器上保存键/值对；
+
+两个存储对象都提供相同的方法和属性：
+- setItem(key, value) 存储键/值对；
+- getItem(key) 按照键获取值；
+- removeItem(key) 删除键及其对应的值；
+- clear() 删除所有数据；
+- key(index) 获取该索引下的键名；
+- length 存储的内容的长度，只读；
+
+localStorage 最主要的特点是：
+- 在同源的所有标签页和窗口之间共享数据；
+- 数据不会过期，它在浏览器重启甚至系统重启后仍然存在；
+- 可以像使用一个普通对象那样，读取/设置键，且存储对象是不可迭代的；
+- 键和值都必须是字符串；如果是任何其他类型，会被自动转换为字符串；
+
+sessionStorage 特点：
+- sessionStorage 的数据只存在于当前浏览器标签页，具有相同页面的另一个标签页中将会有不同的存储；但在同一标签页下的同源 iframe 之间是共享的；数据在页面刷- 新后仍然保留，但在关闭/重新打开浏览器标签页后不会被保留
+
+> Note: 存储对象是不可迭代的；可以通过 Object.keys() 或者 for..in （需要 hasOwnProperty 检查）遍历；
+
+当 localStorage 或 sessionStorage 中的数据更新后，storage 事件就会触发，但以类对象方式访问时，不会触发该事件；
+- key 发生更改的数据的 key（如果调用的是 .clear() 方法，则为 null）；
+- oldValue 旧值（如果是新增数据，则为 null）；
+- newValue 新值（如果是删除数据，则为 null）；
+- url 发生数据更新的文档的 url；
+- storageArea 发生数据更新的 localStorage 或 sessionStorage 对象；
+
+该事件会在所有可访问到存储对象的 window 对象上触发，导致当前数据改变的 window 对象除外；如果两个窗口都在监听 window.onstorage 事件，那么每个窗口都会对另一个窗口中发生的更新作出反应；
+
+#### IndexedDB
+
+IndexedDB 是一个浏览器内建的数据库：
+- 通过支持多种类型的键，来存储几乎可以是任何类型的值；
+- 支撑事务的可靠性；
+- 支持键范围查询、索引；
+- 和 localStorage 相比，它可以存储更大的数据量；
+
+对于传统的客户端-服务器应用，这些功能通常是没有必要的；IndexedDB 适用于离线应用，可与 ServiceWorkers 和其他技术相结合使用；
+
+创建连接：let openRequest = indexedDB.open(name, version);
+- name 字符串，即数据库名称；
+- version 一个正整数版本，默认为 1；
+
+其他用法：
+- 获取一个 promise 包装器，比如 idb；
+- 打开一个数据库：idb.openDb(name, version, onupgradeneeded)
+  - 在 onupgradeneeded 处理程序中创建对象存储和索引，或者根据需要执行版本更新；
+- 对于请求：
+  - 创建事务 db.transaction('books')（如果需要的话，设置 readwrite）；
+  - 获取对象存储 transaction.objectStore('books')；
+- 按键搜索，可以直接调用对象库上的方法，要按对象字段搜索，需要创建索引；
+- 如果内存中容纳不下数据，可以使用光标；
+
+- [JavaScript 现代教程-IndexedDB](https://zh.javascript.info/indexeddb)
+
+#### CSS 动画
+
+CSS 动画可以在不借助 Javascript 的情况下做出一些简单的动画效果；
+
+CSS 提供了四个属性来描述一个过渡：
+- transition-property 列举要设置动画的所有属性，all 表示应用在所有属性上，但不是所有的 CSS 属性都可以使用过渡动画；
+- transition-duration 允许我们指定动画持续的时间，单位为s 或者 ms；
+- transition-timing-function 时间函数描述了动画进程在时间上的分布，如果没有指定时间函数，那么将使用 ease 作为默认值；
+- transition-delay 允许设定动画开始前的延迟时间；还可以提供一个负值，使动画从整个过渡的中间时刻开始渲染；
+
+也可以在 transition 中以 property duration timing-function delay 的顺序一次性定义它们，并且可以同时为多个属性设置过渡动画；
+
+**贝塞尔曲线**
+
+时间函数可以用贝塞尔曲线描述，通过设置四个满足以下条件的控制点：
+- 第一个应为：(0,0)。
+- 最后一个应为：(1,1)。
+- 对于中间值，x 必须位于 0..1 之间，y 可以为任意值
+
+CSS 中设置一贝塞尔曲线的语法为：cubic-bezier(x2, y2, x3, y3)，只需要设置第二个和第三个值，因为第一个点固定为 (0,0)，第四个点固定为 (1,1)；
+
+CSS 提供几条内建的曲线：
+- linear cubic-bezier(0, 0, 1, 1)
+- ease cubic-bezier(0.25, 0.1, 0.25, 1.0)
+- ease-in cubic-bezier(0.42, 0, 1.0, 1.0)
+- ease-out cubic-bezier(0, 0, 0.58, 1.0)
+- ease-in-out cubic-bezier(0.42, 0, 0.58, 1.0)
+
+贝塞尔曲线可以使动画超出其原本的范围；曲线上的控制点的 y 值可以使任意的：不管是负值还是一个很大的值；
+
+**阶跃函数**
+
+时间函数 steps(number of steps[, start/end]) 允许你让动画分段进行，number of steps 表示需要拆分为多少段
+
+start 表示在动画开始时，我们需要立即开始第一段的动画，另一个值 end 表示：改变不应该在最开始的时候发生，而是发生在每一段的最后时刻；
+
+CSS 动画完成后，会触发 transitionend 事件，该事件对象有几个特定的属性：
+- event.propertyName ：当前完成动画的属性，这在同时为多个属性加上动画时会很有用；
+- event.elapsedTime ：动画完成的时间（按秒计算），不包括 transition-delay；
+
+此外还可以通过 CSS 提供的 @keyframes 规则整合多个简单的动画；
+
+- [贝塞尔曲线在线制作工具](http://cubic-bezier.com/)
+
+#### JavaScript 动画
+
+标准动画时序提供了 requestAnimationFrame 函数；当页面在后台时，根本没有重绘，因此回调将不会运行：动画将被暂停并且不会消耗资源；
+
+- 创建方式： let requestId = requestAnimationFrame(callback)；
+- 取消回调：cancelAnimationFrame(requestId)；
+
+这是一个设置大多数动画的 helper 函数 animate：
+- duration 动画运行的总毫秒数；
+- timing 计算动画进度的函数；获取从 0 到 1 的小数时间，返回动画进度，通常也是从 0 到 1；
+- draw 绘制动画的函数；
+
+```js
+function animate({timing, draw, duration}) {
+
+  let start = performance.now();
+
+  requestAnimationFrame(function animate(time) {
+    // timeFraction 从 0 增加到 1
+    let timeFraction = (time - start) / duration;
+    if (timeFraction > 1) timeFraction = 1;
+
+    // 计算当前动画状态
+    let progress = timing(timeFraction);
+
+    draw(progress); // 绘制
+
+    if (timeFraction < 1) {
+      requestAnimationFrame(animate);
+    }
+
+  });
+}
+```
+
+- [JavaScript 现代教程-JS 动画](https://zh.javascript.info/js-animation)
+
+#### Custom elements
+
+Custom elements 有两种：自主自定义标签和自定义内建元素；Custom element 在各浏览器中的兼容性已经非常好了，Edge 支持地相对较差，可以使用 [polyfill](https://github.com/webcomponents/webcomponentsjs)；
+
+**Autonomous custom elements** 
+
+自主自定义标签 “全新的” 元素, 继承自 HTMLElement 抽象类；
+
+```js
+class MyElement extends HTMLElement {
+  constructor() {
+    super();
+    // 元素在这里创建
+  }
+
+  connectedCallback() {
+    // 在元素被添加到文档之后，浏览器会调用这个方法
+    //（如果一个元素被反复添加到文档／移除文档，那么这个方法会被多次调用）
+  }
+
+  disconnectedCallback() {
+    // 在元素从文档移除的时候，浏览器会调用这个方法
+    // （如果一个元素被反复添加到文档／移除文档，那么这个方法会被多次调用）
+  }
+
+  static get observedAttributes() {
+    return [/* 属性数组，这些属性的变化会被监视 */];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    // 当上面数组中的属性发生变化的时候，这个方法会被调用
+  }
+
+  adoptedCallback() {
+    // 在元素被移动到新的文档的时候，这个方法会被调用
+    // （document.adoptNode 会用到, 非常少见）
+  }
+
+  // 还可以添加更多的元素方法和属性
+}
+
+// 让浏览器知道我们新定义的类是为 <my-element> 服务的
+customElements.define("my-element", MyElement);
+```
+> Note: 为了确保 `custom element` 和内建 HTML 元素之间不会发生命名冲突，`Custom element` 名称必须包括一个短横线 `-`；
+
+如果浏览器在 customElements.define 之前的任何地方见到了 custom element 元素，并不会报错，但会把这个元素当作未知元素，就像任何非标准标签一样；:not(:defined) CSS 选择器可以对这样未定义的元素加上样式；
+
+customElements.get(name) 返回指定 custom element name 的类；
+customElements.whenDefined(name) 返回一个 promise，将会在这个具有给定 name 的 custom element 变为已定义状态的时候 resolve（不带值）；
+
+在 HTML 解析器构建 DOM 的时候，会按照先后顺序处理元素，先处理父级元素再处理子元素；
+
+**Customized built-in elements**
+
+自定义内建元素继承内建的 HTML 元素，比如自定义 HTMLButtonElement 等；
+
+```html
+<script>
+  // 类继承自 HTMLButtonElement
+  // 这个按钮在被点击的时候说 "hello"
+  class HelloButton extends HTMLButtonElement {
+    constructor() {
+      super();
+      this.addEventListener('click', () => alert("Hello!"));
+    }
+  }
+
+  // 给 customElements.define 提供定义标签的第三个参数
+  customElements.define('hello-button', HelloButton, {extends: 'button'});
+</script>
+
+<!-- 插入一个普通的 <button> 标签，但添加 is="hello-button" 到这个元素 -->
+<button is="hello-button">Click me</button>
+
+<button is="hello-button" disabled>Disabled</button>
+```
+
+#### 影子 DOM
+
+浏览器在内部使用 DOM/CSS 来绘制它们，这个 DOM 结构一般来说对我们是隐藏的，但可以在开发者工具里面看见它，在 #shadow-root 下看到的就是被称为「shadow DOM」的东西；
+
+一个 DOM 元素可以有以下两类 DOM 子树：
+- Light tree（光明树）一个常规 DOM 子树，由 HTML 子元素组成；
+- Shadow tree（影子树）一个隐藏的 DOM 子树，不在 HTML 中反映，无法被察觉；
+
+如果一个元素同时有以上两种子树，那么浏览器只渲染 shadow tree；影子树可以在自定义元素中被使用，其作用是隐藏组件内部结构和添加只在组件内有效的样式；
+
+```html
+<script>
+customElements.define('show-hello', class extends HTMLElement {
+  connectedCallback() {
+    const shadow = this.attachShadow({mode: 'open'});
+    shadow.innerHTML = `<p>
+      Hello, ${this.getAttribute('name')}
+    </p>`;
+  }
+});
+</script>
+
+<show-hello name="John"></show-hello>
+```
+
+调用 elem.attachShadow({mode: …}) 可以创建一个 shadow tree：
+- mode 选项可以设定封装层级，他必须是以下两个值之一
+  - open：shadow root 可以通过 elem.shadowRoot 访问；
+  - closed：elem.shadowRoot 永远是 null；
+
+浏览器原生的 shadow tree，是封闭的，没有任何方法可以访问它们；
+
+Shadow DOM 元素对于 light DOM 中的 querySelector 不可见；实际上，Shadow DOM 中的元素可能与 light DOM 中某些元素的 id 冲突，这些元素必须在 shadow tree 中独一无二；Shadow DOM 有自己的样式，外部样式规则在 shadow DOM 中不产生作用；
+
+#### 模板元素
+
+内建的 `<template>` 元素用来存储 HTML 模板。浏览器将忽略它的内容，仅检查语法的有效性，但是我们可以在 JavaScript 中访问和使用它来创建其他元素；
+
+```html
+<template id="temp">
+  <p>Hello, world.</p>
+  <style>
+    p { font-weight: bold; }
+  </style>
+  <script>
+    alert("Hello");
+  </script>
+</template>
+
+<script>
+  let elem = document.createElement('div');
+
+  // Clone the template content to reuse it multiple times
+  elem.append(temp.content.cloneNode(true));
+
+  document.body.append(elem);
+  // Now the script from <template> runs
+</script>
+```
+
+浏览器认为 `<template>` 的内容“不在文档中”：样式不会被应用，脚本也不会被执行；当内容插入文档时，该内容将变为活动状态（应用样式，运行脚本等）；
+
+模板的 content 属性可看作 DocumentFragment，将它插入时，会被插入的则是其子节点；
+
+#### Shadow DOM 插槽，组成
+
+为了渲染 shadow DOM 中的每一个 `<slot name="...">` 元素，浏览器在 light DOM 中寻找相同名字的 slot="..."，这些元素在插槽内被渲染；最后得到一个扁平化（flattened）DOM；
+
+扁平化 DOM 是通过插入插槽从 shadow DOM 派生出来的，浏览器渲染它并且用于样式继承、事件传播；但是 JavaScript 在扁平前仍按原样看到文档；slot="..." 属性仅仅对 shadow host 的直接子代有效，对于嵌套元素它将被忽略；
+
+```js
+<script>
+customElements.define('user-card', class extends HTMLElement {
+  connectedCallback() {
+    this.attachShadow({mode: 'open'});
+    this.shadowRoot.innerHTML = `
+      <div>Name:
+        <slot name="username"></slot>
+      </div>
+      <div>Birthday:
+        <slot name="birthday"></slot>
+      </div>
+    `;
+  }
+});
+</script>
+
+<user-card>
+  <span slot="username">John Smith</span>
+  <span slot="birthday">01.01.2001</span>
+</user-card>
+```
+
+shadow DOM 中第一个没有名字的 `<slot>` 是一个默认插槽，它从 light DOM 中获取没有放置在其他位置的所有节点；
+
+如果添加/删除了插槽元素，浏览器将监视插槽并更新渲染，触发 slotchange 事件；
+
+#### Shadow DOM 样式
+
+:host 选择器允许选择 shadow 宿主（包含 shadow 树的元素）；:host(selector) 还可以添加选择器；
+
+shadow 宿主驻留在 light DOM 中，因此它受到文档 CSS 规则的影响；如果在局部的 :host 和文档中都给一个属性设置样式，那么文档样式优先；
+
+使用 ::slotted(selector) 伪类可以给插槽添加样式，但 ::slotted 选择器不能用于任何插槽中更深层的内容，且只能在 CSS 中使用，不能在 querySelector 中使用；
+
+自定义 CSS 属性存在于所有层次，包括 light DOM 和 shadow DOM；
+
+```html
+<style>
+  /* 在外部文档中声明此属性 */
+  user-card {
+    --user-card-field-color: green;
+  }
+</style>
+
+<template id="tmpl">
+  <style>
+    .field {
+      /* 如果 --user-card-field-color 没有被声明过，则取值为 black */
+      color: var(--user-card-field-color, black);
+    }
+  </style>
+  <div class="field">Name: <slot name="username"></slot></div>
+  <div class="field">Birthday: <slot name="birthday"></slot></div>
+</template>
+
+<script>
+customElements.define('user-card', class extends HTMLElement {
+  connectedCallback() {
+    this.attachShadow({mode: 'open'});
+    this.shadowRoot.append(document.getElementById('tmpl').content.cloneNode(true));
+  }
+});
+</script>
+
+<user-card>
+  <span slot="username">John Smith</span>
+  <span slot="birthday">01.01.2001</span>
+</user-card>
+```
+
+#### Shadow DOM 和事件
+
+当事件在组件外部捕获时，shadow DOM 中发生的事件将会以 host 元素作为目标，这就是事件重定向；但如果事件发生在 slotted 元素上，实际存在于 light DOM 上，则不会发生重定向；
+
+事件仅仅是在它们的 composed 标志设置为 true 的时候才能通过 shadow DOM 边界；这些事件仅能在同一 DOM 中的元素上捕获：mouseenter，mouseleave（也不冒泡），load，unload，abort，error，select，slotchange；
+
+#### 正则表达式
+
+在 JavaScript 中，正则表达式通过内建的“RegExp”类的对象来实现，并与字符串集成；
+
+正则表达式包含模式和可选的修饰符，使用 RegExp 对象或 // 字面量创建；new RegExp 允许从字符串中动态地构造模式；
+
+```js
+let regexp = new RegExp("pattern", "i");
+
+regexp = /pattern/; // 没有修饰符
+regexp = /pattern/gmi;
+```
+
+字符串 str.search 方法，可以搜索一个正则表达式，并返回第一个索引；
+
+在 JavaScript 中，有 6 个修饰符：
+- i 使用此修饰符后，搜索时不区分大小写；
+- g 使用此修饰符后，搜索时会查找所有的匹配项，而不只是第一个；
+- m 多行模式；
+- s 启用 dotall 模式，允许点 . 匹配换行符 \n；
+- u 开启完整的 unicode 支持。该修饰符能够修正对于代理对的处理；
+- y 粘滞模式；
+
+**字符类**
+
+字符类（Character classes） 是一个特殊的符号，匹配特定集中的任何符号；
+- \d 表示数字 digit：从 0 到 9 的字符；
+- \s 空格符号 space：包括空格，制表符 \t，换行符 \n 和其他少数稀有字符，例如 \v，\f 和 \r；
+- \w 单字字符 word：拉丁字母或数字或下划线 _；
+- \D 非数字：除 \d 以外的任何字符；
+- \S 非空格符号：除 \s 以外的任何字符；
+- \W 非单字字符：除 \w 以外的任何字符；
+- . 点是一种特殊字符类，它与 “除换行符之外的任何字符” 匹配，带 s 标志时，匹配包括换行符在内的任何字符；
+- \p{Letter} 或 \p{L} 表示任何语言中的一个字母，需要带 u 标志；
+
+**Unicode**
+
+默认情况下，正则表达式同样把一个 4 个字节的“长字符”当成一对 2 个字节长的字符；
+
+主要的字符类别和它们对应的子类别：
+- 字母（Letter） L:
+  - 小写（lowercase） Ll
+  - 修饰（modifier） Lm
+  - 首字母大写（titlecase） Lt
+  - 大写（uppercase） Lu
+  - 其它（other） Lo
+- 数字（Number） N:
+  - 十进制数字（decimal digit） Nd
+  - 十六进制 
+  - 字母数字（letter number） Nl
+  - 其它（other） No
+- 标点符号（Punctuation） P:
+  - 链接符（connector） Pc
+  - 横杠（dash） Pd
+  - 起始引用号（initial quote） Pi
+  - 结束引用号（final quote） Pf
+  - 开（open） Ps
+  - 闭（close） Pe
+  - 其它（other） Po
+- 标记（Mark） M (accents etc):
+  - 间隔合并（spacing combining） Mc
+  - 封闭（enclosing） Me
+  - 非间隔（non-spacing） Mn
+- 符号（Symbol） S:
+  - 货币（currency） Currency_Symbol/Sc
+  - 修饰（modifier） Sk
+  - 数学（math） Sm
+  - 其它（other） So
+- 分隔符（Separator） Z:
+  - 行（line） Zl
+  - 段落（paragraph） Zp
+  - 空格（space） Zs
+- 其它（Other） C:
+  - 控制符（control） Cc
+  - 格式（format） Cf
+  - 未分配（not assigned） Cn
+  - 私有（private use） Co
+  - 代理伪字符（surrogate） Cs
+- 书写系统：Script/sc
+  - 中文 Han
+
+```js
+// 匹配标点
+"。".search(/\p{P}/u); // 0
+
+// 匹配
+"number: xAF".search(/x\p{Hex_Digit}\p{Hex_Digit}/u); // 8
+
+"你好".search(/\p{sc=Han}/u); // 0
+```
+
+> Note: Edge 和 Firefox 尚未实现 Unicode 属性 `p{…}`，可以使用库 [XRegExp](http://xregexp.com)；
+
+**锚点**
+
+插入符号 ^ 匹配文本开头，而美元符号 $ － 则匹配文本末尾，统称为“锚点”；
+
+```js
+let goodInput = "12:34";
+let badInput = "12:345";
+
+let regexp = /^\d\d:\d\d$/;
+alert( regexp.test(goodInput) ); // true
+alert( regexp.test(badInput) ); // false
+```
+
+对于空字符串 ""，正则表达式引擎将会首先匹配模式 ^（输入开始），匹配成功之后，会紧跟着检查模式 $，也匹配成功，所以空字符串是匹配 ^$ 的；
+
+**多行模式**
+
+通过 flag /.../m 可以开启多行模式；默认情况下，锚符 ^ 仅仅匹配文本的开头，在多行模式下，它匹配行的开头；锚符 $ 也可在多行模式下匹配行的结尾；
+
+```js
+let str = `1st place: Winnie
+2nd place: Piglet
+33rd place: Eeyore`;
+
+alert( str.match(/^\d+/gm) ); // 1, 2, 33
+alert( str.match(/\w+\n/gim) ); // Winnie\n,Piglet\n
+```
+
+**词边界**
+
+当正则表达式引擎遇到 \b 时，它会检查字符串中的位置是否是词边界：
+
+- 在字符串开头，如果第一个字符是单词字符 \w；
+- 在字符串中的两个字符之间，其中一个是单词字符 \w，另一个不是；
+- 在字符串末尾，如果最后一个字符是单词字符 \w；
+
+```js
+"Hello, Java!".match(/\b\w+\b/g); // ['Hello', 'Java']
+
+alert( "1 23 456 78".match(/\b\d\d\b/g) ); // 23,78
+alert( "12,34,56".match(/\b\d\d\b/g) ); // 12,34,56
+```
+> Note: `\b` 既可以用于单词，也可以用于数字，词边界 `\b` 不适用于非拉丁字母；
+
+**转义字符**
+
+`[ \ ^ $ . | ? * + ( )`，这些字符在正则表达式中有特殊的含义；如果要把特殊字符作为常规字符来使用，只需要在它前面加个反斜杠，这个过程叫转义；
+
+斜杠符号 '/' 并不是一个特殊符号，但是它被用于在 Javascript 中开启和关闭正则匹配：/...pattern.../，所以我们也应该转义它；
+
+```js
+alert( "Chapter 5.1".match(/\d\.\d/) ); // 5.1
+alert( "1\\2".match(/\\/) ); // '\'
+
+// 斜杠 /
+alert( "/".match(/\//) ); // '/'
+alert( "/".match(new RegExp("/")) ); // '/'
+```
+
+在字符串中的反斜杠表示转义或者类似 \n 这种只能在字符串中使用的特殊字符；其它有些并没有特殊的含义，就像 \d 或者 \z，碰到这种情况的话会把反斜杠移除；所以传递一个字符串（参数）给 new RegExp 时，需要双反斜杠 \\，因为字符串引号会消费其中的一个；
+
+```js
+console.log("\d\.\d"); // d.d
+
+let regStr = "\\d\\.\\d";
+alert(regStr); // \d\.\d (correct now)
+
+let regexp = new RegExp(regStr);
+
+alert( "Chapter 5.1".match(regexp) ); // 5.1
+```
+
+**集合和范围**
+
+在方括号 […] 中的几个字符或者字符类意味着“搜索给定的字符中的任意一个”；集合可以在正则表达式中和其它常规字符一起使用，方括号也可以包含字符范围；[a-z] 会匹配从 a 到 z 范围内的字母；
+
+字符类是某些字符集的简写：
+- \d 和 [0-9] 相同；
+- \w 和 [a-zA-Z0-9_] 相同；
+- \s 和 [\t\n\v\f\r ] 外加少量罕见的 unicode 空格字符相同；
+
+除了普通的范围匹配，还有类似 [^…] 的“排除”范围匹配；通过在匹配查询的开头添加插入符号 ^ 来表示，它会匹配所有除了给定的字符之外的任意字符；且在方括号中的特殊字符不需要转义；
+
+破折号 '-' 在方括号中有特殊含义，但这个含义只有当它位于其它字符之间而不是开头或结尾时才会发生作用，所以我们并不需要转义它；需要匹配 `^` 时，建议转义；
+
+```js
+// 并不需要转义
+let reg = /[-().^+]/g;
+alert( "1 + 2 - 3".match(reg) ); // 匹配 +，-
+
+alert( '𝒳'.match(/[𝒳𝒴]/u) ); // 𝒳
+
+let reg = /\d\d[-:]\d\d/g;
+alert( "Breakfast at 09:00. Dinner at 21-30".match(reg) ); // 09:00, 21-30
+```
+
+如果集合中有代理对（surrogate pairs），则需要标志 u 以使其正常工作；
+
+**量词**
+
+最明显的量词便是一对引号间的数字：{n, m}；在一个字符（或一个字符类等等）后跟着一个量词，用来指出我们具体需要的数量；
+
+- {n} 表示确切的位数；
+- {n, m} 表示 n 到 m  之间的位数；
+- {n,} 省略上限，表示查找位数大于或等于 n 的位数；
+
+大多数常用的量词都可以有缩写：
+- `+` 代表“一个或多个”，相当于 {1,}；
+- ? 代表“零个或一个”，相当于 {0,1}；使得符号变得可选；
+- * 代表着“零个或多个”，相当于 {0,}，表示这个字符可以多次出现或不出现；
+
+```js
+let str = "Should I write color or colour?";
+alert( str.match(/colou?r/g) ); // color, colour
+
+alert( "100 10 1".match(/\d0+/g) ); // 100, 10
+alert( "100 10 1".match(/\d0*/g) ); // 100, 10, 1
+
+// 正则表达式“浮点数”（带浮点的数字）：\d+\.\d+
+// 正则表达式“打开没有属性的 HTML 标记”，比如 <span> 或 <p>：/<[a-z]+>/i
+// 正则表达式“打开没有属性的HTML标记”（改进版）：/<[a-z][a-z0-9]*>/i
+// 正则表达式“打开没有属性的HTML标记”：/<\/?[a-z][a-z0-9]*>/i
+```
+
+**贪婪量词和惰性量词**
+
+在贪婪模式下（默认情况下），量词都会尽可能地重复多次；正则表达式引擎尝试用 .+ 去获取尽可能多的字符，然后再一步步地筛选它们
+
+通过在量词之后添加一个问号 '?' 来启用懒惰模式，所以匹配模式变为 *? 或 +?，甚至将 '?' 变为 ??；懒惰模式只能够通过带 ? 的量词启用，其它的量词依旧保持贪婪模式；
+
+有时需要运用集合和反向集合来解决懒惰模式下的一些问题；
+
+```js
+let str1 = '...<a href="link1" class="wrong">... <p style="" class="doc">...';
+let str2 = '...<a href="link1" class="doc">... <a href="link2" class="doc">...';
+let reg = /<a href="[^"]*" class="doc">/g;
+
+// Works!
+alert( str1.match(reg) ); // 没有匹配项，是正确的
+alert( str2.match(reg) ); // <a href="link1" class="doc">, <a href="link2" class="doc">
+
+// 匹配注释
+let reg = /<!--[\s\S]*?-->/g;
+let str = `... <!-- My -- comment
+ test --> ..  <!----> ..
+`;
+alert( str.match(reg) ); // '<!-- My -- comment \n test -->', '<!---->'
+
+// 匹配标签 
+let reg = /<[^<>]+>/g;
+let str = '<> <a href="/"> <input type="radio" checked> <b>';
+alert( str.match(reg) ); // '<a href="/">', '<input type="radio" checked>', '<b>'
+```
+
+- [JavaScript 现代教程-贪婪量词和惰性量词](https://zh.javascript.info/regexp-greedy-and-lazy)
+
+**捕获组**
+
+模式的一部分可以用括号括起来 (...)，这称为“捕获组（capturing group）”；这允许将匹配的一部分作为结果数组中的单独项，如果我们将量词放在括号后，则它将括号视为一个整体；
+
+
+```js
+// 匹配域名
+let regexp = /([\w-]+\.)+\w+/g;
+alert( "site.com my.site.com".match(regexp) ); // site.com,my.site.com
+```
+
+方法 str.match(regexp)，如果 regexp 没有 g 标志，将查找第一个匹配并将它作为一个数组返回；
+- 在索引 0 处：完全匹配；
+- 在索引 1 处：第一个括号的内容；
+- 在索引 2 处：第二个括号的内容；
+- ...
+
+括号可以嵌套；在这种情况下，编号也从左到右，零索引始终保持完全匹配；即使组是可选的并且在匹配项中不存在，也存在相应的 result 数组项，并且等于 undefined；
+
+```js
+let str = '<h1>Hello, world!</h1>';
+let tag = str.match(/<(.*?)>/);
+
+console.log(tag); //  ['<h1>', 'h1', index: 0, input: '<h1>Hello, world!</h1>', groups: undefined]
+alert( tag[0] ); // <h1>
+alert( tag[1] ); // h1
+```
+
+当搜索所有匹配项（标志 g）时，match 方法不会返回组的内容，结果是一个匹配数组，但没有每个匹配项的详细信息；使用方法 str.matchAll(regexp) 进行搜索并获取捕获组的内容；
+
+matchAll 和 match 有三个区别：
+- 它返回的不是数组，而是一个可迭代的对象；
+- 当标志 g 存在时，它将每个匹配组作为一个数组返回；
+- 如果没有匹配项，则不返回 null，而是返回一个空的可迭代对象；
+
+```js
+let results = '<h1> <h2>'.matchAll(/<(.*?)>/gi);
+
+// results - is not an array, but an iterable object
+alert(results); // [object RegExp String Iterator]
+
+alert(results[0]); // undefined (*)
+
+results = Array.from(results); // let's turn it into array
+
+alert(results[0]); // <h1>,h1 (1st tag)
+alert(results[1]); // <h2>,h2 (2nd tag)
+```
+
+命名组是通过在开始括号之后立即放置 `?<name>` 来完成的；
+
+```js
+let dateRegexp = /(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})/g;
+
+let str = "2019-10-30 2020-01-01";
+
+let results = str.matchAll(dateRegexp);
+
+for(let result of results) {
+  let {year, month, day} = result.groups;
+
+  alert(`${day}.${month}.${year}`);
+  // 第一个 alert：30.10.2019
+  // 第二个：01.01.2020
+}
+```
+
+方法 str.replace(regexp, replacement) 用 replacement 替换 str 中匹配 regexp 的所有捕获组；使用 $n 或者名称 `$<name>`；
+
+```js
+let str = "John Bull";
+let regexp = /(\w+) (\w+)/;
+alert( str.replace(regexp, '$2, $1') ); // Bull, John
+
+let regexp = /(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})/g;
+let str = "2019-10-30, 2020-01-01";
+alert( str.replace(regexp, '$<day>.$<month>.$<year>') );
+// 30.10.2019, 01.01.2020
+```
+
+可以通过在开头添加 ?: 来排除组；
+
+```js
+let str = "Gogogo John!";
+
+// ?: 从捕获组中排除 'go'
+let regexp = /(?:go)+ (\w+)/i;
+
+let result = str.match(regexp);
+
+alert( result[0] ); // Gogogo John（完全匹配）
+alert( result[1] ); // John
+alert( result.length ); // 2（数组中没有更多项）
+```
+
+**模式中的反向引用**
+
+我们不仅可以在结果或替换字符串中使用捕获组 (...) 的内容，还可以在模式本身中使用它们；
+
+可以使用 \N 在模式中引用一个组，其中 N 是组号；\1 在模式中进一步的含义是“查找与第一（捕获）分组相同的文本”；
+
+如果正则表达式中有很多括号对（注：捕获组），给它们起个名字方便引用；要引用命名组，我们可以使用：`\k<name>`；
+
+```js
+let str = `He said: "She's the one!".`;
+
+let regexp = /(?<quote>['"])(.*?)\k<quote>/g;
+
+alert( str.match(regexp) ); // "She's the one!"
+```
+
+**选择（OR）|**
+
+通常用圆括号把模式中的选择部分括起来，像这样 before(XXX|YYY)after；
+
+```js
+let reg = /([01]\d|2[0-3]):[0-5]\d/g;
+
+alert("00:00 10:10 23:59 25:99 1:2".match(reg)); // 00:00,10:10,23:59
+```
+
+**环视断言**
+
+一般来说，环视断言括号中（前瞻和后瞻的通用名称）的内容不会成为匹配到的一部分结果，如果想要捕捉整个环视表达式或其中的一部分，只需要将其包裹在另加的括号中；
+
+| 模式 | 类型 | 匹配 |
+| :----- | :----- | :----- |
+| x(?=y) | 前瞻肯定断言 | x ，仅当后面跟着 y |
+| x(?!y) | 前瞻否定断言 | x ，仅当后面不跟 y |
+| (?<=y)x	| 后瞻肯定断言 | x ，仅当跟在 y 后面 |
+| (?<!y)x	| 后瞻否定断言 | x ，仅当不跟在 y 后面 |
+
+```js
+let str = "1 turkey costs 30€";
+let reg = /\d+(?=(€|kr))/; // €|kr 两边有额外的括号
+alert( str.match(reg) ); // 30, €
+
+let str = "1 turkey costs $30";
+let reg = /(?<=(\$|£))\d+/;
+alert( str.match(reg) ); // 30, $
+
+// 匹配非负数
+let regexp = /(?<![-\d])\d+/g;
+let str = "0 12 -5 123 -18";
+alert( str.match(regexp) ); // 0, 12, 123
+
+// 在 body 后插入，在替换字符串中，$& 表示匹配本身
+let str = '...<body style="...">...';
+str = str.replace(/(?<=<body.*?>)/, `<h1>Hello</h1>`);
+str = str.replace(/<body.*?>/, '$&<h1>Hello</h1>');
+```
+
+**灾难性回溯**
+
+解决方式：
+- 第一种重写正则表达式，尽可能减少其中排列组合的数量；
+- 另一种使用前瞻断言禁止量词的回溯；
+
+```js
+alert( "JavaScript".match(/\w+Script/)); // JavaScript
+alert( "JavaScript".match(/(?=(\w+))\1Script/)); // null
+
+// 括号被命名为 ?<word>，使用 \k<word> 来引用
+let regexp = /^((?=(?<word>\w+))\k<word>\s?)*$/;
+let str = "An input string that takes a long time or even makes this regex to hang!";
+
+alert( regexp.test(str) ); // false
+alert( regexp.test("A correct string") ); // true
+```
+
+**粘性标志 "y"**
+
+y 标志允许在源字符串中的指定位置执行搜索；
+
+方法 regexp.exec(str)：
+- 如果 regexp 没有标志 g 或 y，那么这个方法就可以寻找字符串 str 中的第一个匹配，就像 str.match(regexp) 一样；
+- 如果有标志 g，那么它就会在字符串 str 中执行搜索，从存储在 regexp.lastIndex 属性中的位置开始，如果发现匹配，则将 regexp.lastIndex 设置为匹配后的索引；
+- 如果正则表达式带有标记 y，则搜索将精确地在 regexp.lastIndex 位置执行，不会再继续了；
+
+**正则表达式（RegExp）和字符串（String）的方法**
+
+- str.match(regexp) 方法在字符串 str 中找到匹配 regexp 的字符；
+  - 如果 regexp 不带有 g 标记，则以数组的形式返回第一个匹配项，其中包含分组和属性 index（匹配项的位置）、input（输入字符串，等于 str）；
+  - 如果 regexp 带有 g 标记，则它将所有匹配项的数组作为字符串返回，而不包含分组和其他详细信息；
+  - 如果没有匹配项，则无论是否带有标记 g ，都将返回 null；
+- str.matchAll(regexp) 方法 str.matchAll(regexp) 是 str.match “新改进的”变体；
+  - 它返回包含匹配项的可迭代对象，而不是数组。可以用 Array.from 从中得到一个常规数组；
+  - 每个匹配项均以包含分组的数组形式返回（返回格式与不带 g 标记的 str.match 相同）；
+  - 如果没有结果，则返回的不是 null，而是一个空的可迭代对象；
+- str.split(regexp|substr, limit) 可以使用正则表达式（或子字符串）作为分隔符来分割字符串；
+- str.search(regexp) 方法返回第一个匹配项的位置，如果未找到，则返回 -1；
+- str.replace(str|regexp, str|func) 用于搜索和替换的通用方法；
+  - 当第一个参数是字符串时，它仅替换第一个匹配项；
+  - 第二个参数是一个替代字符串，可以在其中使用特殊字符：
+    - $&	插入整个匹配项；
+    - $`	在匹配项之前插入字符串的一部分；
+    - $'	在匹配项之后插入字符串的一部分；
+    - $n	插入第 n 个分组的内容；
+    - `$<name>`	插入带有给定 name 的括号内的内容；
+    - `$$`	插入字符 $；
+  - 第二个参数可以是一个函数：
+  - func(match, p1, p2, ..., pn, offset, input, groups) 带参数调用：
+    - match 匹配项；
+    - p1, p2, ..., pn 分组的内容（如有）；
+    - offset 匹配项的位置；
+    - input 源字符串；
+    - groups 所指定分组的对象；
+  - 如果正则表达式中没有括号，则只有 3 个参数：func(str, offset, input)
+- regexp.exec(str) 方法返回字符串 str 中的 regexp 匹配项；
+- regexp.test(str) 方法查找匹配项，然后返回 true/false 表示是否存在；
+  - 如果正则表达式带有标记 g，则 regexp.test 从 regexp.lastIndex 属性中查找，并更新此属性，就像 regexp.exec 一样；
+  - 如果我们在不同的源字符串上应用相同的全局表达式，可能会出现错误的结果，因为 regexp.test 的调用会增加 regexp.lastIndex 属性值，因此在另一个字符串中的搜索可能是从非 0 位置开始的
