@@ -122,10 +122,9 @@ let phrase = `can embed another ${str}`; // 模板字符串
 - null 用于未知的值，只有一个 null 值的独立类型；
 - undefined 用于未定义的值，只有一个 undefined 值的独立类型，代表未被赋值；
 
-```js
-// 不建议显示地将 undefined 赋值给变量，通常，使用 null 将一个“空”或者“未知”的值写入变量中，而 undefined 则保留作为未进行初始化的事物的默认初始值；
-let age = undefined;
-```
+> Note: 不建议显示地将 `undefined` 赋值给变量，通常，使用 `null` 将一个“空”或者“未知”的值写入变量中，而 `undefined` 则保留作为未进行初始化的事物的默认初始值；
+
+> Tips: `void` 并不改变表达式的结果，只是让表达式不返回值；因此可以用 `void 0` 来获得 `undefined`；
 
 - Symbol 用于唯一的标识符；
 - Object 用于更复杂的数据结构；
@@ -445,7 +444,9 @@ JavaScript 中主要的内存管理概念是可达性（Reachability），及存
 - 增量收集（Incremental collection）：如果有许多对象，并且我们试图一次遍历并标记整个对象集，则可能需要一些时间，并在执行过程中带来明显的延迟，所以引擎试图将垃圾收集工作分成几部分来做；然后将这几部分会逐一进行处理，这需要它们之间有额外的标记来追踪变化，但是这样会有许多微小的延迟而不是一个大的延迟；
 - 闲时收集（Idle-time collection）：垃圾收集器只会在 CPU 空闲时尝试运行，以减少可能对代码执行的影响；
 
-- [Javascript 内存机制](https://zhuanlan.zhihu.com/p/111324373)
+- [JavaScript 内存泄漏教程](https://www.ruanyifeng.com/blog/2017/04/memory-leak.html)
+- [内存泄漏（memory leak）](https://www.wolai.com/mary/qwwq3geBqBcXs2cygGY3Lx)
+- [JavaScript 内存泄露的4种方式及如何避免](https://blog.csdn.net/qappleh/article/details/80337630)
 
 #### 对象方法，this
 
@@ -827,15 +828,29 @@ while (i != 10) {
 }
 ```
 
-[JavaScript 浮点数陷阱及解法](https://github.com/camsong/blog/issues/9)
+解决方案：
+
+```js
+// 使用 toPrecision 凑整并 parseFloat 转成数字后再显示
+function strip(num, precision = 12) {
+  return +parseFloat(num.toPrecision(precision));
+}
+
+// 判断是否在误差范围
+function isEqual(arg1, arg2){
+  return Math.abs(arg1 - arg2) < Number.EPSILON;
+}
+```
 
 > Note: 数字内部表示的另一个有趣结果是存在两个零：`0` 和 `-0`；因为在存储时，使用一位来存储符号，不过运算符将它们视为相同的值；
 
+[JavaScript 浮点数陷阱及解法](https://github.com/camsong/blog/issues/9)
+
 **isFinite 和 isNaN**
 
-isNaN(value) 将其参数转换为数字，然后测试它是否为 NaN；值 “NaN” 是独一无二的，它不等于任何东西，包括它自身；
-
-isFinite(value) 将其参数转换为数字，如果是常规数字，则返回 true，而不是 NaN/Infinity/-Infinity；因此该方法可以用于验证字符串值是否为常规数字；
+- isNaN(value) 将其参数转换为数字，然后测试它是否为 NaN；值 “NaN” 是独一无二的，它不等于任何东西，包括它自身，任何不能被转换为数值的的值都会返回 true；
+- Number.isNaN(value) 首先判断传入参数是否为数字，如果是数字再继续判断是否为 NaN ，不会进行数据类型的转换，这种方法对于 NaN 的判断更为准确；
+- isFinite(value) 将其参数转换为数字，如果是常规数字，则返回 true，而不是 NaN/Infinity/-Infinity；因此该方法可以用于验证字符串值是否为常规数字；
 
 > Note: 在所有数字函数中，包括 `isFinite`，空字符串或仅有空格的字符串均被视为 `0`；
 
@@ -2760,7 +2775,7 @@ f(); // John
 | 全局上下文 | 全局对象 | 全局对象 |
 | 函数上下文 | 全局对象 | undefined |
 | 对象上下文 | 调用的对象 | 调用的对象 |
-| 模块上下文 | 自动开启严格模式 | 在 `<script type="module">` 中为 undefined，在 node 模块中为导出对象 |
+| 模块上下文 | 自动开启严格模式 | 在浏览器端 ES6 模块（`<script type="module">`）中为 undefined，在 Node CommonJS 模块中为当前模块 |
 | bind, call, apply | 传入的 thisArg，非对象 thisArg 会被转为对象 | 传入的 thisArg，不会进行对象转换 |
 | 箭头函数 | 从创建的执行上下文获取，顶级为全局变量 | 从创建的执行上下文获取，顶级为 undefined |
 | eval | 直接调用同箭头函数；间接调用为全局对象 | 直接调用同箭头函数，间接调用为全局对象 |
@@ -4290,6 +4305,7 @@ let range = {
 > Note: 使用 nomodule 特性来提供一个后备：`<script nomodule>...</script>`；
 
 - [Cannot use import statement outside a module](https://www.jianshu.com/p/60a8a74f5eee)
+- [CommonJS和ES6模块的区别](https://juejin.cn/post/6844904067651600391)
 
 #### 导出和导入
 
@@ -7646,6 +7662,8 @@ regexp = /pattern/gmi;
 
 **Unicode**
 
+Unicode 全称 Unicode Translation Format，又叫做统一码、万国码、单一码，Unicode 的实现方式（也就是编码方式）有很多种，常见的是 UTF-8、UTF-16、UTF-32 和 USC-2；UTF-8 是使用最广泛的 Unicode 编码方式，它是一种可变长的编码方式，可以是 1—4 个字节不等，它可以完全兼容 ASCII 码的 128 个字符；
+
 默认情况下，正则表达式同样把一个 4 个字节的“长字符”当成一对 2 个字节长的字符；
 
 主要的字符类别和它们对应的子类别：
@@ -8070,3 +8088,5 @@ y 标志允许在源字符串中的指定位置执行搜索；
 - regexp.test(str) 方法查找匹配项，然后返回 true/false 表示是否存在；
   - 如果正则表达式带有标记 g，则 regexp.test 从 regexp.lastIndex 属性中查找，并更新此属性，就像 regexp.exec 一样；
   - 如果我们在不同的源字符串上应用相同的全局表达式，可能会出现错误的结果，因为 regexp.test 的调用会增加 regexp.lastIndex 属性值，因此在另一个字符串中的搜索可能是从非 0 位置开始的
+
+- [JavaScript 现代教程-正则表达式（RegExp）和字符串（String）的方法](https://zh.javascript.info/regexp-methods)
