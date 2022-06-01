@@ -1225,6 +1225,35 @@ arr.join(glue) 与 split 相反，该方法会创建并返回一个由连接符�
 
 arr.reduce((accumulator, item, index, array) => { ... }, [initial]) 函数一个接一个地应用于所有数组元素，并将其结果“搬运”到下一个调用，其中 accumulator 是上一个函数调用的结果，第一次等于 initial（若存在）；arr.reduceRight 和 arr.reduce 方法的功能一样，只是遍历为从右到左；
 
+```js
+const lookup = [
+    ['M', 1000],
+    ['CM', 900],
+    ['D', 500],
+    ['CD', 400],
+    ['C', 100],
+    ['XC', 90],
+    ['L', 50],
+    ['XL', 40],
+    ['X', 10],
+    ['IX', 9],
+    ['V', 5],
+    ['IV', 4],
+    ['I', 1],
+];
+
+const convertToRoman = (number) =>
+    lookup.reduce((curr, [key, value]) => {
+        curr += key.repeat(Math.floor(number / value));
+        number = number % value;
+        return curr;
+    }, '');
+
+convertToRoman(20); // 'XX'
+convertToRoman(21); // 'XXI'
+convertToRoman(2021); // 'MMXXI'
+```
+
 **fill 和 copyWithin**
 
 arr.fill(value, start, end) 从索引 start 到 end，用重复的 value 填充数组；
