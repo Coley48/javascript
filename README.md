@@ -2,7 +2,7 @@
 
 该项目主要用于在学习 JavaScript 时编写测试代码；并做好相应笔记，同时该项目也是一个 JavaScript 模板库；
 
-### 项目搭建
+## 项目搭建
 
 1. 安装 webpack
 
@@ -43,7 +43,7 @@ npm i -D style-loader css-loader html-webpack-plugin
 },
 ```
 
-### JavaScript 基础
+## JavaScript 基础
 
 **什么是 JavaScript ？**
 
@@ -60,7 +60,7 @@ JavaScript 引擎工作基本原理：引擎解析脚本，然后将脚本编译
 - [JavaScript MDN 中文参考手册](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference)
 - [JavaScript 兼容性表](https://caniuse.com/)
 <!-- 
-#### script 标签
+### script 标签
 
 应该尽量将较复杂的脚本存放在单独的文件中，使用独立文件的好处是浏览器会下载它，然后将它保存到浏览器的缓存中；之后，其他页面想要相同的脚本就会从缓存中获取，所以文件实际上只会下载一次，这可以节省流量，并使得页面（加载）更快；
 
@@ -75,7 +75,7 @@ alert("Hello")
 [1, 2].forEach(alert);
 ``` -->
 
-#### 变量
+### 变量
 
 1. 必须仅包含字母，数字，符号 $ 和 _；
 2. 首字符必须非数字；
@@ -84,7 +84,7 @@ alert("Hello")
 5. 不能使用[保留字](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Lexical_grammar#%E5%85%B3%E9%94%AE%E5%AD%97)命名；
 6. 允许非英文字母，但不推荐；
 
-#### 数据类型
+### 数据类型
 
 在 JavaScript 中有 8 种基本的数据类型（译注：7 种原始类型和 1 种引用类型）；JavaScript，被称为“动态类型”（dynamically typed）的编程语言，意思是虽然编程语言中有不同的数据类型，但是你定义的变量并不会在定义后，被限制为某一数据类型；
 
@@ -139,7 +139,7 @@ typeof null // "object"
 typeof alert // "function"
 ```
    
-#### 类型转换
+### 类型转换
 
 - 字符串转换：转换发生在输出内容的时候，也可以通过 String(value) 进行显式转换；
 - 数字型转换：转换发生在进行算术操作时，也可以通过 Number(value) 进行显式转换；
@@ -158,7 +158,7 @@ typeof alert // "function"
 | 0, null, undefined, NaN, "" | false |
 | 其他值 | true |
 
-#### 基础运算符，数学
+### 基础运算符，数学
 
 **赋值运算符**
 
@@ -179,7 +179,7 @@ let c = 3 - (a = b + 1); // a: 3, c: 0 慎用！
 
 [JavaScript 运算符优先级表](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Operator_Precedence)
 
-#### 值的比较
+### 值的比较
 
 在比较字符串的大小时，JavaScript 会使用“字典（dictionary）”或“词典（lexicographical）”顺序进行判定，换言之，字符串是按字符（母）逐个进行比较的；
 
@@ -220,7 +220,7 @@ alert( undefined < 0 ); // false
 alert( undefined == 0 ); // false
 ```
 
-#### 逻辑运算符 if 和 ?:
+### 逻辑运算符 if 和 ?:
 
 - 或运算符 || 返回的值是操作数的初始形式，不会做布尔转换；
 
@@ -239,7 +239,7 @@ alert( undefined == 0 ); // false
 
 > Tips: 两个非运算 `!!` 有时候用来将某个值转化为布尔类型：
 
-#### 空值合并运算符 ??
+### 空值合并运算符 ??
 
 `a ?? b` 表示如果第一个参数不是 null/undefined，则 ?? 返回第一个参数，否则，返回第二个参数；
 
@@ -257,7 +257,7 @@ result = (a !== null && a !== undefined) ? a : b;
 
 出于安全原因，JavaScript 禁止将 ?? 运算符与 && 和 || 运算符一起使用，除非使用括号明确指定了优先级；
 
-#### 循环
+### 循环
 
 跳出多层循环：
 
@@ -278,7 +278,7 @@ outer: for (let i = 0; i < 3; i++) {
 
 > Tips: `break` 指令必须在代码块内，从技术上讲，任何被标记的代码块都有效；
 
-#### 函数
+### 函数
 
 在 JavaScript 中，函数是一种特殊的值，函数定义有函数声明和函数表达式两种；二者差别主要在，函数表达式是在代码执行到达时被创建，并且仅从那一刻起可用；而函数声明则不同，在函数声明被定义之前，它就可以被调用；
 
@@ -288,7 +288,7 @@ outer: for (let i = 0; i < 3; i++) {
 
 一个函数应该只包含函数名所指定的功能，而不是做更多与函数名无关的功能；两个独立的行为通常需要两个函数，即使它们通常被一起调用；在这种情况下，我们可以创建第三个函数来调用这两个函数；
 
-#### 在浏览器中调试
+### 在浏览器中调试
 
 > Tips: 在控制台中要插入多行代码，按 `Shift+Enter` 来进行换行；
 
@@ -299,7 +299,7 @@ outer: for (let i = 0; i < 3; i++) {
 
 > Tips: 在代码中的某一行上右键，在显示的关联菜单中点击一个非常有用的名为 `Continue to here` 的选项；
 
-#### 注释
+### 注释
 
 - 需要注释：
 
@@ -312,7 +312,7 @@ outer: for (let i = 0; i < 3; i++) {
 1. 描述“代码如何工作”和“代码做了什么”；
 2. 已经足够简单或有很好自描述性的代码；
 
-#### 忍者代码
+### 忍者代码
 
 1. 不要为了简洁而降低代码可读性；
 1. 不用一个字母的变量和单词缩写；
@@ -325,7 +325,7 @@ outer: for (let i = 0; i < 3; i++) {
 8. 避免返回非标准结果的函数；
 9. 避免将多个功能合并在一个函数中；
 
-#### 测试
+### 测试
 
 前端测试主要分为 3 种：单元测试（Unit Test）、集成测试（Integration Test）、UI 测试（UI Test）；
 
@@ -353,7 +353,7 @@ npm i -D jest
 - [Jest 测试框架中文文档](https://jestjs.io/zh-Hans/)
 - [Vue.js Jest 单元测试](https://alexjover.com/blog/write-the-first-vue-js-component-unit-test-in-jest/)
 
-#### 普通对象
+### 普通对象
 
 **对象属性**
 
@@ -389,7 +389,7 @@ alert( "blabla" in user ); // false
 
 > Tips: 对象中，整数属性会被进行排序，其他属性则按照创建的顺序显示；整数属性指的是一个可以在不做任何更改的情况下与一个整数进行相互转换的字符串；
 
-#### 对象引用和复制
+### 对象引用和复制
 
 > Tips: 赋值了对象的变量存储的不是对象本身，而是该对象“在内存中的地址”；换句话说就是对该对象的“引用”；
 
@@ -423,7 +423,7 @@ function cloneDeep(object) {
 }
 ```
 
-#### 垃圾回收
+### 垃圾回收
 
 JavaScript 中主要的内存管理概念是可达性（Reachability），及存储在内存中并以某种方式可访问或可用的值；
 
@@ -448,13 +448,13 @@ JavaScript 中主要的内存管理概念是可达性（Reachability），及存
 - [内存泄漏（memory leak）](https://www.wolai.com/mary/qwwq3geBqBcXs2cygGY3Lx)
 - [JavaScript 内存泄露的4种方式及如何避免](https://blog.csdn.net/qappleh/article/details/80337630)
 
-#### 对象方法，this
+### 对象方法，this
 
 JavaScript 中的 this 可以用于任何函数，即使它不是对象的方法；this 的值是在代码运行时计算出来的，它取决于代码上下文；
 
 在普通函数中的 this，严格模式下的值为 undefined，非严格模式的情况下，this 将会是全局对象（浏览器为 window）；箭头函数没有自己的 this，其 this 值取决于外部“正常的”函数；
 
-#### 构造器和操作符 new
+### 构造器和操作符 new
 
 从技术上讲，构造函数也是一个常规函数；但一般以大写字母开头并只用 new 操作符执行；当一个函数被使用 new 操作符执行时，它按照以下步骤：
 
@@ -522,7 +522,7 @@ alert(john.name); // John
 
 > Tips: 如果没有参数，我们可以省略 `new` 后的括号；
 
-#### 可选链 ?.
+### 可选链 ?.
 
 如果可选链 ?. 前面的值为 undefined 或者 null，它会停止运算并返回 undefined；
 
@@ -544,7 +544,7 @@ user?.["key"];
 
 > Tips: 删除一个可能不存在的属性，`delete user?.name`；可以使用 ?. 来安全地读取或删除，但不能写入；
 
-#### Symbol 类型
+### Symbol 类型
 
 规范中，对象的属性键只能是字符串类型或者 Symbol 类型，Symbol 值表示唯一的标识符；
 
@@ -617,7 +617,7 @@ Symbol.keyFor(id); // id
 除此之外，JavaScript 内部还有许多系统 Symbol，可以用来微调对象的各个方面，以此改变一些内建行为，这些 Symbol 被列在了 [Symbol 表](https://tc39.github.io/ecma262/#sec-well-known-symbols) 的规范中；
 
 
-#### 对象——原始值转换
+### 对象——原始值转换
 
 JavaScript 不允许自定义运算符对对象的处理方式；因此在对对象进行运算时，对象会被自动转换为原始值，并会得到一个原始值的结果；
 
@@ -747,7 +747,7 @@ let obj = {
 alert(obj * 2); // 4，对象被转换为原始值字符串 "2"，之后它被乘法转换为数字 2
 ```
 
-#### 原始类型的方法
+### 原始类型的方法
 
 JavaScript 允许我们像使用对象一样使用原始类型，如在字符串字面值上调用方法；
 
@@ -774,9 +774,16 @@ console.warn(str.test); // 非严格模式 undefined
 console.warn(str.test); // 严格模式 Uncaught TypeError: Cannot create property 'test' on string 'string'
 ```
 
-#### 数字类型
+### 数字类型
 
-JavaScript 中的常规数字以 64 位的格式 IEEE-754 存储，也被称为“双精度浮点数”；在内部，所以有 64 位可以存储一个数字：其中 52 位被用于存储这些数字，其中 11 位用于存储小数点的位置（对于整数，它们为零），而 1 位用于符号；因此所表示的范围介于 ±(2^53-1) 之间；
+JavaScript 中的常规数字以 64 位的格式 IEEE-754 存储，也被称为“双精度浮点数”；在内部，所以有 64 位可以存储一个数字，所表示的范围介于 ±(2^53-1) 之间：
+- 1 位用于表示符号（sign）（正数或者负数）
+- 11 位用于表示指数（exponent）（-1022 到 1023）
+- 52 位用于表示尾数（mantissa）（表示 0 和 1 之间的数值）
+
+尾数（也称为有效数）是表示实际值（有效数字）的数值部分，小数点后的数字，精度为 2^-52，可以通过 `Number.EPSILON` 获得，或者十进制数小数点后大约 15 到 17 位，超过这个精度会被舍入；
+指数是尾数应乘以的 2 的幂次，将其视为科学计数法；能容纳的最大值是 2^1024 - 1，可以通过 `Number.MAX_VALUE` 获得，超过这个值的数会被替换为特殊的数值常量 `Infinity`。
+只有在 ±(2^53-1) 范围内的整数才能在不丢失精度的情况下被表示，可以通过 `Number.MIN_SAFE_INTEGER` 和 `Number.MAX_SAFE_INTEGER` 获得；
 
 > Tips: 定义数字时，可以使用下划线间隔数字以增强可读性：`let billion = 1_000_000_000;`，JavaScript 引擎会直接忽略数字之间的 `_`；
 
@@ -845,6 +852,7 @@ function isEqual(arg1, arg2){
 > Note: 数字内部表示的另一个有趣结果是存在两个零：`0` 和 `-0`；因为在存储时，使用一位来存储符号，不过运算符将它们视为相同的值；
 
 [JavaScript 浮点数陷阱及解法](https://github.com/camsong/blog/issues/9)
+[MDN Number](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Number)
 
 **isFinite 和 isNaN**
 
@@ -878,7 +886,7 @@ parseInt 和 parseFloat 可以从字符串中“读取”数字，直到无法�
 
 > Tips: `parseInt(str, radix)` 函数具有可选的第二个参数，它指定了数字系统的基数，因此 `parseInt` 还可以解析十六进制数字、二进制数字等的字符串：
 
-#### 字符串
+### 字符串
 
 字符串的内部格式始终是 UTF-16，它不依赖于页面编码；
 
@@ -1005,7 +1013,7 @@ function initialFirst(str) {
 }
 ```
 
-#### 数组
+### 数组
 
 数组是一种特殊的对象，它们扩展了对象，提供了特殊的方法来处理有序的数据集合以及 length 属性；JavaScript 引擎尝试把这些元素一个接一个地存储在连续的内存区域；
 
@@ -1056,7 +1064,7 @@ function getMaxSubSum(arr) {
 }
 ```
 
-#### 数组方法
+### 数组方法
 
 **splice**
 
@@ -1320,7 +1328,7 @@ function shuffle(array) {
 }
 ```
 
-#### 可迭代对象
+### 可迭代对象
 
 可迭代（Iterable）对象是数组的泛化，这个概念是说任何对象都可以被定制为可在 for..of 循环中使用的对象；数组和字符串是使用最广泛的内建可迭代对象；
 
@@ -1422,7 +1430,7 @@ alert( str.slice(1, 3) ); // 乱码（两个不同 UTF-16 扩展字符碎片拼�
 
 > Tips: 在规范中，大多数内建方法都假设它们需要处理的是可迭代对象或者类数组对象，而不是“真正的”数组，因为这样抽象度更高；
 
-#### Map and Set（映射和集合）
+### Map and Set（映射和集合）
 
 **Map**
 
@@ -1533,7 +1541,7 @@ Array.from(new Set([1, 2, 3, 3, 5])); // [1, 2, 3, 5]
 
 > Tips: 在 `Map` 和 `Set` 中迭代总是按照值插入的顺序进行的，所以我们不能说这些集合是无序的，但是我们不能对元素进行重新排序，也不能直接按其编号来获取元素；
 
-#### WeakMap and WeakSet
+### WeakMap and WeakSet
 
 **WeakMap**
 
@@ -1577,7 +1585,7 @@ obj = null;
 
 > Tips: `WeakSet` 同 `WeakMap` 的主要优点是对对象是弱引用，所以被它们引用的对象很容易地被垃圾收集器移除；
 
-#### Object.keys，values，entries
+### Object.keys，values，entries
 
 对于普通对象：
 
@@ -1613,7 +1621,7 @@ function sumSalaries(salaries) {
 }
 ```
 
-#### 解构赋值
+### 解构赋值
 
 JavaScript 中最常用的两种数据结构是 Object 和 Array；对象是通过键来存储数据项的单个实体，数组将数据收集到一个有序的集合；
 
@@ -1738,7 +1746,7 @@ function myFunc(options) {
 }
 ```
 
-#### 日期和时间
+### 日期和时间
 
 内建对象：日期（Date）用于存储日期和时间，并提供了日期/时间的管理方法；
 
@@ -1920,7 +1928,7 @@ function getSecondsToday() {
 
 [时区是怎么划分的？世界各时区的时间如何统一表达？GMT、UTC、UNIX有什么区别？](https://blog.csdn.net/zgdwxp/article/details/102728563)
 
-#### JSON 方法，toJSON
+### JSON 方法，toJSON
 
 JSON（JavaScript Object Notation）是表示值和对象的通用格式；
 
@@ -2066,7 +2074,7 @@ alert( JSON.stringify(meetup, function replacer(key, value) {
 */
 ```
 
-#### 递归和堆栈
+### 递归和堆栈
 
 递归是一种编程模式，在一个任务可以自然地拆分成多个相同类型但更简单的任务的情况下非常有用；简单来说，函数会调用自身就是所谓的递归；
 
@@ -2165,7 +2173,7 @@ export function Fibonacci(n) {
 }
 ```
 
-#### Rest 参数与 Spread 语法
+### Rest 参数与 Spread 语法
 
 在 JavaScript 中，无论函数是如何定义的，你都可以使用任意数量的参数调用函数，未使用的参数会被函数忽略掉；
 
@@ -2219,7 +2227,7 @@ let arrCopy = [...arr];
 
 <!-- Object.assign会调用[[Setter]]，Spread语法不会，待验证 -->
 
-#### 变量作用域，闭包
+### 变量作用域，闭包
 
 **变量**
 
@@ -2331,7 +2339,7 @@ func();
 - [Lexical environment and function scope](https://stackoverflow.com/questions/12599965/lexical-environment-and-function-scope)
 - [Executable Code and Execution Contexts](https://tc39.es/ecma262/#sec-executable-code-and-execution-contexts)
 
-#### 旧时的 var
+### 旧时的 var
 
 在 JavaScript 中，有三种声明变量的方式：let，const（现代方式），var（过去留下来的方式）；
 
@@ -2395,7 +2403,7 @@ sayHi();
 })();
 ```
 
-#### 全局对象
+### 全局对象
 
 全局对象提供可在任何地方使用的变量和函数，且其所有属性都可以被直接访问；默认情况下，这些全局变量内建于语言或环境中；在浏览器中，它的名字是 “window”，对 Node.js 而言，它的名字是 “global”，其它环境可能用的是别的名字；
 
@@ -2407,7 +2415,7 @@ sayHi();
 
 另外，一般还使用全局对象来测试对现代语言功能的支持；对于没有某些现代功能的旧版浏览器，可以创建 “polyfills”：添加环境不支持但在现代标准中存在的功能；
 
-#### 函数对象，NFE
+### 函数对象，NFE
 
 在 JavaScript 中，函数就是对象，可以把函数理解成可被调用的“行为对象（action object）”；我们不仅可以调用它们，还能把它们当作对象来处理：增/删属性，按引用传递等；
 
@@ -2535,13 +2543,13 @@ function sum2(a) {
 }
 ```
 
-#### new Function 语法
+### new Function 语法
 
 还有一种很少见的函数创建方法；使用 Function 创建函数：`new Function ([arg1, arg2, ...argN], functionBody);`，由于历史原因，参数也可以按逗号分隔符的形式给出，这种方法实际上是通过运行时通过参数传递过来的字符串创建的；
 
 另外，如果使用 new Function 创建一个函数，那么该函数的 [[Environment]] 并不指向当前的词法环境，而是指向全局环境；
 
-#### 调度：setTimeout 和 setInterval
+### 调度：setTimeout 和 setInterval
 
 > Note: 这两个方法并不在 JavaScript 的规范中，但是大多数运行环境都有内建的调度程序，并且提供了这些方法；目前来讲，所有浏览器以及 Node.js 都支持这两个方法；
 
@@ -2603,7 +2611,7 @@ for(let j = 0; j < 100000000; j++) {
 
 - [window.setTimeout MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/API/setTimeout)
 
-#### 装饰器模式和转发，call/apply
+### 装饰器模式和转发，call/apply
 
 **装饰器**
 
@@ -2699,7 +2707,7 @@ function throttle(func, ms) {
 }
 ```
 
-#### 函数绑定
+### 函数绑定
 
 浏览器中的 setTimeout 方法有些特殊：它为函数调用设定了 this=window（对于 Node.js，this 则会变为计时器（timer）对象；即使是在严格模式下，setTimeout() 的回调函数里面的 this 仍然默认指向 window 对象，并不是 undefined；
 
@@ -2765,7 +2773,7 @@ f = f.bind( {name: "John"} ).bind( {name: "Pete"} );
 f(); // John
 ```
 
-#### 深入理解箭头函数
+### 深入理解箭头函数
 
 箭头函数是针对那些没有自己的“上下文”，但在当前上下文中起作用的短代码的；箭头函数具有以下特点：
 
@@ -2975,7 +2983,7 @@ j()(); // No base ref.
 - [eval() MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval)
 - [window.setTimeout MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/API/setTimeout)
 
-#### 属性标志和属性描述符
+### 属性标志和属性描述符
 
 对象属性（properties），除 value 外，还有三个特殊的特性（attributes），也就是所谓的“标志”；默认都为 true；
 
@@ -3068,7 +3076,7 @@ console.log(descriptors);
 - Object.isSealed(obj) 如果添加/删除属性被禁止，并且所有现有的属性都具有 configurable: false则返回 true；
 - Object.isFrozen(obj) 如果添加/删除/更改属性被禁止，并且所有当前属性都是 configurable: false, writable: false，则返回 true；
 
-#### 属性的 getter 和 setter
+### 属性的 getter 和 setter
 
 对象属性分为两种，一种是数据属性，另一种是访问器属性（accessor properties）；本质上是用于获取和设置值的函数，但从外部代码来看就像常规属性；
 
@@ -3124,7 +3132,7 @@ user.name = ""; // alert ...
 
 - [getter MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/get)
 
-#### 原型继承
+### 原型继承
 
 在 JavaScript 中，对象有一个特殊的隐藏属性 [[Prototype]]（如规范中所命名的），它要么为 null，要么就是对另一个对象的引用，该对象被称为“原型”；
 
@@ -3189,7 +3197,7 @@ delete user.fullName // user，admin 中 fullName 均被删除
 
 > 在现代引擎中，从性能的角度来看，从对象还是从原型链获取属性都是没区别的；引擎会记住在哪里找到的该属性，并在下一次请求中重用它；并且一旦有内容更改，它们就会自动更新内部缓存；
 
-#### F.prototype
+### F.prototype
 
 如果 F.prototype 是一个对象或者 null（赋以其他值会被忽略），那么 new 操作符会使用它为新对象设置 [[Prototype]]；
 
@@ -3232,7 +3240,7 @@ alert(rabbit2.eats); // 从新的 prototype 取值 undefined
 
 > Note: 为了确保正确的 `constructor`，我们可以选择添加/删除属性到默认 `prototype`，而不是将其整个覆盖；
 
-#### 原生的原型
+### 原生的原型
 
 所有的内建对象都遵循相同的模式（pattern）：方法都存储在 prototype 中，同时对象本身只存储数据；
 
@@ -3306,7 +3314,7 @@ function f(a, b) {
 f.defer(1000)(1, 2); // 1 秒后显示 3
 ```
 
-#### 原型方法，没有 `__proto__` 的对象
+### 原型方法，没有 `__proto__` 的对象
 
 JavaScript 规范中规定，proto 必须仅在浏览器环境下才能得到支持，因此 `__proto__` 被认为是过时且不推荐使用的（deprecated）；应该使用以下现代方法代替 `__proto__`：
 
@@ -3349,7 +3357,7 @@ Object.getPrototypeOf(rabbit).sayHi(); // undefined
 rabbit.__proto__.sayHi(); // undefined
 ```
 
-#### Class 基本语法
+### Class 基本语法
 
 在现代 JavaScript 中，还有一个更高级的“类（class）”构造方式；而 new 操作符会自动调用 constructor() 方法，因此我们可以在 constructor() 中初始化对象；
 
@@ -3425,7 +3433,7 @@ let button = new Button("hello");
 setTimeout(button.click, 1000); // hello
 ```
 
-#### 类继承
+### 类继承
 
 类继承是一个类扩展另一个类的一种方式，可以在现有功能之上创建新功能；
 
@@ -3517,7 +3525,7 @@ longEar.eat(); // Long Ear eats.
 // rabbit.jump();
 ```
 
-#### 静态属性和静态方法
+### 静态属性和静态方法
 
 可以把一个方法赋值给类的函数本身，而不是赋给它的 "prototype"，这样的方法被称为 静态的（static）；静态方法和属性可以被继承；
 
@@ -3546,7 +3554,7 @@ console.warn(VipUser.__proto__ === User); // true
 console.warn(VipUser.prototype.__proto__ === User.prototype); // true
 ```
 
-#### 私有的和受保护的属性和方法
+### 私有的和受保护的属性和方法
 
 在面向对象的编程中，属性和方法分为两组：
 
@@ -3574,13 +3582,13 @@ console.log(User.secret); // 10
 // console.log(User.#secret); // Property '#secret' is not accessible outside class 'User' because it has a private identifier
 ```
 
-#### 扩展内建类
+### 扩展内建类
 
 通常使用 extends 继承内建类，可以扩展内建类的一些方法，或者可以在内建类的原型对象上添加自定义的字段以实现扩展；
 
 > Note: 内建类相互间不继承静态方法；
 
-#### 类检查：instanceof
+### 类检查：instanceof
 
 instanceof 操作符用于检查一个对象是否属于某个特定的 class，通常，instanceof 在检查中会将原型链考虑在内；
 
@@ -3667,7 +3675,7 @@ alert( {}.toString.call(new XMLHttpRequest()) ); // [object XMLHttpRequest]
 | instanceof | 对象 |	true/false |
 | {}.toString	| 原始数据类型，内建对象，包含 Symbol.toStringTag 属性的对象 | string |
 
-#### Mixin 模式
+### Mixin 模式
 
 Mixin 是一个通用的面向对象编程术语：一个包含可被其他类使用而无需继承的方法的类；Mixin 提供了实现特定行为的方法，但是我们不单独使用它，而是使用它来将这些行为添加到其他类中；
 
@@ -3753,7 +3761,7 @@ let eventMixin = {
 
 - [JavaScript 现代教程-Mixin 模式](https://zh.javascript.info/mixins)
 
-#### 错误处理，try...catch
+### 错误处理，try...catch
 
 try...catch 仅对运行时的 error 有效；这类错误被称为“运行时的错误（runtime errors）”，有时被称为“异常（exceptions）”；
 
@@ -3803,7 +3811,7 @@ window.onerror = function(message, url, line, col, error) {
 
 全局错误处理程序 window.onerror 的作用通常不是恢复脚本的执行，如果发生编程错误，那这几乎是不可能的，它的作用是将错误信息发送给开发者；
 
-#### 自定义 Error，扩展 Error
+### 自定义 Error，扩展 Error
 
 JavaScript 允许将 throw 与任何参数一起使用，所以从技术上讲，我们自定义的 error 不需要从 Error 中继承。但是，如果我们继承，那么就可以使用 obj instanceof Error 来识别 error 对象；
 
@@ -3830,7 +3838,7 @@ alert( new PropertyRequiredError("field").name ); // PropertyRequiredError
 
 包装异常是一项广泛应用的技术：用于处理低级别异常并创建高级别 error 而不是各种低级别 error 的函数，低级别异常有时会成为该对象的属性；
 
-#### 回调简介
+### 回调简介
 
 异步执行某项功能的函数应该提供一个 callback 参数用于在相应事件完成时调用，这被称为“基于回调”的异步编程风格；
 
@@ -3847,7 +3855,7 @@ function loadScript(src, callback) {
 }
 ```
 
-#### Promise
+### Promise
 
 传递给 new Promise 的函数被称为 executor，当 new Promise 被创建，executor 会自动运行；它的参数 resolve 和 reject 是由 JavaScript 自身提供的回调；
 - resolve(value) 如果任务成功完成并带有结果 value；
@@ -3898,7 +3906,7 @@ function delay(ms) {
 delay(3000).then(() => alert('runs after 3 seconds'));
 ```
 
-#### Promise 链
+### Promise 链
 
 每个对 .then 的调用都会返回了一个新的 promise，因此我们可以在其之上调用下一个 .then；形成一个 .then 处理程序（handler）链，也即 Promise 链；
 
@@ -3934,7 +3942,7 @@ class Thenable {
 }
 ```
 
-#### 使用 promise 进行错误处理
+### 使用 promise 进行错误处理
 
 Promise 的执行者（executor）和 promise 的处理程序（handler）周围有一个“隐式的 try..catch”；如果发生异常，就会被捕获，并被视为 rejection 进行处理；控制权移交至最近的 error 处理程序（handler）；
 
@@ -3966,7 +3974,7 @@ new Promise(function (resolve, reject) {
 }).catch(alert);
 ```
 
-#### Promise API
+### Promise API
 
 在 Promise 类中，有 6 种静态方法；
 
@@ -4015,7 +4023,7 @@ Promise.resolve(value) 用结果 value 创建一个 resolved 的 promise；当�
 
 与 Promise.resolve 类似 Promise.reject(error) 用 error 创建一个 rejected 的 promise；
 
-#### Promisification
+### Promisification
 
 promisify(f)：接受一个需要被 promisify 的函数 f，并返回一个包装（wrapper）函数；
 
@@ -4043,7 +4051,7 @@ let loadScriptPromise = promisify(loadScript);
 loadScriptPromise(...).then(...);
 ```
 
-#### 微任务（Microtask）
+### 微任务（Microtask）
 
 Promise 的处理程序（handlers）.then、.catch 和 .finally 都是异步的；而异步任务需要适当的管理，为此，ECMA 标准规定了一个内部队列 PromiseJobs，通常被称为“微任务队列（microtask queue）”（V8 术语）；
 
@@ -4059,7 +4067,7 @@ setTimeout(() => promise.catch(err => alert('caught')), 1000);
 window.addEventListener('unhandledrejection', event => alert(event.reason));
 ```
 
-#### async/await
+### async/await
 
 async 函数总是返回一个 promise，其他值将自动被包装在一个 resolved 的 promise 中；
 
@@ -4125,7 +4133,7 @@ async function f() {
 
 > Tips: `async/await` 可以和 `Promise.all` 一起使用；
 
-#### Generator
+### Generator
 
  Generator 可以按需一个接一个地返回（“yield”）多个值；它们可与 iterable 完美配合使用，从而可以轻松地创建数据流；在此类函数被调用时，它不会运行其代码，而是返回一个被称为 “generator object” 的特殊对象，来管理执行流程；
 
@@ -4241,7 +4249,7 @@ generator.throw(new Error("The answer is not found in my database"));
 g.return('foo'); // { value: "foo", done: true }
 ```
 
-#### 异步迭代和 generator
+### 异步迭代和 generator
 
 异步迭代允许我们对按需通过异步请求而得到的数据进行迭代：
 
@@ -4292,7 +4300,7 @@ let range = {
 })();
 ```
 
-#### 模块 Module
+### 模块 Module
 
 简单讲，一个模块（module）就是一个文件，一个脚本就是一个模块；一个模块可以包含用于特定目的的类或函数库；
 
@@ -4336,7 +4344,7 @@ let range = {
 - [Cannot use import statement outside a module](https://www.jianshu.com/p/60a8a74f5eee)
 - [CommonJS和ES6模块的区别](https://juejin.cn/post/6844904067651600391)
 
-#### 导出和导入
+### 导出和导入
 
 通常要明确列出需要导入的内容：
 
@@ -4442,7 +4450,7 @@ let say = obj.default;
 
 > Note: 动态导入在常规脚本中工作时，它们不需要 script type="module"；import 不是一个函数，只是一种特殊语法，恰好使用了括号；
 
-#### Proxy 和 Reflect
+### Proxy 和 Reflect
 
 一个 Proxy 对象包装另一个对象并拦截诸如读取/写入属性和其他操作，可以选择自行处理它们，或者透明地允许该对象处理它们；
 
@@ -4774,7 +4782,7 @@ arr = new Proxy(arr, {
 - [Proxy MDN 中文参考文档](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
 - [JavaScript 现代教程-Proxy 和 Reflect](https://zh.javascript.info/proxy)
 
-#### eval
+### eval
 
 调用 eval(code) 会运行代码字符串，并返回最后一条语句的结果；
 
@@ -4812,7 +4820,7 @@ let f = new Function('a', 'alert(a)');
 f(5); // 5
 ```
 
-#### 柯里化（Currying）
+### 柯里化（Currying）
 
 柯里化（Currying）是一种关于函数的高阶技术，柯里化是一种函数的转换，它是指将一个函数从可调用的 f(a, b, c) 转换为可调用的 f(a)(b)(c)；柯里化不会调用函数，它只是对函数进行转换；
 
@@ -4842,7 +4850,7 @@ alert( curriedSum(1)(2,3) ); // 6，对第一个参数的柯里化
 alert( curriedSum(1)(2)(3) ); // 6，全柯里化
 ```
 
-#### Reference Type
+### Reference Type
 
 为确保 obj.methed() 调用正常运行，JavaScript 中点 '.' 返回的不是一个函数，而是一个特殊的 Reference Type 的值；
 
@@ -4860,7 +4868,7 @@ Reference Type 的值是一个三个值的组合 (base, name, strict)，其中�
 
 this 的值仅在函数直接被通过点符号 obj.method() 或方括号 obj['method']() 语法（此处它们作用相同）调用时才被正确传递；除了方法调用之外的任何操作（如赋值 = 或 ||），都会把它转换为一个不包含允许设置 this 信息的普通值；
 
-#### BigInt
+### BigInt
 
 BigInt 是一种特殊的数字类型，它提供了对任意长度整数的支持；创建 bigint 的方式有两种：在一个整数字面量后面加 n 或者调用 BigInt 函数，该函数从字符串、数字等中生成 bigint；
 
@@ -4882,7 +4890,7 @@ const bigintFromNumber = BigInt(10); // 与 10n 相同
 
 目前并没有一个众所周知的好用的 polyfill，不过，[JSBI](https://github.com/GoogleChromeLabs/jsbi) 库提出了另一种解决方案，该库使用自己的方法实现了大的数字，可以使用它们替代原生的 bigint；
 
-#### 浏览器环境，规格
+### 浏览器环境，规格
 
 JavaScript 规范将能运行 JavaScript 的环境称为主机环境，每个环境都提供了特定于平台的功能；
 
@@ -4892,7 +4900,7 @@ JavaScript 规范将能运行 JavaScript 的环境称为主机环境，每个环
 
 浏览器对象模型（Browser Object Model），简称 BOM，表示由浏览器（主机环境）提供的用于处理文档（document）之外的所有内容的其他对象；
 
-#### DOM 树
+### DOM 树
 
 根据文档对象模型（DOM），每个 HTML 标签都是一个对象，嵌套的标签是闭合标签的“子标签（children）”，标签内的文本也是一个对象；
 
@@ -4917,7 +4925,7 @@ JavaScript 规范将能运行 JavaScript 的环境称为主机环境，每个环
 
 - [查看 DOM 结构在线工具](http://software.hixie.ch/utilities/js/live-dom-viewer/)
 
-#### 遍历 DOM
+### 遍历 DOM
 
 最顶层的 document 节点是 document.documentElement，这是对应 `<html>` 标签的 DOM 节点；document.body 对应 `<body>`，document.head 对应 `<head>`；
 
@@ -4954,7 +4962,7 @@ while(elem = elem.parentElement) { // 向上，直到 <html>
 }
 ```
 
-#### 搜索：getElement*，querySelector*
+### 搜索：getElement*，querySelector*
 
 **getElementById**
 
@@ -4990,7 +4998,7 @@ elem.closest(css) 方法会查找与 CSS 选择器匹配的最近的祖先，包
 
 > Note: 所有的 `getElementsBy*` 方法都会返回一个 实时的（live）集合，这样的集合始终反映的是文档的当前状态，并且在文档发生更改时会“自动更新”；而 `querySelectorAll` 返回的是一个静态的集合；
 
-#### 节点属性：type，tag 和 content
+### 节点属性：type，tag 和 content
 
 EventTarget 是根的“抽象（abstract）”类，该类的对象从未被创建；它作为一个基础，以便让所有 DOM 节点都支持所谓的“事件（event）”；
 
@@ -5077,7 +5085,7 @@ textContent 提供了对元素内的 文本 的访问权限：仅文本，去掉
 </script>
 ```
 
-#### 特性和属性（Attributes and properties）
+### 特性和属性（Attributes and properties）
 
 当浏览器加载页面时，它会“读取”（或者称之为：“解析”）HTML 并从中生成 DOM 对象；对于元素节点，大多数标准的 HTML 特性（attributes）会自动变成 DOM 对象的属性（properties）；
 
@@ -5137,7 +5145,7 @@ textContent 提供了对元素内的 文本 的访问权限：仅文本，去掉
 </script>
 ```
 
-#### 修改文档（document）
+### 修改文档（document）
 
 **创建元素**
 
@@ -5214,7 +5222,7 @@ function clear(elem) {
 
 > Note: 根据规范，`<table>` 只允许特定于表格的标签，浏览器会把 `<table>` 内的文本添加到了表格前面；
 
-#### 样式和类
+### 样式和类
 
 通常有两种设置元素样式的方式：
 
@@ -5233,7 +5241,7 @@ elem.style 属性是一个对象，它对应于 "style" 特性（attribute）中
 
 我们使用 style.* 来对各个样式属性进行赋值，使用特殊属性 style.cssText 以字符串的形式设置完整的样式；
 
-#### 计算样式：getComputedStyle
+### 计算样式：getComputedStyle
 
 style 属性仅对 "style" 特性（attribute）值起作用，而没有任何 CSS 级联（cascade）；
 
@@ -5243,7 +5251,7 @@ style 属性仅对 "style" 特性（attribute）值起作用，而没有任何 C
 
 > Note: JavaScript 看不到 `:visited` 所应用的样式；此外，CSS 中也有一个限制，即禁止在 `:visited` 中应用更改几何形状的样式，这是为了确保一个不好的页面无法测试链接是否被访问，进而窥探隐私；
 
-#### 元素大小和滚动 
+### 元素大小和滚动 
 
 > Note: 一些浏览器（并非全部）通过从内容（上面标记为 “content width”）中获取空间来为滚动条保留空间；
 
@@ -5274,7 +5282,7 @@ offsetParent 是最接近的 CSS 定位的祖先，或者是 td，th，table，b
 
 - [JavaScript 现代教程-元素大小和滚动文档](https://zh.javascript.info/size-and-scroll)
 
-#### Window 大小和滚动
+### Window 大小和滚动
 
 可以使用 document.documentElement 的 clientWidth/clientHeight 获取窗口宽高；浏览器也支持像 window.innerWidth/innerHeight 这样的属性，window.innerWidth/innerHeight 包括了滚动条；
 
@@ -5300,7 +5308,7 @@ alert('Full document height, with scrolled out part: ' + scrollHeight);
 
 > Tips: 使用 `elem.style.overflow = "hidden"` 禁止滚动；
 
-#### 坐标
+### 坐标
 
 大多数 JavaScript 方法处理的是以下两种坐标系中的一个：
 
@@ -5343,7 +5351,7 @@ function getCoords(elem) {
 }
 ```
 
-#### 事件
+### 事件
 
 当 HTML 的加载和处理均完成，DOM 被完全构建完成时触发 DOMContentLoaded 事件；当一个 CSS 动画完成时会触发 transitionend 事件；
 
@@ -5407,7 +5415,7 @@ event 对象的一些属性：
 
 - [window.onload 和 DOMContentLoaded 的区别](https://www.jianshu.com/p/1a8a7e698447)
 
-#### 冒泡和捕获
+### 冒泡和捕获
 
 当一个事件发生在一个元素上，它会首先运行在该元素上的处理程序，然后运行其父元素上的处理程序，然后一直向上到其他祖先上的处理程序；
 
@@ -5427,7 +5435,7 @@ DOM 事件标准描述了事件传播的 3 个阶段：
 
 > Tips: 通过属性 `event.eventPhase` 可以获得捕获事件的当前阶段（capturing=1，target=2，bubbling=3）；
 
-#### 事件委托
+### 事件委托
 
 捕获和冒泡允许我们实现一种被称为事件委托的强大的事件处理模式；如果有许多以类似方式处理的元素，那么就不必为每个元素分配一个处理程序，而是将单个处理程序放在它们的共同祖先上；
 
@@ -5443,7 +5451,7 @@ DOM 事件标准描述了事件传播的 3 个阶段：
 - 事件必须冒泡，有些事件不会冒泡就无法使用事件委托；
 - 委托可能会增加 CPU 负载，因为容器级别的处理程序会对容器中任意位置的事件做出反应；
 
-#### 浏览器默认行为
+### 浏览器默认行为
 
 许多事件会自动触发浏览器执行某些行为，如链接点击，表单提交等；可以通过两种方式阻止浏览器默认行为：
 
@@ -5473,7 +5481,7 @@ DOM 事件标准描述了事件传播的 3 个阶段：
 </script>
 ```
 
-#### 创建自定义事件
+### 创建自定义事件
 
 内建事件类形成一个层次结构（hierarchy），类似于 DOM 元素类，根是内建的 Event 类；
 
@@ -5525,7 +5533,7 @@ elem.dispatchEvent(new CustomEvent("hello", {
 </script>
 ```
 
-#### 鼠标事件
+### 鼠标事件
 
 与点击相关的事件始终具有 button 属性，该属性允许获取确切的鼠标按钮；在 mousedown 和 mouseup 事件中则可能需要用到 event.button，因为这两个事件在任何按键上都会触发，所以我们可以使用 button 属性来区分是左键单击还是右键单击；
 
@@ -5565,7 +5573,7 @@ elem.dispatchEvent(new CustomEvent("hello", {
 
 如果想禁用选择以保护页面的内容不被复制粘贴，那么可以使用另一个事件：oncopy；
 
-#### 移动鼠标：mouseover/out，mouseenter/leave
+### 移动鼠标：mouseover/out，mouseenter/leave
 
 当鼠标指针移到某个元素上时，mouseover 事件就会发生，而当鼠标离开该元素时，mouseout 事件就会发生；
 
@@ -5577,7 +5585,7 @@ elem.dispatchEvent(new CustomEvent("hello", {
 
 事件 mouseenter/mouseleave 类似于 mouseover/mouseout，它们在鼠标指针进入/离开元素时触发；但元素内部与后代之间的转换不会产生影响，且事件 mouseenter/mouseleave 不会冒泡；
 
-#### 鼠标拖放事件
+### 鼠标拖放事件
 
 ```js
 // 球体拖动
@@ -5619,7 +5627,7 @@ ball.ondragstart = function() {
 };
 ```
 
-#### 指针事件
+### 指针事件
 
 指针事件（Pointer Events）是一种用于处理来自各种输入设备（例如鼠标、触控笔和触摸屏等）的输入信息的现代化解决方案；
 
@@ -5679,7 +5687,7 @@ pointercancel 事件将会在一个正处于活跃状态的指针交互由于某
 gotpointercapture 会在一个元素使用 setPointerCapture 来启用捕获后触发；
 lostpointercapture 会在捕获被释放后触发：其触发可能是由于 releasePointerCapture 的显式调用，或是 pointerup/pointercancel 事件触发后的自动调用；
 
-#### 键盘：keydown 和 keyup
+### 键盘：keydown 和 keyup
 
 当一个按键被按下时，会触发 keydown 事件，而当按键被释放时，会触发 keyup 事件；
 
@@ -5697,7 +5705,7 @@ lostpointercapture 会在捕获被释放后触发：其触发可能是由于 rel
 
 - [字母数字按键代码W3C规范](https://www.w3.org/TR/uievents-code/#key-alphanumeric-section)
 
-#### 滚动
+### 滚动
 
 scroll 事件在 window 和可滚动元素上都可以运行；不能通过在 onscroll 监听器中使用 event.preventDefault() 来阻止滚动，因为它会在滚动发生之后才触发；
 
@@ -5749,7 +5757,7 @@ window.addEventListener('scroll', showVisible);
 showVisible();
 ```
 
-#### 表单属性和方法
+### 表单属性和方法
 
 文档中的表单是特殊集合 document.forms 的成员，既可以使用名字，也可以使用在文档中的编号来获取表单；在表单中，其中的任何元素都可以通过命名的集合 form.elements 来获取到；
 
@@ -5819,7 +5827,7 @@ showVisible();
 - option.index `<option>` 在其所属的 `<select>` 中的编号；
 - option.text `<option>` 的文本内容（可以被访问者看到）；
 
-#### 聚焦：focus/blur
+### 聚焦：focus/blur
 
 当用户点击某个元素或使用键盘上的 Tab 键选中时，该元素将会获得聚焦（focus），还有一个 HTML 特性（attribute）autofocus 可以让焦点在网页加载时默认落在一个元素上，此外还有其它途径可以获得焦点；
 
@@ -5837,7 +5845,7 @@ showVisible();
 
 focus 和 blur 事件不会向上冒泡，但会在捕获阶段向下传播，因此可以在捕获阶段进行事件委托；也可以使用冒泡事件 focusin 和 focusout，但必须使用 elem.addEventListener 来分配它们；
 
-#### 事件：change，input，cut，copy，paste
+### 事件：change，input，cut，copy，paste
 
 当元素更改完成时，将触发 change 事件，对于文本输入框，当其失去焦点时，就会触发 change 事件；
 
@@ -5845,7 +5853,7 @@ focus 和 blur 事件不会向上冒泡，但会在捕获阶段向下传播，�
 
 ClipboardEvent 类，并提供了对剪切/拷贝/粘贴的数据的访问方法；
 
-#### 表单：事件和方法提交
+### 表单：事件和方法提交
 
 提交表单时，会触发 submit 事件，它通常用于在将表单发送到服务器之前对表单进行校验，或者中止提交，并使用 JavaScript 来处理表单；form.submit() 方法允许从 JavaScript 启动表单发送，我们可以使用此方法动态地创建表单，并将其发送到服务器；
 
@@ -5855,7 +5863,7 @@ ClipboardEvent 类，并提供了对剪切/拷贝/粘贴的数据的访问方法
 
 > Note: 在输入框中使用 Enter 发送表单时，会在 `<input type="submit">`上触发一次 click 事件；
 
-#### 页面生命周期
+### 页面生命周期
 
 **DOMContentLoaded**
 
@@ -5980,7 +5988,7 @@ document.body.append(script); // 添加到文档
 
 > Tips: 在实际开发中，`defer` 用于需要整个 DOM 的脚本，和/或脚本的相对执行顺序很重要的时候；`async` 用于独立脚本，例如计数器或广告，这些脚本的相对执行顺序无关紧要；
 
-#### 资源加载：onload，onerror
+### 资源加载：onload，onerror
 
 浏览器允许跟踪外部资源的加载，如脚本，iframe，图片等；readystatechange 事件也适用于资源，但很少被使用；
 
@@ -5998,7 +6006,7 @@ load 和 error 事件也适用于其他资源，基本上（basically）适用�
 - crossorigin="anonymous" 如果服务器的响应带有包含 * 或我们的源（origin）的 header Access-Control-Allow-Origin，则允许访问，浏览器不会将授权信息和 cookie 发送到远程服务器；
 - crossorigin="use-credentials" 如果服务器发送回带有我们的源的 header Access-Control-Allow-Origin 和 Access-Control-Allow-Credentials: true，则允许访问。浏览器会将授权信息和 cookie 发送到远程服务器；
 
-#### DOM 变动观察器（Mutation observer）
+### DOM 变动观察器（Mutation observer）
 
 MutationObserver 是一个内建对象，它观察 DOM 元素，并在检测到更改时触发回调；
 
@@ -6033,7 +6041,7 @@ config 是一个具有布尔选项的对象，该布尔选项表示“将对哪�
 
 > Note: 观察器在内部对节点使用弱引用，也就是说，如果一个节点被从 DOM 中移除了，并且该节点变得不可访问，那么它就可以被垃圾回收；
 
-#### 选择（Selection）和范围（Range）
+### 选择（Selection）和范围（Range）
 
 选择的基本概念是 Range：本质上是一对“边界点”：范围起点和范围终点；每个点都被表示为一个带有相对于起点的相对偏移（offset）的父 DOM 节点，如果父节点是元素节点，则偏移量是子节点的编号（子节点数），对于文本节点，则是文本中的位置（字符数）；
 
@@ -6165,7 +6173,7 @@ document.getSelection().empty()
 </script>
 ```
 
-#### 事件循环：微任务和宏任务
+### 事件循环：微任务和宏任务
 
 浏览器中 JavaScript 的执行流程和 Node.js 中的流程都是基于事件循环的；事件循环是一个在 JavaScript 引擎等待任务，执行任务和进入休眠状态等待更多任务这几个状态之间转换的无限循环；
 
@@ -6206,7 +6214,7 @@ menu.onclick = function() {
 4. 如果宏任务队列为空，则休眠直到出现宏任务；
 5. 转到步骤 1；
 
-#### 弹窗和 window 的方法
+### 弹窗和 window 的方法
 
 如果弹窗是在用户触发的事件处理程序（如 onclick）之外调用的，大多数浏览器都会阻止此类弹窗；
 
@@ -6241,7 +6249,7 @@ open 调用会返回对新窗口的引用，它可以用来操纵弹窗的属性
 
 - [JavaScript 现代教程-弹窗和 window 的方法](https://zh.javascript.info/popup-windows)
 
-#### 跨窗口通信
+### 跨窗口通信
 
 如果两个 URL 具有相同的协议，域和端口，则称它们是“同源”的；“同源（Same Origin）”策略限制了窗口（window）和 frame 之间的相互访问；非同源窗口引用只能更改其 location；
 
@@ -6288,7 +6296,7 @@ targetOrigin 是一种安全措施，如果目标窗口是非同源的，我们�
 
 > Note: `message` 事件只能通过 `addEventListener` 分配处理程序；
 
-#### ArrayBuffer，二进制数组
+### ArrayBuffer，二进制数组
 
 ArrayBuffer 是 JavaScript 中基本的二进制对象，是对固定长度的连续内存空间的引用；
 
@@ -6361,7 +6369,7 @@ DataView 是在 ArrayBuffer 上的一种特殊的超灵活“未类型化”视�
 
 > Note: 还有另外两个术语，用于对二进制数据进行操作的方法的描述：`ArrayBufferView` 是所有这些视图的总称，`BufferSource` 是 `ArrayBuffer` 和 `ArrayBufferView` 的总称；
 
-#### TextDecoder 和 TextEncoder
+### TextDecoder 和 TextEncoder
 
 内建的 TextDecoder 对象在给定缓冲区（buffer）和编码格式（encoding）的情况下，能够将值读取到实际的 JavaScript 字符串中；
 
@@ -6397,7 +6405,7 @@ let uint8Array = encoder.encode("Hello");
 alert(uint8Array); // 72,101,108,108,111
 ```
 
-#### Blob
+### Blob
 
 arrayBuffer 和视图（view）都是 ECMA 标准的一部分，是 JavaScript 的一部分；浏览器还有一个二进制类型大对象 Blob，Blob 对象表示一个不可变、原始数据的类文件对象，由可选的字符串 type（通常是 MIME 类型）和 blobParts 组成；
 
@@ -6528,7 +6536,7 @@ while (true) {
 }
 ```
 
-#### File 和 FileReader
+### File 和 FileReader
 
 File 对象继承自 Blob，并扩展了与文件系统相关的功能；
 
@@ -6595,7 +6603,7 @@ function readFile(input) {
 
 > Note: 对于 `Web Worker`，还有一种同步的 `FileReader` 变体，称为 `FileReaderSync`；读取方法 `read*` 不会生成事件，而是会像常规函数那样返回一个结果；
 
-#### Fetch
+### Fetch
 
 JavaScript 可以将网络请求发送到服务器，并在需要时加载新信息；fetch() 方法是一种现代通用的方法；
 
@@ -6694,7 +6702,7 @@ alert(result.message);
 
 > Note: 如果请求的 body 是字符串，则 Content-Type 会默认设置为 text/plain;charset=UTF-8；但要发送 JSON 时，会使用 headers 选项来发送 application/json，这是 JSON 编码的数据的正确的 Content-Type；
 
-#### FormData
+### FormData
 
 FormData 的特殊之处在于网络方法（network methods），例如 fetch 可以接受一个 FormData 对象作为 body；它会被编码并发送出去，带有 Content-Type: multipart/form-data；
 
@@ -6736,7 +6744,7 @@ let formData = new FormData([form])
 
 表单始终以 Content-Type: multipart/form-data 来发送数据，这个编码允许发送文件；
 
-#### Fetch：下载进度
+### Fetch：下载进度
 
 fetch 方法允许去跟踪下载进度，但到目前为止，fetch 方法无法跟踪上传进度；
 
@@ -6805,7 +6813,7 @@ let commits = JSON.parse(result);
 alert(commits[0].author.login);
 ```
 
-#### Fetch：中止
+### Fetch：中止
 
 有一个特殊的内建对象：AbortController；它不仅可以中止 fetch，还可以中止其他异步任务；
 
@@ -6874,7 +6882,7 @@ let results = await Promise.all([...fetchJobs, ourJob]);
 // 它将中止所有 fetch 和 ourJob
 ```
 
-#### Fetch：跨源请求
+### Fetch：跨源请求
 
 可以使用 script 标签实现跨域，也成为 jsonp；
 
@@ -6910,7 +6918,7 @@ let results = await Promise.all([...fetchJobs, ourJob]);
 
 - [JavaScript 现代教程-Fetch：跨源请求](https://zh.javascript.info/fetch-crossorigin)
 
-#### Fetch API
+### Fetch API
 
 ```js
 let promise = fetch(url, {
@@ -6937,7 +6945,7 @@ let promise = fetch(url, {
 
 - [JavaScript 现代教程-长轮询（Long polling）](https://zh.javascript.info/long-polling)
 
-#### URL 对象
+### URL 对象
 
 内建的 URL 类提供了用于创建和解析 URL 的便捷接口；URL 对象立即允许我们访问其组件，因此这是一个解析 url 的好方法；
 
@@ -6972,7 +6980,7 @@ URL 对象会自动处理那些不被允许的字符必须被编码，用其 UTF
 
 > Note: `encode*` 与 `URL` 在对 IPv6 地址的编码方式不同，`URL` 可以正确编码；
 
-#### XMLHttpRequest
+### XMLHttpRequest
 
 XMLHttpRequest 是一个内建的浏览器对象，它允许使用 JavaScript 发送 HTTP 请求；XMLHttpRequest 有两种执行模式：同步（synchronous）和异步（asynchronous）；
 
@@ -7098,7 +7106,7 @@ function upload(file) {
 
 - [JavaScript 现代教程-可恢复的文件上传](https://zh.javascript.info/resume-upload)
 
-#### WebSocket
+### WebSocket
 
 WebSocket 协议提供了一种在浏览器和服务器之间建立持久连接来交换数据的方法，数据可以作为“数据包”在两个方向上传递，而不会断开连接和其他 HTTP 请求；
 
@@ -7176,7 +7184,7 @@ wss.on('connection', function connection(ws) {
 });
 ```
 
-#### Server-Sent Events
+### Server-Sent Events
 
 Server-Sent Events 规范描述了一个内建的类 EventSource，它能保持与服务器的连接，并允许从中接收事件，与 WebSocket 类似，其连接是持久的；
 
@@ -7220,7 +7228,7 @@ EventSource 支持跨源请求，就像 fetch 任何其他网络方法，可以�
 
 服务器可以在事件开始时使用 event: ... 指定另一种类型事件，此外还可以通过 addEventListener 监听自定义事件；
 
-#### Cookie，document.cookie
+### Cookie，document.cookie
 
 Cookie 是直接存储在浏览器中的一小串数据，它们是 HTTP 协议的一部分，Cookie 通常是由 Web 服务器使用响应 Set-Cookie HTTP-header 设置的，然后浏览器使用 Cookie HTTP-header 将它们自动添加到（几乎）每个对相同域的请求中；
 
@@ -7290,7 +7298,7 @@ setCookie('user', 'John', {secure: true, 'max-age': 3600});
 
 > Note: 如果 `cookie` 是由用户所访问的页面的域以外的域放置的，则称其为第三方 `cookie`，通常用于跟踪和广告服务；
 
-#### LocalStorage，sessionStorage
+### LocalStorage，sessionStorage
 
 Web 存储对象 localStorage 和 sessionStorage 允许我们在浏览器上保存键/值对；
 
@@ -7322,7 +7330,7 @@ sessionStorage 特点：
 
 该事件会在所有可访问到存储对象的 window 对象上触发，导致当前数据改变的 window 对象除外；如果两个窗口都在监听 window.onstorage 事件，那么每个窗口都会对另一个窗口中发生的更新作出反应；
 
-#### IndexedDB
+### IndexedDB
 
 IndexedDB 是一个浏览器内建的数据库：
 - 通过支持多种类型的键，来存储几乎可以是任何类型的值；
@@ -7348,7 +7356,7 @@ IndexedDB 是一个浏览器内建的数据库：
 
 - [JavaScript 现代教程-IndexedDB](https://zh.javascript.info/indexeddb)
 
-#### CSS 动画
+### CSS 动画
 
 CSS 动画可以在不借助 Javascript 的情况下做出一些简单的动画效果；
 
@@ -7392,7 +7400,7 @@ CSS 动画完成后，会触发 transitionend 事件，该事件对象有几个�
 
 - [贝塞尔曲线在线制作工具](http://cubic-bezier.com/)
 
-#### JavaScript 动画
+### JavaScript 动画
 
 标准动画时序提供了 requestAnimationFrame 函数；当页面在后台时，根本没有重绘，因此回调将不会运行：动画将被暂停并且不会消耗资源；
 
@@ -7429,7 +7437,7 @@ function animate({timing, draw, duration}) {
 
 - [JavaScript 现代教程-JS 动画](https://zh.javascript.info/js-animation)
 
-#### Custom elements
+### Custom elements
 
 Custom elements 有两种：自主自定义标签和自定义内建元素；Custom element 在各浏览器中的兼容性已经非常好了，Edge 支持地相对较差，可以使用 [polyfill](https://github.com/webcomponents/webcomponentsjs)；
 
@@ -7507,7 +7515,7 @@ customElements.whenDefined(name) 返回一个 promise，将会在这个具有给
 <button is="hello-button" disabled>Disabled</button>
 ```
 
-#### 影子 DOM
+### 影子 DOM
 
 浏览器在内部使用 DOM/CSS 来绘制它们，这个 DOM 结构一般来说对我们是隐藏的，但可以在开发者工具里面看见它，在 #shadow-root 下看到的就是被称为「shadow DOM」的东西；
 
@@ -7541,7 +7549,7 @@ customElements.define('show-hello', class extends HTMLElement {
 
 Shadow DOM 元素对于 light DOM 中的 querySelector 不可见；实际上，Shadow DOM 中的元素可能与 light DOM 中某些元素的 id 冲突，这些元素必须在 shadow tree 中独一无二；Shadow DOM 有自己的样式，外部样式规则在 shadow DOM 中不产生作用；
 
-#### 模板元素
+### 模板元素
 
 内建的 `<template>` 元素用来存储 HTML 模板。浏览器将忽略它的内容，仅检查语法的有效性，但是我们可以在 JavaScript 中访问和使用它来创建其他元素；
 
@@ -7571,7 +7579,7 @@ Shadow DOM 元素对于 light DOM 中的 querySelector 不可见；实际上，S
 
 模板的 content 属性可看作 DocumentFragment，将它插入时，会被插入的则是其子节点；
 
-#### Shadow DOM 插槽，组成
+### Shadow DOM 插槽，组成
 
 为了渲染 shadow DOM 中的每一个 `<slot name="...">` 元素，浏览器在 light DOM 中寻找相同名字的 slot="..."，这些元素在插槽内被渲染；最后得到一个扁平化（flattened）DOM；
 
@@ -7604,7 +7612,7 @@ shadow DOM 中第一个没有名字的 `<slot>` 是一个默认插槽，它从 l
 
 如果添加/删除了插槽元素，浏览器将监视插槽并更新渲染，触发 slotchange 事件；
 
-#### Shadow DOM 样式
+### Shadow DOM 样式
 
 :host 选择器允许选择 shadow 宿主（包含 shadow 树的元素）；:host(selector) 还可以添加选择器；
 
@@ -7648,13 +7656,13 @@ customElements.define('user-card', class extends HTMLElement {
 </user-card>
 ```
 
-#### Shadow DOM 和事件
+### Shadow DOM 和事件
 
 当事件在组件外部捕获时，shadow DOM 中发生的事件将会以 host 元素作为目标，这就是事件重定向；但如果事件发生在 slotted 元素上，实际存在于 light DOM 上，则不会发生重定向；
 
 事件仅仅是在它们的 composed 标志设置为 true 的时候才能通过 shadow DOM 边界；这些事件仅能在同一 DOM 中的元素上捕获：mouseenter，mouseleave（也不冒泡），load，unload，abort，error，select，slotchange；
 
-#### 正则表达式
+### 正则表达式
 
 在 JavaScript 中，正则表达式通过内建的“RegExp”类的对象来实现，并与字符串集成；
 
