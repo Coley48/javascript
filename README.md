@@ -51,6 +51,24 @@ npm i -D style-loader css-loader html-webpack-plugin
 
 JavaScript 引擎工作基本原理：引擎解析脚本，然后将脚本编译转化为机器语言，最后执行机器语言；
 
+完整的 JavaScript 实现包含以下几个部分：
+- 核心 （ECMAScript）
+- 文档对象模型（DOM）
+- 浏览器对象模型（BOM）
+
+ECMAScript，即 ECMA-262 定义的语言，Web浏览器是 ECMAScript 实现的一种宿主环境，宿主环境提供 ECMAScript 的基准实现和环境自身交互必须的扩展。扩展（比如 DOM）使用 ECMAScript 核心类型和语法，提供特定于环境的额外功能，其他宿主环境还有服务器端 JavaScript 平台 Node.js 和即将被淘汰的 Adobe Flash。
+
+ECMA-262 在基本的层面，描述了这门语言的如下部分：
+- 语法
+- 类型
+- 语句
+- 关键字
+- 保留字
+- 操作符
+- 全局对象
+
+ECMAScript 只是对实现这个规范描述的所有方面的一门语言的称呼。JavaScript 和 Adobe ActionScript 都实现了 ECMAScript。
+
 **浏览器中的 JavaScript 限制**
 
 为了用户的（信息）安全，在浏览器中的 JavaScript 的能力是受限的，目的是防止恶意网页获取用户私人信息或损害用户数据；网页中的 JavaScript 不能读、写、复制和执行硬盘上的任意文件，不同的标签页/窗口之间通常互不了解；
@@ -74,6 +92,16 @@ alert("Hello")
 // Uncaught TypeError: Cannot read properties of undefined (reading '2')
 [1, 2].forEach(alert);
 ```
+
+- async：表示应该立即开始下载脚本，但不能阻止其他页面动作，如下载资源或等待脚本加载。只对外部脚本文件有效。
+- charset：使用 src 属性指定的代码字符集。这个属性很少使用，因为大多数浏览器不在乎它的值。
+- crossorigin：配置相关请求的CORS（跨源资源共享）设置。默认不适用CORS。crossorigin="anonymous"配置文件请求不必设置凭据标志。crossorigin="use-credentials"设置凭据标志，意味着出站请求会包含凭据。
+- defer：表示脚本可以延迟到文档完全被解析和显示之后再执行。只对外部脚本文件有效。在IE7及更早版本中，对行内脚本也可以指定该属性。
+- integrity：允许比对接收到的资源和指定的加密签名以验证子资源完整性（SRI，Subresource Integrity）。如果接收到的资源的签名与这个属性指定的签名不匹配，则页面会报错，脚本不会执行。这个属性可以用于确保内容分发网络（CDN，Content Delivery Network）不会提供恶意内容。
+- language：最初用于表示代码块中的脚本语言（如"JavaScript"、"JavaScript 1.2"、"VBScript"）。大多数浏览器会忽略该属性，已废弃。
+- src：表示包含要执行的代码的外部文件。
+
+> Note: 按照惯例，外部 JavaScript 文件的扩展名是 .js。但这不是必需的，因为浏览器不会检查所包含 JavaScript 文件扩展名，这就为使用服务器端脚本语言动态生成 JavaScript 代码，或者在浏览器中将 JavaScript 扩展语言（TypeScript、JSX）转译为 JavaScript 提供了可能性。不过要注意，服务器经常会根据文件扩展来确定相应的正确 MIME 类型，如果不打算使用 .js 扩展名，一定要确保服务器能正确返回正确的 MIME 类型。
 
 ### 变量
 
@@ -172,6 +200,23 @@ let c = 3 - (a = b + 1); // a: 3, c: 0 慎用！
 ++, --，又分为前置形式和后置形式，前置形式返回一个新的值，但后置返回原来的值（做加法/减法之前的值）；
 
 [JavaScript 运算符优先级表](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Operator_Precedence)
+
+**位运算符**
+
+在计算机内部，正数以原码存储，负数以补码（二补数）存储。计算补码时，先确定其绝对值原码，再对该原码取反得到其反码，最后结果加一。
+
+ECAMScript 中的所有数值都以 IEEE 764 64位格式存储，但位操作并不直接应用到64位表示，而是先把值转换为32位整数，然后执行位操作，最后再把结果从32位转换为64位存储起来。
+
+特殊值 NaN 和 Infinity 在位操作中都会被当作 0 处理。如果位操作应用到非数值，那么会先用 Number() 函数将值转换为数值。
+
+- 按位非 `~`：返回数值的反码（一补数），最终效果是对数值，按位取反并减一。
+- 按位与 `&`：对两个数的每一位执行与操作，两位同为 1 时返回 1，任何一位为 0 时返回 0。
+- 按位或 `|`：对两个数的每一位执行或操作，两位至少一位为 1 时返回 1，两位同为 0 时返回 0。
+- 按位异或 `^`：对两个数的每一位执行异或操作，只有一位为 1 时返回 1，两位同为 1 或 同为 0 时返回 0。
+- 左移 `<<`：移动位数为指数，结果为乘以2的n次幂，0 填充空位，保留符号位。
+- 右移 `>>`：
+- 无符号左移 `<<<`：
+- 无符号右移 `>>>`：
 
 ### 值的比较
 
@@ -4919,6 +4964,8 @@ const bigintFromNumber = BigInt(10); // 与 10n 相同
 当在 if 或其他布尔运算中时，bigint 的行为类似于 number，在 if 中，bigint 0n 为假，其他值为 true；
 
 目前并没有一个众所周知的好用的 polyfill，不过，[JSBI](https://github.com/GoogleChromeLabs/jsbi) 库提出了另一种解决方案，该库使用自己的方法实现了大的数字，可以使用它们替代原生的 bigint；
+
+## 浏览器：文档，事件，接口
 
 ### 浏览器环境，规格
 
