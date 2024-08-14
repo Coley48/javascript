@@ -93,15 +93,20 @@ alert("Hello")
 [1, 2].forEach(alert);
 ```
 
+- src：表示包含要执行的代码的外部文件。
 - async：表示应该立即开始下载脚本，但不能阻止其他页面动作，如下载资源或等待脚本加载。只对外部脚本文件有效。
 - charset：使用 src 属性指定的代码字符集。这个属性很少使用，因为大多数浏览器不在乎它的值。
 - crossorigin：配置相关请求的CORS（跨源资源共享）设置。默认不适用CORS。crossorigin="anonymous"配置文件请求不必设置凭据标志。crossorigin="use-credentials"设置凭据标志，意味着出站请求会包含凭据。
 - defer：表示脚本可以延迟到文档完全被解析和显示之后再执行。只对外部脚本文件有效。在IE7及更早版本中，对行内脚本也可以指定该属性。
 - integrity：允许比对接收到的资源和指定的加密签名以验证子资源完整性（SRI，Subresource Integrity）。如果接收到的资源的签名与这个属性指定的签名不匹配，则页面会报错，脚本不会执行。这个属性可以用于确保内容分发网络（CDN，Content Delivery Network）不会提供恶意内容。
 - language：最初用于表示代码块中的脚本语言（如"JavaScript"、"JavaScript 1.2"、"VBScript"）。大多数浏览器会忽略该属性，已废弃。
-- src：表示包含要执行的代码的外部文件。
+- type：已废弃。该属性使用一个 MIME 类型字符串来表示脚本的内容，但 MIME 类型并没有跨浏览器标准。即使浏览器默认使用 JavaScript，在某些情况下某个无效或无法识别的 MIME 类型也可能导致浏览器跳过（不执行）相关代码。因此除非在使用 XHTML 或 script 标签要求或包含非 JavaScript 代码，否则不要指定 type 属性。
 
 > Note: 按照惯例，外部 JavaScript 文件的扩展名是 .js。但这不是必需的，因为浏览器不会检查所包含 JavaScript 文件扩展名，这就为使用服务器端脚本语言动态生成 JavaScript 代码，或者在浏览器中将 JavaScript 扩展语言（TypeScript、JSX）转译为 JavaScript 提供了可能性。不过要注意，服务器经常会根据文件扩展来确定相应的正确 MIME 类型，如果不打算使用 .js 扩展名，一定要确保服务器能正确返回正确的 MIME 类型。
+
+### noscript 标签
+
+针对早期浏览器不支持 JavaScript 的问题，使用 noscript 元素提供替代内容，实现页面优雅降级的处理方案。而浏览器对脚本的支持被关闭时，该元素也会被渲染。
 
 ### 变量
 
@@ -225,6 +230,8 @@ ECAMScript 中的所有数值都以 IEEE 764 64位格式存储，但位操作并
 > 在计算机中机器数的字长往往是固定的，当机器数左移 n 位或右移 n 位时，必然会使其 n 位低位或 n 位高位出现空位。空位应该补 0 还是 1，这与机器数采用有无符号数有关。对无符号数的移位称为逻辑移位，对有符号数的移位称为算数移位。
 
 右移时，高位补 0 或者 1，而左移时，始终高位舍弃，低位补 0，不会产生符号问题，因此左移和无符号左移表现一致。
+
+- [为什么右移有「有无」符号之别，而左移却没有？](https://blog.csdn.net/YopenLang/article/details/126925578)
 
 ### 值的比较
 
@@ -6055,7 +6062,8 @@ defer 特性告诉浏览器不要等待脚本，浏览器将继续处理 HTML，
 
 async 脚本就是一个会在加载完成时执行的完全独立的脚本，其他脚本不会等待 async 脚本加载完成，同样，async 脚本也不会等待其他脚本；浏览器也不会因 async 脚本而阻塞（与 defer 类似）；
 
-DOMContentLoaded 和异步脚本不会彼此等待：
+异步脚本保证会在页面的 load 事件前执行，但与 DOMContentLoaded 不会彼此等待，因此异步脚本不应该在加载期间修改 DOM。
+
 - 如果异步脚本在页面完成后才加载完成，则 DOMContentLoaded 可能会发生在异步脚本之前；
 - 如果异步脚本很短，或者是从 HTTP 缓存中加载的，则 DOMContentLoaded 也可能发生在异步脚本之后；
 
@@ -6069,9 +6077,11 @@ script.src = "/article/script-async-defer/long.js";
 document.body.append(script); // 添加到文档
 ```
 
-默认情况下，动态脚本的行为是“异步”的，即效果同 async；可以显式地设置 script.async=false，改变这个规则，使执行效果同 defer；
+默认情况下，动态脚本的行为是“异步”的，执行按加载优先顺序；可以显式地设置 script.async=false，改变这个规则，执行按文档中出现顺序；
 
 > Tips: 在实际开发中，`defer` 用于需要整个 DOM 的脚本，和/或脚本的相对执行顺序很重要的时候；`async` 用于独立脚本，例如计数器或广告，这些脚本的相对执行顺序无关紧要；
+
+- [现代 JavaScript 教程文档](https://zh.javascript.info/script-async-defer)
 
 ### 资源加载：onload，onerror
 
