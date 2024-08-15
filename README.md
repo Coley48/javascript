@@ -146,12 +146,18 @@ const bigInt = 1234567890123456789012345678901234567890n;
 双引号和单引号都是“简单”引用，在 JavaScript 中两者几乎没有什么差别；反引号是功能扩展引号，它们允许我们通过将变量和表达式包装在 ${…} 中，来将它们嵌入到字符串中；
 
 - Boolean 用于 true 和 false；表示逻辑类型；
-- null 用于未知的值，只有一个 null 值的独立类型；
+- null 用于未知的值，只有一个 null 值的独立类型；逻辑上表示空对象指针；
 - undefined 用于未定义的值，只有一个 undefined 值的独立类型，代表未被赋值；
 
-> Note: 不建议显示地将 `undefined` 赋值给变量，通常，使用 `null` 将一个“空”或者“未知”的值写入变量中，而 `undefined` 则保留作为未进行初始化的事物的默认初始值；
+> Note: 不建议显示地将 `undefined` 赋值给变量，通常，使用 `null` 将一个“空”或者“未知”的值写入变量中，而 `undefined` 则保留作为未进行初始化的事物的默认初始值，主要用于比较，明确与 null 之间的区别；
 
 > Tips: `void` 并不改变表达式的结果，只是让表达式不返回值；因此可以用 `void 0` 来获得 `undefined`；
+
+> undefined 值是由 null 值派生而来的，因此 ECMA-262 将它们定义为表面上相等。
+
+```js
+null == undefined // true
+```
 
 - Symbol 用于唯一的标识符；
 - Object 用于更复杂的数据结构；
@@ -165,11 +171,25 @@ typeof null // "object"
 // 在 JavaScript 语言中没有一个特别的 “function” 类型，函数隶属于 object 类型，但是 typeof 会对函数区分对待，并返回 "function"；
 typeof alert // "function"
 ```
-   
+
+> 严格来讲，函数在 ECAMScript 中被认为是对象，并不代表一种数据类型，但函数也有自己特殊的属性，为此，就有必要通过 typeof 操作符来区分函数和其他对象。
+
+> 无论是声明还是未声明，typeof 返回的都是字符串 undefined。逻辑上讲这是对的，虽然严格来讲这两个变量存在根本性差异，但他们都无法执行实际操作。建议声明的同时进行初始化，以此区分上述差异。
+
+```js
+// 未初始化的变量会被自动赋值 undefined
+let temp;
+typeof temp // undefined
+
+// 未声明变量
+// Uncaught ReferenceError: age is not defined
+typeof age // undefined
+```
+
 ### 类型转换
 
 - 字符串转换：转换发生在输出内容的时候，也可以通过 String(value) 进行显式转换；
-- 数字型转换：转换发生在进行算术操作时，也可以通过 Number(value) 进行显式转换；
+- 数字型转换：转换发生在进行算术操作时，也可以通过 Number、parseInt、parseFloat 进行显式转换；
 
 | 值 | 转换 |
 |:----|:----|
@@ -177,6 +197,16 @@ typeof alert // "function"
 | null | 0 |
 | true / false | 1 / 0 |
 | string | 忽略字符串两端的空白，按原样读取，空字符串变成 0，转换出错则输出 NaN |
+| object | 先调用 valueOf() 然后按上述规则转换，结果为 NaN，再尝试 toString() 转换 |
+
+> parseInt 还可以传入第二个底数参数，解析不同进制的数值。parseFloat 只解析十进制值，如果字符串表示整数（没有小数点或者小数点后面只有一个零），则 parseFloat 返回整数。
+
+```js
+parseFloat("0xA") // 十六进制数值始终返回 0
+parseFloat("1234blue") // 1234
+parseFloat("0908.5") // 908.5
+parseFloat("3.125e7") // 31250000
+```
 
 - 布尔型转换：转换发生在进行逻辑操作时，也可以通过 Boolean(value) 进行显式转换；
 
@@ -184,6 +214,8 @@ typeof alert // "function"
 |:----|:----|
 | 0, null, undefined, NaN, "" | false |
 | 其他值 | true |
+
+> if 等流控制语句会自动执行其他类型值到布尔值的转换。
 
 ### 基础运算符，数学
 
