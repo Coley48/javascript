@@ -128,9 +128,25 @@ alert("Hello")
 console.log(1 / 0 === Infinity); // true
 
 // NaN 代表一个计算错误；它是一个不正确的或者一个未定义的数学操作所得到的结果；
-// 任何对 NaN 的进一步数学运算都会返回 NaN，且 NaN 不等于任何值，包括自己；
+0 / 0 // NaN 0 不能作为被除数
+Infinity * 0 // NaN 将无穷大缩小为 0，在数学上无意义
+Infinity / Infinity // NaN
+Infinity % Infinity // NaN
+Infinity - Infinity // NaN
+-Infinity - -Infinity // NaN
+-Infinity + Infinity // NaN
+Math.sqrt(-1) // NaN 负数没有平方根
 console.log('a' / 2 === NaN); // false
+
+// 其他特殊加减运算
+-0 + -0 // -0
+-0 + 0 // 0
+0 - -0 // -0
+-0 - -0 // 0
+0 - 0 // 0
 ```
+
+> 任何对 NaN 的进一步数学运算都会返回 NaN，且 NaN 不等于任何值，包括自己；
 
 - BigInt 用于任意长度的整数；
 
@@ -198,6 +214,10 @@ typeof age // undefined
 | true / false | 1 / 0 |
 | string | 忽略字符串两端的空白，按原样读取，空字符串变成 0，转换出错则输出 NaN |
 | object | 先调用 valueOf() 然后按上述规则转换，结果为 NaN，再尝试 toString() 转换 |
+
+> 加法中，如果只有一个操作数是字符串，则将另一个操作数转换为字符串，然后拼接。如果有任一操作数是对象、数值或布尔值，则调用 toString() 方法获取字符串，对于 null 和 undefined，调用 String() 函数分别获取 "null" 和 "undefined"，然后再执行拼接。
+
+> 减法中，如果有任一操作数是字符串、布尔值、null 或 undefined，则先用 Number() 转为数值，再执行运算。如果有任一操作数是对象，则调用 valueOf() 方法获取该值，再运算，若没有 valueOf 方法，则调用 toString() 方法，然后将得到的字符串转为数值，再运算。
 
 > parseInt 还可以传入第二个底数参数，解析不同进制的数值。parseFloat 只解析十进制值，如果字符串表示整数（没有小数点或者小数点后面只有一个零），则 parseFloat 返回整数。
 
@@ -296,7 +316,15 @@ alert( 'Glow' > 'Glee' ); // true
 alert( 'Bee' > 'Be' ); // true
 ```
 
-当对不同类型的值进行比较时，JavaScript 会首先将其转化为数字（number）再判定大小；
+相等（==）与不相等（!=）对于两个不同类型的操作数会进行隐式类型转换（强制类型转换），而全等（===）不全等（!==）不做转换，同时比较类型相等。
+
+当对不同类型的值进行比较时，JavaScript 会按以下规则进行比较：
+- 如果任一操作数是布尔值，则将其转换为数值再比较是否相等。
+- 如果一个操作数是字符串，另一个是数值，则尝试将字符串转换为数值，再比较。
+- 如果一个操作数是对象，另一个不是对象，则调用对象的 valueOf 方法取其原始值，再根据前面的规则比较。
+- null 与 undefined 相等，且 null 与 undefined 不能转换为其他类型的值进行比较。
+- 如果任一操作数是 NaN，相等为 false，不等为 true。
+- 如果两操作数都是对象/Symbol，则比较它们是否为同一对象/Symbol的引用。
 
 ```js
 // 当使用严格等于 === 时，不相等，因为它们属于不同的类型；
@@ -318,6 +346,14 @@ alert( null >= 0 ); // true
 alert( undefined > 0 ); // false
 alert( undefined < 0 ); // false
 alert( undefined == 0 ); // false
+
+"5" == 5 // true
+true == 2 // false
+
+// 任何关系操作符在涉及比较 NaN 时都返回 false
+NaN < 3 // false
+NaN >= 3 // false
+"a" < 3 // false 这里字符串会转换为 NaN
 ```
 
 ### 逻辑运算符 if 和 ?:
@@ -337,7 +373,7 @@ alert( undefined == 0 ); // false
 - 与运算符 && 返回的值是第一个假值的初始形式；
 - 非运算符 ! 返回操作数的取反布尔值；
 
-> Tips: 两个非运算 `!!` 有时候用来将某个值转化为布尔类型：
+> Tips: 两个非运算 `!!` 有时候用来将某个值转化为布尔类型，等同于 Boolean()；
 
 ### 空值合并运算符 ??
 
@@ -358,6 +394,12 @@ result = (a !== null && a !== undefined) ? a : b;
 出于安全原因，JavaScript 禁止将 ?? 运算符与 && 和 || 运算符一起使用，除非使用括号明确指定了优先级；
 
 ### 循环
+
+do-while 语句是一种后测试循环语句，即循环体中的代码执行后才会对退出条件进行求值，循环体内的代码至少执行一次。
+while 与 for 则为先测试循环语句。先检测推出条件，再执行循环体代码。
+for-in 用于枚举对象中的非符号键属性。若迭代变量为 null 或 undefined，则不执行循环体。
+for-of 用于遍历可迭代对象（数组、字符串、Map、Set、arguments等）的元素。循环会按照可迭代对象的 next() 方法产生值的顺序迭代元素。
+for-await-of 语句是 ES2018 对 for-of 语句的扩展，以支持生成期约（promise）的异步可迭代对象。
 
 跳出多层循环：
 
@@ -2478,6 +2520,16 @@ counter();
 > Note: 在 JavaScript 中，所有函数都是天生闭包的（除 "new Function" 语法）；也就是说：JavaScript 中的函数会自动通过隐藏的 `[[Environment]]` 属性记住创建它们的位置，所以它们都可以访问外部变量；
 
 通常，函数调用完成后，会将词法环境和其中的所有变量从内存中删除，但当有一个嵌套函数在外部函数结束后仍可达，则它将具有引用词法环境的 [[Environment]] 属性；因此词法环境仍会被保留在内存；
+
+**with 语句**
+
+with 语句的用途是将代码作用域设置为特定的对象，语句内部的变量会首先被认为是一个局部变量，其次查找绑定的特定对象，最后依次往上查找。
+
+严格模式不允许使用 with 语句，否则抛出错误。由于 with 语句影响性能且难以调试，通常不建议使用。
+
+```js
+"use strict";with(window) {} // SyntaxError: Strict mode code may not include a with statement
+```
 
 **实践**
 
