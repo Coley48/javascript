@@ -375,6 +375,22 @@ NaN >= 3 // false
 
 > Tips: 两个非运算 `!!` 有时候用来将某个值转化为布尔类型，等同于 Boolean()；
 
+switch 语句可以用于所有数据类型，其次，条件的值不需要是常量，可以是变量或者表达式。switch 语句在比较每个条件的值时会使用全等操作符。
+
+```js
+let num = 25;
+switch (true) {
+  case num < 0:
+    break;
+  case num >= 0 && num < 10:
+    break;
+  case num >= 10:
+    break;
+  default:
+    break;
+}
+```
+
 ### 空值合并运算符 ??
 
 `a ?? b` 表示如果第一个参数不是 null/undefined，则 ?? 返回第一个参数，否则，返回第二个参数；
@@ -426,9 +442,33 @@ outer: for (let i = 0; i < 3; i++) {
 
 函数就是行为（action），所以它们的名字通常是动词，它应该简短且尽可能准确地描述函数的作用，这样读代码的人就能清楚地知道这个函数的功能；一种普遍的做法是用动词前缀来开始一个函数，这个前缀模糊地描述了这个行为；
 
-空值的 return 或没有 return 的函数返回值为 undefined；
+> 空值的 return 或没有 return 的函数返回值为 undefined。最佳实践是函数要么返回值，要么不返回值。只在某个条件下返回值的函数不便于调试。
 
 一个函数应该只包含函数名所指定的功能，而不是做更多与函数名无关的功能；两个独立的行为通常需要两个函数，即使它们通常被一起调用；在这种情况下，我们可以创建第三个函数来调用这两个函数；
+
+严格模式对函数的限制，违反以下规则，会语法报错：
+- 函数不能以 eval 或 arguments 作为名称；
+- 函数的参数不能叫 eval 或 arguments；
+- 两个命名参数不能拥有同一个名称；
+
+ECMAScript 中所有函数的参数都是按值传递的，函数外的值会被复制到函数内部的一个局部变量中，即一个命名参数，或者说 arguments 对象中一个槽位。尽管对于对象类型是引用值，但在函数内部重新赋值一个新对象给参数，外部的对象不会受到影响。
+
+```c++
+#include <iostream>
+using namespace std;
+
+void test(int& n) {
+	n = 10;
+}
+
+int main()
+{
+    int a = 2;
+    test(a);
+    cout << a; // 10
+    return 0;
+}
+```
 
 ### 在浏览器中调试
 
@@ -949,6 +989,8 @@ console.log("string".toUpperCase()); // STRING
 原始类型不是对象，不能存储额外的数据
 
 ```js
+typeof new String("") // object 
+
 let str = "string";
 
 str.test = 1;
@@ -3815,7 +3857,7 @@ console.log(User.secret); // 10
 
 ### 类检查：instanceof
 
-instanceof 操作符用于检查一个对象是否属于某个特定的 class，通常，instanceof 在检查中会将原型链考虑在内；
+instanceof 操作符用于检查一个对象是否属于某个特定的 class，通常，instanceof 在检查中会将原型链考虑在内；如果用 instanceof 检测原始值，则会报错，原始值不是对象。
 
 ```js
 class Rabbit {}
@@ -3829,7 +3871,8 @@ console.log( new Rabbit() instanceof Rabbit ); // true
 let arr = [1, 2, 3];
 arr instanceof Array; // true
 arr instanceof Object; // true
-({}) instanceof Object;
+({}) instanceof Object; // true
+arr instanceof 123 // TypeError: Right-hand side of 'instanceof' is not an object
 ```
 
 **Symbol.hasInstance**
